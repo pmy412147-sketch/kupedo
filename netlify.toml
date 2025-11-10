@@ -1,0 +1,12 @@
+[build]
+  command = "chmod +x build.sh && ./build.sh"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
+  # Disable secrets scanning for Firebase public API keys
+  SECRETS_SCAN_ENABLED = "false"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
