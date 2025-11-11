@@ -21,6 +21,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { X, Upload } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { getCategoryFields } from '@/lib/category-fields';
+import { CategorySpecificFields } from '@/components/CategorySpecificFields';
 
 export default function AddAdPage() {
   const { user } = useAuth();
@@ -77,6 +79,9 @@ export default function AddAdPage() {
     priceNote: '',
     videoUrl: ''
   });
+
+  // Universal category-specific fields
+  const [categorySpecificData, setCategorySpecificData] = useState<Record<string, any>>({});
 
   const featureOptions = {
     interior: [
@@ -211,6 +216,14 @@ export default function AddAdPage() {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
+
+      // Add universal category-specific data
+      if (Object.keys(categorySpecificData).length > 0) {
+        adData.specs = {
+          ...(adData.specs || {}),
+          ...categorySpecificData
+        };
+      }
 
       if (categoryType === 'vehicle') {
         const hasSpecs = Object.values(vehicleSpecs).some(v => v !== '');
@@ -868,6 +881,22 @@ export default function AddAdPage() {
                         </div>
                       </div>
                     </>
+                  )}
+
+                  {/* Universal Category-Specific Fields */}
+                  {formData.category_id && getCategoryFields(formData.category_id).length > 0 && (
+                    <div className="border-t border-gray-200 pt-8 mt-8">
+                      <CategorySpecificFields
+                        fields={getCategoryFields(formData.category_id)}
+                        values={categorySpecificData}
+                        onChange={(fieldId, value) => {
+                          setCategorySpecificData(prev => ({
+                            ...prev,
+                            [fieldId]: value
+                          }));
+                        }}
+                      />
+                    </div>
                   )}
 
                   {/* Obrázky */}
