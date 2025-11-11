@@ -16,9 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { categories } from '@/lib/categories';
 import { useAuth } from '@/contexts/AuthContext';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { X, Upload, Loader2 } from 'lucide-react';
@@ -55,17 +53,19 @@ export default function EditAdPage() {
 
   const loadAd = async () => {
     try {
-      const adDoc = await getDoc(doc(db, 'ads', adId));
+      const { data: adData, error } = await supabase
+        .from('ads')
+        .select('*')
+        .eq('id', adId)
+        .single();
 
-      if (!adDoc.exists()) {
+      if (error || !adData) {
         toast.error('Inzerát nebol nájdený');
         router.push('/moje-inzeraty');
         return;
       }
 
-      const adData = adDoc.data();
-
-      if (adData.user_id !== user?.uid) {
+      if (adData.user_id !== user?.id) {
         toast.error('Nemáte oprávnenie upraviť tento inzerát');
         router.push('/moje-inzeraty');
         return;
@@ -137,20 +137,40 @@ export default function EditAdPage() {
       const newImageUrls: string[] = [];
 
       for (const image of newImages) {
-        const imageRef = ref(storage, `ads/${user.uid}/${Date.now()}_${image.name}`);
-        await uploadBytes(imageRef, image);
-        const url = await getDownloadURL(imageRef);
-        newImageUrls.push(url);
+        const fileExt = image.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `ads/${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('ad-images')
+          .upload(filePath, image);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('ad-images')
+          .getPublicUrl(filePath);
+
+        newImageUrls.push(urlData.publicUrl);
       }
 
       const allImages = [...existingImages, ...newImageUrls];
 
-      await updateDoc(doc(db, 'ads', adId), {
-        ...formData,
-        price: parseFloat(formData.price) || 0,
-        images: allImages,
-        updated_at: new Date().toISOString()
-      });
+      const { error: updateError } = await supabase
+        .from('ads')
+        .update({
+          ...formData,
+          price: parseFloat(formData.price) || 0,
+          images: allImages,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', adId);
+
+      if (updateError) {
+        throw updateError;
+      }
 
       toast.success('Inzerát bol úspešne aktualizovaný');
       router.push('/moje-inzeraty');

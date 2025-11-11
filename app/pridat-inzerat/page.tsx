@@ -16,9 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { categories, realEstateTypes, realEstateKinds, realEstateConditions } from '@/lib/categories';
 import { useAuth } from '@/contexts/AuthContext';
-import { collection, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { X, Upload } from 'lucide-react';
@@ -185,16 +183,29 @@ export default function AddAdPage() {
       const imageUrls: string[] = [];
 
       for (const image of images) {
-        const imageRef = ref(storage, `ads/${user.uid}/${Date.now()}_${image.name}`);
-        await uploadBytes(imageRef, image);
-        const url = await getDownloadURL(imageRef);
-        imageUrls.push(url);
+        const fileExt = image.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `ads/${user.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('ad-images')
+          .upload(filePath, image);
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: urlData } = supabase.storage
+          .from('ad-images')
+          .getPublicUrl(filePath);
+
+        imageUrls.push(urlData.publicUrl);
       }
 
       const adData: any = {
         ...formData,
         price: parseFloat(formData.price) || 0,
-        user_id: user.uid,
+        user_id: user.id,
         images: imageUrls,
         status: 'active',
         created_at: new Date().toISOString(),
@@ -245,7 +256,13 @@ export default function AddAdPage() {
         adData.realEstate = realEstate;
       }
 
-      await addDoc(collection(db, 'ads'), adData);
+      const { error: insertError } = await supabase
+        .from('ads')
+        .insert([adData]);
+
+      if (insertError) {
+        throw insertError;
+      }
 
       toast.success('Inzerát bol úspešne pridaný');
       router.push('/moje-inzeraty');
