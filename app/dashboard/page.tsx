@@ -16,7 +16,9 @@ import {
   Users,
   Clock,
   Download,
-  RefreshCw
+  RefreshCw,
+  Coins,
+  ShoppingCart
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -52,6 +54,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [topAds, setTopAds] = useState<AdPerformance[]>([]);
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | 'all'>('7d');
+  const [coinBalance, setCoinBalance] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -59,7 +62,22 @@ export default function Dashboard() {
       return;
     }
     loadDashboardData();
+    loadCoinBalance();
   }, [user, timeRange]);
+
+  const loadCoinBalance = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('user_coins')
+      .select('balance')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setCoinBalance(data.balance);
+    }
+  };
 
   const loadDashboardData = async () => {
     if (!user) return;
@@ -207,6 +225,45 @@ export default function Dashboard() {
           Všetko
         </Button>
       </div>
+
+      {/* Coin Balance Card */}
+      <Card className="mb-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-200 dark:border-emerald-800">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Coins className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+            Moje mince
+          </CardTitle>
+          <CardDescription>Použite mince na topovanie vašich inzerátov</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-5xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+                {coinBalance}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Dostupných mincí
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => router.push('/mince')}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+              >
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Kúpiť mince
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => router.push('/mince?tab=history')}
+              >
+                <Clock className="h-4 w-4 mr-2" />
+                História
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

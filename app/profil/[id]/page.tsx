@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase, Profile, Ad, Review } from '@/lib/supabase';
 import { useParams, useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   MapPin,
   Calendar,
@@ -22,7 +23,9 @@ import {
   MessageSquare,
   Package,
   TrendingUp,
-  Award
+  Award,
+  Coins,
+  ShoppingCart
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { sk } from 'date-fns/locale';
@@ -30,16 +33,36 @@ import { sk } from 'date-fns/locale';
 export default function ProfilePage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const profileId = params.id as string;
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userAds, setUserAds] = useState<Ad[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coinBalance, setCoinBalance] = useState(0);
+  const isOwnProfile = user?.id === profileId;
 
   useEffect(() => {
     fetchProfileData();
-  }, [profileId]);
+    if (isOwnProfile) {
+      fetchCoinBalance();
+    }
+  }, [profileId, isOwnProfile]);
+
+  const fetchCoinBalance = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('user_coins')
+      .select('balance')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setCoinBalance(data.balance);
+    }
+  };
 
   const fetchProfileData = async () => {
     try {
@@ -195,6 +218,25 @@ export default function ProfilePage() {
                 )}
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {isOwnProfile && (
+                    <div
+                      className="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-200 dark:border-emerald-800 rounded-lg p-4 cursor-pointer hover:scale-105 transition-transform"
+                      onClick={() => router.push('/mince')}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Coins className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-sm text-emerald-700 dark:text-emerald-400 font-medium">Moje mince</span>
+                      </div>
+                      <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300">
+                        {coinBalance}
+                      </p>
+                      <p className="text-xs text-emerald-600 dark:text-emerald-500">
+                        <ShoppingCart className="h-3 w-3 inline mr-1" />
+                        Kliknite pre nákup
+                      </p>
+                    </div>
+                  )}
+
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Star className="h-4 w-4 text-amber-500" />
