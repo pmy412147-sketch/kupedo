@@ -35,11 +35,10 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7204460641314366"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
         <ThemeProvider attribute="class" defaultTheme="light">
           <AuthProvider>

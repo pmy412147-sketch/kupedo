@@ -107,10 +107,8 @@ export default function CategoryPage() {
                     images={ad.images}
                     user_id={ad.user_id}
                   />
-                  {(index + 1) % 10 === 0 && index !== ads.length - 1 && (
-                    <div key={`ad-${index}`} className="col-span-1 md:col-span-3 lg:col-span-4">
-                      <AdSenseInFeed />
-                    </div>
+                  {(index + 1) % 8 === 0 && index !== ads.length - 1 && (
+                    <AdSenseInFeed key={`ad-${index}`} />
                   )}
                 </>
               ))}
