@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { collection, query, where, getDocs, or, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { MessageSquare } from 'lucide-react';
@@ -33,30 +32,34 @@ export default function MessagesPage() {
 
     const fetchConversations = async () => {
       try {
-        const q = query(
-          collection(db, 'messages'),
-          or(
-            where('sender_id', '==', user.uid),
-            where('receiver_id', '==', user.uid)
-          )
-        );
+        const { data: messages, error } = await supabase
+          .from('messages')
+          .select('*')
+          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+          .order('created_at', { ascending: false });
 
-        const snapshot = await getDocs(q);
-        const messages = snapshot.docs.map(doc => doc.data());
+        if (error) {
+          console.error('Error fetching messages:', error);
+          return;
+        }
+
+        if (!messages || messages.length === 0) {
+          setConversations([]);
+          return;
+        }
 
         const conversationsMap = new Map<string, any>();
+        const userIds = new Set<string>();
 
         for (const msg of messages) {
-          const otherUserId = msg.sender_id === user.uid ? msg.receiver_id : msg.sender_id;
+          const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+          userIds.add(otherUserId);
 
           if (!conversationsMap.has(otherUserId)) {
-            const userDoc = await getDoc(doc(db, 'users', otherUserId));
-            const userData = userDoc.data();
-
             conversationsMap.set(otherUserId, {
               userId: otherUserId,
-              userName: userData?.name || 'Používateľ',
-              userAvatar: userData?.avatar_url,
+              userName: 'Používateľ',
+              userAvatar: undefined,
               lastMessage: msg.content,
               lastMessageTime: msg.created_at,
               unread: 0
@@ -69,10 +72,25 @@ export default function MessagesPage() {
             }
           }
 
-          if (msg.receiver_id === user.uid && !msg.read) {
+          if (msg.receiver_id === user.id && !msg.read) {
             const conv = conversationsMap.get(otherUserId);
             conv.unread++;
           }
+        }
+
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .in('id', Array.from(userIds));
+
+        if (profiles) {
+          profiles.forEach(profile => {
+            const conv = conversationsMap.get(profile.id);
+            if (conv) {
+              conv.userName = profile.display_name || 'Používateľ';
+              conv.userAvatar = profile.avatar_url;
+            }
+          });
         }
 
         const conversationsArray = Array.from(conversationsMap.values())

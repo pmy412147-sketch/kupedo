@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { collection, query, where, getDocs, deleteDoc, doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2, Edit, Pause, Play } from 'lucide-react';
@@ -35,18 +34,17 @@ export default function MyAdsPage() {
 
     const fetchMyAds = async () => {
       try {
-        const q = query(
-          collection(db, 'ads'),
-          where('user_id', '==', user.uid)
-        );
+        const { data, error } = await supabase
+          .from('ads')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
-        const snapshot = await getDocs(q);
-        const adsData = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Ad));
-
-        setAds(adsData.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+        if (error) {
+          console.error('Error fetching ads:', error);
+        } else {
+          setAds(data || []);
+        }
       } catch (error) {
         console.error('Error fetching ads:', error);
       } finally {
@@ -63,9 +61,17 @@ export default function MyAdsPage() {
     }
 
     try {
-      await deleteDoc(doc(db, 'ads', adId));
-      setAds(ads.filter(ad => ad.id !== adId));
-      toast.success('Inzerát bol odstránený');
+      const { error } = await supabase
+        .from('ads')
+        .delete()
+        .eq('id', adId);
+
+      if (error) {
+        toast.error('Chyba pri odstraňovaní inzerátu');
+      } else {
+        setAds(ads.filter(ad => ad.id !== adId));
+        toast.success('Inzerát bol odstránený');
+      }
     } catch (error) {
       toast.error('Chyba pri odstraňovaní inzerátu');
     }
@@ -75,16 +81,22 @@ export default function MyAdsPage() {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
 
     try {
-      await updateDoc(doc(db, 'ads', adId), {
-        status: newStatus,
-        updatedAt: new Date()
-      });
+      const { error } = await supabase
+        .from('ads')
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', adId);
 
-      setAds(ads.map(ad =>
-        ad.id === adId ? { ...ad, status: newStatus } : ad
-      ));
-
-      toast.success(newStatus === 'active' ? 'Inzerát aktivovaný' : 'Inzerát pozastavený');
+      if (error) {
+        toast.error('Chyba pri zmene stavu');
+      } else {
+        setAds(ads.map(ad =>
+          ad.id === adId ? { ...ad, status: newStatus } : ad
+        ));
+        toast.success(newStatus === 'active' ? 'Inzerát bol aktivovaný' : 'Inzerát bol pozastavený');
+      }
     } catch (error) {
       toast.error('Chyba pri zmene stavu inzerátu');
     }

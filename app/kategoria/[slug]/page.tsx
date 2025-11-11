@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { AdCard } from '@/components/AdCard';
 import { FilterBar, FilterValues } from '@/components/FilterBar';
-import { collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { categories } from '@/lib/categories';
 import { useParams } from 'next/navigation';
 
@@ -29,34 +28,33 @@ export default function CategoryPage() {
   const fetchAds = async (filters?: FilterValues) => {
     setLoading(true);
     try {
-      const q = query(
-        collection(db, 'ads'),
-        where('status', '==', 'active'),
-        orderBy('created_at', 'desc'),
-        limit(50)
-      );
-
-      const snapshot = await getDocs(q);
-      let adsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Ad));
-
-      // Filter by category slug
-      adsData = adsData.filter(ad => ad.category_id === params.slug);
+      let query = supabase
+        .from('ads')
+        .select('*')
+        .eq('status', 'active')
+        .eq('category_id', params.slug)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       // Filter by price
       if (filters?.priceFrom) {
         const priceFrom = parseFloat(filters.priceFrom);
-        adsData = adsData.filter(ad => ad.price >= priceFrom);
+        query = query.gte('price', priceFrom);
       }
 
       if (filters?.priceTo) {
         const priceTo = parseFloat(filters.priceTo);
-        adsData = adsData.filter(ad => ad.price <= priceTo);
+        query = query.lte('price', priceTo);
       }
 
-      setAds(adsData);
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching ads:', error);
+        setAds([]);
+      } else {
+        setAds(data || []);
+      }
     } catch (error) {
       console.error('Error fetching ads:', error);
     } finally {

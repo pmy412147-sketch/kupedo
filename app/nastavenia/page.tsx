@@ -8,9 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Loader2, Upload } from 'lucide-react';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function SettingsPage() {
@@ -41,17 +39,23 @@ export default function SettingsPage() {
     if (!user) return;
 
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading profile:', error);
+      } else if (data) {
         setFormData({
-          displayName: userData.displayName || userData.name || '',
-          phone: userData.phone || '',
-          bio: userData.bio || '',
-          location: userData.location || '',
-          avatar_url: userData.avatar_url || ''
+          displayName: data.display_name || '',
+          phone: data.phone || '',
+          bio: data.bio || '',
+          location: data.location || '',
+          avatar_url: data.avatar_url || ''
         });
-        setAvatarPreview(userData.avatar_url || '');
+        setAvatarPreview(data.avatar_url || '');
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -81,31 +85,52 @@ export default function SettingsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !db) return;
+    if (!user) return;
 
     setLoading(true);
     try {
       let avatarUrl = formData.avatar_url;
 
-      if (avatarFile && storage) {
-        const avatarRef = ref(storage, `avatars/${user.uid}/${Date.now()}_${avatarFile.name}`);
-        await uploadBytes(avatarRef, avatarFile);
-        avatarUrl = await getDownloadURL(avatarRef);
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, avatarFile, {
+            upsert: true
+          });
+
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+
+        avatarUrl = publicUrl;
       }
 
-      await updateDoc(doc(db, 'users', user.uid), {
-        name: formData.displayName,
-        displayName: formData.displayName,
-        phone: formData.phone,
-        bio: formData.bio,
-        location: formData.location,
-        avatar_url: avatarUrl,
-        updatedAt: new Date()
-      });
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          display_name: formData.displayName,
+          phone: formData.phone,
+          bio: formData.bio,
+          location: formData.location,
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        throw error;
+      }
 
       await refreshUserProfile();
       alert('Profil úspešne aktualizovaný!');
-      router.push(`/profil/${user.uid}`);
+      router.push(`/profil/${user.id}`);
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Chyba pri aktualizácii profilu');

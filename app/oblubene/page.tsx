@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { AdCard } from '@/components/AdCard';
 import { Card } from '@/components/ui/card';
-import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
@@ -33,23 +32,34 @@ export default function FavoritesPage() {
 
     const fetchFavorites = async () => {
       try {
-        const q = query(
-          collection(db, 'favorites'),
-          where('user_id', '==', user.uid)
-        );
+        const { data: favorites, error: favError } = await supabase
+          .from('favorites')
+          .select('ad_id')
+          .eq('user_id', user.id);
 
-        const snapshot = await getDocs(q);
-        const favoriteAdIds = snapshot.docs.map(doc => doc.data().ad_id);
-
-        const adsData: Ad[] = [];
-        for (const adId of favoriteAdIds) {
-          const adDoc = await getDoc(doc(db, 'ads', adId));
-          if (adDoc.exists()) {
-            adsData.push({ id: adDoc.id, ...adDoc.data() } as Ad);
-          }
+        if (favError) {
+          console.error('Error fetching favorites:', favError);
+          setAds([]);
+          return;
         }
 
-        setAds(adsData);
+        if (!favorites || favorites.length === 0) {
+          setAds([]);
+          return;
+        }
+
+        const adIds = favorites.map(f => f.ad_id);
+        const { data: adsData, error: adsError } = await supabase
+          .from('ads')
+          .select('*')
+          .in('id', adIds);
+
+        if (adsError) {
+          console.error('Error fetching ads:', adsError);
+          setAds([]);
+        } else {
+          setAds(adsData || []);
+        }
       } catch (error) {
         console.error('Error fetching favorites:', error);
       } finally {

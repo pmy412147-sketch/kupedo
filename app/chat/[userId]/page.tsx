@@ -6,21 +6,11 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  onSnapshot,
-  addDoc,
-  doc,
-  getDoc,
-  or
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Send } from 'lucide-react';
+import type { RealtimeChannel } from '@supabase/supabase-js';
 
 interface Message {
   id: string;
@@ -55,40 +45,76 @@ export default function ChatPage() {
   useEffect(() => {
     if (!user) return;
 
+    let channel: RealtimeChannel;
+
     const fetchOtherUser = async () => {
-      const userDoc = await getDoc(doc(db, 'users', params.userId as string));
-      if (userDoc.exists()) {
-        setOtherUser({ id: userDoc.id, ...userDoc.data() } as UserProfile);
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, display_name, avatar_url')
+        .eq('id', params.userId as string)
+        .single();
+
+      if (data) {
+        setOtherUser({
+          id: data.id,
+          name: data.display_name || 'Používateľ',
+          avatar_url: data.avatar_url
+        });
+      }
+    };
+
+    const fetchMessages = async () => {
+      const { data } = await supabase
+        .from('messages')
+        .select('*')
+        .or(`and(sender_id.eq.${user.id},receiver_id.eq.${params.userId}),and(sender_id.eq.${params.userId},receiver_id.eq.${user.id})`)
+        .order('created_at', { ascending: true });
+
+      if (data) {
+        setMessages(data);
+        setTimeout(scrollToBottom, 100);
       }
     };
 
     fetchOtherUser();
+    fetchMessages();
 
-    const q = query(
-      collection(db, 'messages'),
-      or(
-        where('sender_id', '==', user.uid),
-        where('receiver_id', '==', user.uid)
-      ),
-      orderBy('created_at', 'asc')
-    );
+    // Subscribe to real-time updates
+    channel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `sender_id=eq.${user.id},receiver_id=eq.${params.userId}`
+        },
+        (payload) => {
+          setMessages(prev => [...prev, payload.new as Message]);
+          setTimeout(scrollToBottom, 100);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `sender_id=eq.${params.userId},receiver_id=eq.${user.id}`
+        },
+        (payload) => {
+          setMessages(prev => [...prev, payload.new as Message]);
+          setTimeout(scrollToBottom, 100);
+        }
+      )
+      .subscribe();
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const messagesData = snapshot.docs
-        .map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        } as Message))
-        .filter(msg =>
-          (msg.sender_id === user.uid && msg.receiver_id === params.userId) ||
-          (msg.sender_id === params.userId && msg.receiver_id === user.uid)
-        );
-
-      setMessages(messagesData);
-      setTimeout(scrollToBottom, 100);
-    });
-
-    return () => unsubscribe();
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
   }, [user, params.userId]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -97,14 +123,16 @@ export default function ChatPage() {
     if (!user || !newMessage.trim()) return;
 
     try {
-      await addDoc(collection(db, 'messages'), {
-        sender_id: user.uid,
-        receiver_id: params.userId,
-        ad_id: adId || null,
-        content: newMessage,
-        read: false,
-        created_at: new Date().toISOString()
-      });
+      await supabase
+        .from('messages')
+        .insert({
+          sender_id: user.id,
+          receiver_id: params.userId as string,
+          ad_id: adId || null,
+          content: newMessage,
+          read: false,
+          created_at: new Date().toISOString()
+        });
 
       setNewMessage('');
     } catch (error) {
