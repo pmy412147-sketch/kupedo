@@ -11,6 +11,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square } from 'lucide-react';
 import { toast } from 'sonner';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
+import { ImageLightbox } from '@/components/ImageLightbox';
 
 interface Ad {
   id: string;
@@ -78,6 +79,7 @@ export default function AdDetailPage() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   useEffect(() => {
     const fetchAd = async () => {
@@ -255,27 +257,41 @@ export default function AdDetailPage() {
                 <div className="mb-4">
                   {ad.images.length > 0 ? (
                     <div className="relative">
-                      <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
+                      <div
+                        className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden cursor-pointer group"
+                        onClick={() => setLightboxOpen(true)}
+                      >
                         <img
                           src={ad.images[selectedImage]}
                           alt={ad.title}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-contain transition-transform group-hover:scale-105"
                         />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          <div className="bg-black/60 text-white px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                            Kliknite pre zväčšenie
+                          </div>
+                        </div>
                         {ad.images.length > 1 && (
                           <>
                             <button
-                              onClick={() => setSelectedImage((prev) => (prev === 0 ? ad.images.length - 1 : prev - 1))}
-                              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedImage((prev) => (prev === 0 ? ad.images.length - 1 : prev - 1));
+                              }}
+                              className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10"
                             >
                               <ChevronLeft className="h-6 w-6" />
                             </button>
                             <button
-                              onClick={() => setSelectedImage((prev) => (prev === ad.images.length - 1 ? 0 : prev + 1))}
-                              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedImage((prev) => (prev === ad.images.length - 1 ? 0 : prev + 1));
+                              }}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors z-10"
                             >
                               <ChevronRight className="h-6 w-6" />
                             </button>
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm z-10">
                               {selectedImage + 1} / {ad.images.length}
                             </div>
                           </>
@@ -702,6 +718,14 @@ export default function AdDetailPage() {
           </div>
         </div>
       </main>
+
+      {lightboxOpen && (
+        <ImageLightbox
+          images={ad.images}
+          initialIndex={selectedImage}
+          onClose={() => setLightboxOpen(false)}
+        />
+      )}
     </>
   );
 }
