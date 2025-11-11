@@ -5,8 +5,7 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
 import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square } from 'lucide-react';
@@ -85,33 +84,76 @@ export default function AdDetailPage() {
         // Track page view start time
         const startTime = Date.now();
 
-        const adDoc = await getDoc(doc(db, 'ads', params.id as string));
-        if (adDoc.exists()) {
-          const adData = { id: adDoc.id, ...adDoc.data() } as Ad;
-          setAd(adData);
+        // Fetch ad from Supabase
+        const { data: adData, error: adError } = await supabase
+          .from('ads')
+          .select('*')
+          .eq('id', params.id as string)
+          .maybeSingle();
 
-          const sellerDoc = await getDoc(doc(db, 'users', adData.user_id));
-          if (sellerDoc.exists()) {
-            setSeller(sellerDoc.data() as UserProfile);
-          }
+        if (adError) {
+          console.error('Error fetching ad:', adError);
+          setLoading(false);
+          return;
+        }
 
-          if (user) {
-            const favDoc = await getDoc(doc(db, 'favorites', `${user.uid}_${params.id}`));
-            setIsFavorite(favDoc.exists());
-          }
+        if (!adData) {
+          console.log('Ad not found');
+          setLoading(false);
+          return;
+        }
 
-          // Track view with analytics
-          const { trackAdView } = await import('@/lib/analytics');
-          trackAdView(params.id as string, user?.uid);
-
-          // Track duration on unmount
-          return () => {
-            const duration = Math.floor((Date.now() - startTime) / 1000);
-            if (duration > 3) { // Only track if stayed more than 3 seconds
-              trackAdView(params.id as string, user?.uid, duration);
-            }
+        // Parse metadata if it exists
+        let parsedAd = { ...adData };
+        if (adData.metadata) {
+          parsedAd = {
+            ...adData,
+            specs: adData.metadata.specs || undefined,
+            features: adData.metadata.features || undefined,
+            realEstate: adData.metadata.realEstate || undefined,
           };
         }
+
+        setAd(parsedAd as Ad);
+
+        // Fetch seller profile
+        const { data: sellerData } = await supabase
+          .from('profiles')
+          .select('id, display_name, avatar_url')
+          .eq('id', adData.user_id)
+          .single();
+
+        if (sellerData) {
+          setSeller({
+            id: sellerData.id,
+            name: sellerData.display_name || 'Používateľ',
+            avatar_url: sellerData.avatar_url
+          } as UserProfile);
+        }
+
+        // Check if favorited
+        if (user) {
+          const { data: favData } = await supabase
+            .from('favorites')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('ad_id', params.id as string)
+            .single();
+
+          setIsFavorite(!!favData);
+        }
+
+        // Track view with analytics
+        const { trackAdView } = await import('@/lib/analytics');
+        trackAdView(params.id as string, user?.id);
+
+        // Track duration on unmount
+        return () => {
+          const duration = Math.floor((Date.now() - startTime) / 1000);
+          if (duration > 3) {
+            trackAdView(params.id as string, user?.id, duration);
+          }
+        };
       } catch (error) {
         console.error('Error fetching ad:', error);
       } finally {
@@ -128,26 +170,36 @@ export default function AdDetailPage() {
       return;
     }
 
-    const favoriteId = `${user.uid}_${params.id}`;
     try {
       if (isFavorite) {
-        await deleteDoc(doc(db, 'favorites', favoriteId));
+        // Remove from favorites
+        await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('ad_id', params.id);
+
         setIsFavorite(false);
         toast.success('Odstránené z obľúbených');
       } else {
-        await setDoc(doc(db, 'favorites', favoriteId), {
-          user_id: user.uid,
-          ad_id: params.id,
-          created_at: new Date().toISOString()
-        });
+        // Add to favorites
+        await supabase
+          .from('favorites')
+          .insert({
+            user_id: user.id,
+            ad_id: params.id,
+            created_at: new Date().toISOString()
+          });
+
         setIsFavorite(true);
         toast.success('Pridané do obľúbených');
 
         // Track interaction
         const { trackInteraction } = await import('@/lib/analytics');
-        trackInteraction(params.id as string, 'save', user.uid);
+        trackInteraction(params.id as string, 'save', user.id);
       }
     } catch (error) {
+      console.error('Error toggling favorite:', error);
       toast.error('Chyba pri pridávaní do obľúbených');
     }
   };
