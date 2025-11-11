@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Plus, Trash2, Edit, Pause, Play } from 'lucide-react';
+import { Plus, Trash2, Edit, Pause, Play, TrendingUp, Coins } from 'lucide-react';
 import { toast } from 'sonner';
+import { BoostAdModal } from '@/components/BoostAdModal';
 
 interface Ad {
   id: string;
@@ -18,6 +20,8 @@ interface Ad {
   images: string[];
   status: string;
   created_at: string;
+  is_boosted?: boolean;
+  boosted_until?: string;
 }
 
 export default function MyAdsPage() {
@@ -25,6 +29,9 @@ export default function MyAdsPage() {
   const router = useRouter();
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
+  const [boostModalOpen, setBoostModalOpen] = useState(false);
+  const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
+  const [coinBalance, setCoinBalance] = useState(0);
 
   useEffect(() => {
     if (!user) {
@@ -32,28 +39,53 @@ export default function MyAdsPage() {
       return;
     }
 
-    const fetchMyAds = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('ads')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('Error fetching ads:', error);
-        } else {
-          setAds(data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching ads:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchMyAds();
+    fetchCoinBalance();
   }, [user, router]);
+
+  const fetchCoinBalance = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('user_coins')
+      .select('balance')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setCoinBalance(data.balance);
+    }
+  };
+
+  const fetchMyAds = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('ads')
+        .select('*')
+        .eq('user_id', user!.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching ads:', error);
+      } else {
+        setAds(data || []);
+      }
+    } catch (error) {
+      console.error('Error fetching ads:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBoost = (ad: Ad) => {
+    setSelectedAd(ad);
+    setBoostModalOpen(true);
+  };
+
+  const handleBoostSuccess = () => {
+    fetchMyAds();
+    fetchCoinBalance();
+  };
 
   const handleDelete = async (adId: string) => {
     if (!confirm('Naozaj chcete odstrániť tento inzerát?')) {
@@ -160,7 +192,14 @@ export default function MyAdsPage() {
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div>
-                          <h3 className="text-xl font-semibold mb-2">{ad.title}</h3>
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-xl font-semibold">{ad.title}</h3>
+                            {ad.is_boosted && ad.boosted_until && new Date(ad.boosted_until) > new Date() && (
+                              <Badge className="bg-gradient-to-r from-amber-400 to-amber-600 text-white">
+                                TOP
+                              </Badge>
+                            )}
+                          </div>
                           <p className="text-2xl font-bold text-[#2ECC71] mb-2">
                             {ad.price > 0 ? `${ad.price} €` : 'Dohodou'}
                           </p>
@@ -172,9 +211,22 @@ export default function MyAdsPage() {
                               {ad.status === 'active' ? 'Aktívny' : 'Pozastavený'}
                             </span>
                           </p>
+                          {ad.is_boosted && ad.boosted_until && new Date(ad.boosted_until) > new Date() && (
+                            <p className="text-sm text-amber-600 mt-1 flex items-center gap-1">
+                              <TrendingUp className="h-4 w-4" />
+                              Topované do: {new Date(ad.boosted_until).toLocaleDateString('sk-SK')}
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex gap-2 flex-wrap">
+                          <Button
+                            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+                            onClick={() => handleBoost(ad)}
+                          >
+                            <TrendingUp className="h-4 w-4 mr-2" />
+                            Topovať
+                          </Button>
                           <Button
                             variant="outline"
                             onClick={() => router.push(`/upravit-inzerat/${ad.id}`)}
@@ -215,6 +267,20 @@ export default function MyAdsPage() {
           )}
         </div>
       </main>
+
+      {selectedAd && (
+        <BoostAdModal
+          open={boostModalOpen}
+          onClose={() => {
+            setBoostModalOpen(false);
+            setSelectedAd(null);
+          }}
+          adId={selectedAd.id}
+          adTitle={selectedAd.title}
+          userCoins={coinBalance}
+          onSuccess={handleBoostSuccess}
+        />
+      )}
     </>
   );
 }
