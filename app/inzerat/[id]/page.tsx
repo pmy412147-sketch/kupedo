@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
 import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square } from 'lucide-react';
 import { toast } from 'sonner';
+import { AdSenseStickyBanner } from '@/components/AdSenseStickyBanner';
 
 interface Ad {
   id: string;
@@ -684,6 +685,7 @@ export default function AdDetailPage() {
             </div>
           </div>
         </div>
+        <AdSenseStickyBanner />
       </main>
     </>
   );

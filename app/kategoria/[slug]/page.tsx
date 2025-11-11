@@ -7,6 +7,7 @@ import { FilterBar, FilterValues } from '@/components/FilterBar';
 import { supabase } from '@/lib/supabase';
 import { categories } from '@/lib/categories';
 import { useParams } from 'next/navigation';
+import { AdSenseInFeed } from '@/components/AdSenseInFeed';
 
 interface Ad {
   id: string;
@@ -95,16 +96,21 @@ export default function CategoryPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {ads.map((ad) => (
-                <AdCard
-                  key={ad.id}
-                  id={ad.id}
-                  title={ad.title}
-                  price={ad.price}
-                  location={ad.location}
-                  images={ad.images}
-                  user_id={ad.user_id}
-                />
+              {ads.map((ad, index) => (
+                <>
+                  <AdCard
+                    key={ad.id}
+                    id={ad.id}
+                    title={ad.title}
+                    price={ad.price}
+                    location={ad.location}
+                    images={ad.images}
+                    user_id={ad.user_id}
+                  />
+                  {(index + 1) % 10 === 0 && index !== ads.length - 1 && (
+                    <AdSenseInFeed key={`ad-${index}`} />
+                  )}
+                </>
               ))}
             </div>
           )}

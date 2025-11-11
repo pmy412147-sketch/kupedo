@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, Chrome as Home, SlidersHorizontal, Users, Package, Shield, TrendingUp, Sparkles, Award, Clock, CheckCircle } from 'lucide-react';
+import { AdSenseInFeed } from '@/components/AdSenseInFeed';
 
 
 export default function HomePage() {
@@ -351,18 +352,23 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {ads.map((ad) => (
-                  <AdCard
-                    key={ad.id}
-                    id={ad.id}
-                    title={ad.title}
-                    price={ad.price}
-                    location={ad.location}
-                    images={ad.images}
-                    user_id={ad.user_id}
-                    created_at={ad.created_at}
-                    view_count={ad.view_count}
-                  />
+                {ads.map((ad, index) => (
+                  <>
+                    <AdCard
+                      key={ad.id}
+                      id={ad.id}
+                      title={ad.title}
+                      price={ad.price}
+                      location={ad.location}
+                      images={ad.images}
+                      user_id={ad.user_id}
+                      created_at={ad.created_at}
+                      view_count={ad.view_count}
+                    />
+                    {(index + 1) % 10 === 0 && index !== ads.length - 1 && (
+                      <AdSenseInFeed key={`ad-${index}`} />
+                    )}
+                  </>
                 ))}
               </div>
             )}
