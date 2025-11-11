@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, BarChart3 } from 'lucide-react';
+import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, BarChart3, Coins } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { SearchWithSuggestions } from './SearchWithSuggestions';
