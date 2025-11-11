@@ -22,6 +22,7 @@ export default function HomePage() {
   const router = useRouter();
 
   const [heroFilters, setHeroFilters] = useState({
+    searchQuery: '',
     category: 'vsetky',
     location: '',
     offer: '',
@@ -81,17 +82,16 @@ export default function HomePage() {
   }, [searchParams]);
 
   const handleHeroSearch = () => {
-    // If specific category is selected, redirect to category page
+    const params = new URLSearchParams();
+
+    if (heroFilters.searchQuery.trim()) {
+      params.set('search', heroFilters.searchQuery.trim());
+    }
+
     if (heroFilters.category !== 'vsetky') {
-      router.push(`/kategoria/${heroFilters.category}`);
+      router.push(`/kategoria/${heroFilters.category}?${params.toString()}`);
     } else {
-      // Otherwise filter on homepage
-      const filters: FilterValues = {
-        category: 'all',
-        priceFrom: heroFilters.priceFrom,
-        priceTo: heroFilters.priceTo
-      };
-      fetchAds(filters);
+      router.push(`/?${params.toString()}`);
     }
   };
 
@@ -133,6 +133,20 @@ export default function HomePage() {
               </div>
 
               <div className="hidden lg:block bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-5" style={{ width: '130%', maxWidth: '850px' }}>
+                <div className="mb-3">
+                  <label className="text-xs text-gray-600 mb-1 block font-medium">Čo hľadáte?</label>
+                  <Input
+                    placeholder="napr. iPhone 15, byt v Bratislave..."
+                    value={heroFilters.searchQuery}
+                    onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
+                    className="h-11 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleHeroSearch();
+                      }
+                    }}
+                  />
+                </div>
                 <div className="grid grid-cols-5 gap-2 mb-3">
                   <div>
                     <label className="text-xs text-gray-600 mb-1 block font-medium">Kategória</label>
@@ -230,6 +244,20 @@ export default function HomePage() {
               </div>
 
               <div className="lg:hidden bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4">
+                <div className="mb-3">
+                  <label className="text-xs text-gray-600 mb-1 block font-medium">Čo hľadáte?</label>
+                  <Input
+                    placeholder="napr. iPhone, byt..."
+                    value={heroFilters.searchQuery}
+                    onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
+                    className="h-10 text-sm"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleHeroSearch();
+                      }
+                    }}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
                     <label className="text-xs text-gray-600 mb-1 block font-medium">Kategória</label>

@@ -16,11 +16,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, BarChart3 } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
+import { SearchWithSuggestions } from './SearchWithSuggestions';
 
 export function Header() {
   const { user, userProfile, signOut } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
   const router = useRouter();
@@ -28,13 +28,6 @@ export function Header() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
 
   return (
     <>
@@ -46,18 +39,9 @@ export function Header() {
               <span className="text-xl font-bold text-[#2C3E50] dark:text-white">Kupado.sk</span>
             </Link>
 
-            <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-xl mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  type="search"
-                  placeholder="Hľadať inzeráty..."
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </form>
+            <div className="hidden md:flex flex-1 max-w-xl mx-8">
+              <SearchWithSuggestions placeholder="Čo hľadáte? napr. iPhone, byt v Bratislave..." className="w-full" />
+            </div>
 
             <div className="flex items-center gap-2">
               {mounted && (
@@ -141,18 +125,9 @@ export function Header() {
             </div>
           </div>
 
-          <form onSubmit={handleSearch} className="md:hidden pb-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                type="search"
-                placeholder="Hľadať inzeráty..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </form>
+          <div className="md:hidden pb-3">
+            <SearchWithSuggestions placeholder="Hľadať..." className="w-full" />
+          </div>
         </div>
       </header>
 
