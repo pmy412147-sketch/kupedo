@@ -17,17 +17,62 @@ import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, BarC
 import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { SearchWithSuggestions } from './SearchWithSuggestions';
+import { supabase } from '@/lib/supabase';
 
 export function Header() {
   const { user, userProfile, signOut } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [coinBalance, setCoinBalance] = useState(0);
   const { theme, setTheme, resolvedTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadCoinBalance();
+
+      // Subscribe to real-time updates
+      const channel = supabase
+        .channel('user-coins-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_coins',
+            filter: `user_id=eq.${user.id}`,
+          },
+          (payload) => {
+            if (payload.new && 'balance' in payload.new) {
+              setCoinBalance(payload.new.balance as number);
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  const loadCoinBalance = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('user_coins')
+      .select('balance')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (data) {
+      setCoinBalance(data.balance);
+    }
+  };
 
   const currentTheme = theme || resolvedTheme || 'light';
 
