@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CategoryField, getFieldSections } from '@/lib/category-fields';
 
 interface CategorySpecificFieldsProps {
@@ -26,6 +27,38 @@ export function CategorySpecificFields({ fields, values, onChange }: CategorySpe
     const value = values[field.id] || '';
 
     switch (field.type) {
+      case 'checkbox':
+        const selectedOptions = Array.isArray(value) ? value : [];
+        return (
+          <div key={field.id} className="space-y-3 col-span-2">
+            <Label className="text-base font-semibold">
+              {field.label} {field.required && <span className="text-red-500">*</span>}
+            </Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {field.options?.map((option) => (
+                <div key={option} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`${field.id}-${option}`}
+                    checked={selectedOptions.includes(option)}
+                    onCheckedChange={(checked) => {
+                      const newValue = checked
+                        ? [...selectedOptions, option]
+                        : selectedOptions.filter((o: string) => o !== option);
+                      onChange(field.id, newValue);
+                    }}
+                  />
+                  <label
+                    htmlFor={`${field.id}-${option}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {option}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
       case 'select':
         return (
           <div key={field.id} className="space-y-2">

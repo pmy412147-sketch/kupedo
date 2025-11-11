@@ -238,6 +238,144 @@ export const categorySpecificFields: Record<string, CategoryField[]> = {
     }
   ],
 
+  // AUTOMOBILY
+  auto: [
+    {
+      id: 'brand',
+      label: 'Značka',
+      type: 'text',
+      placeholder: 'napr. Volkswagen',
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'model',
+      label: 'Model',
+      type: 'text',
+      placeholder: 'napr. Tiguan',
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'year',
+      label: 'Rok výroby',
+      type: 'number',
+      placeholder: 'napr. 2021',
+      min: 1950,
+      max: new Date().getFullYear() + 1,
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'mileage',
+      label: 'Tachometer (km)',
+      type: 'number',
+      placeholder: 'napr. 190417',
+      min: 0,
+      unit: 'km',
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'fuel',
+      label: 'Palivo',
+      type: 'select',
+      options: ['Benzín', 'Diesel', 'Hybrid', 'Elektro', 'LPG', 'CNG'],
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'transmission',
+      label: 'Prevodovka',
+      type: 'select',
+      options: ['Manuál', 'Automat', 'Poloautomat'],
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'bodyType',
+      label: 'Karoséria',
+      type: 'select',
+      options: ['Sedan', 'Hatchback', 'Kombi', 'SUV', 'Kupé', 'Kabriolet', 'MPV', 'Van', 'Pickup'],
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'color',
+      label: 'Farba',
+      type: 'text',
+      placeholder: 'napr. Čierna',
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'doors',
+      label: 'Počet dverí',
+      type: 'select',
+      options: ['2/3', '4/5', '6/7'],
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'seats',
+      label: 'Počet miest',
+      type: 'number',
+      min: 2,
+      max: 9,
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'power',
+      label: 'Výkon',
+      type: 'number',
+      unit: 'kW',
+      placeholder: 'napr. 110',
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'engineSize',
+      label: 'Objem motora',
+      type: 'number',
+      unit: 'cm³',
+      placeholder: 'napr. 1984',
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'condition',
+      label: 'Stav',
+      type: 'select',
+      options: ['Nové', 'Ojazdené', 'Predvádzacie', 'Poškodené', 'Na náhradné diely'],
+      section: 'Špecifikácie vozidla'
+    },
+    {
+      id: 'features_interior',
+      label: 'Interiér',
+      type: 'checkbox',
+      options: [
+        'Adaptívny tempomat',
+        'Autorádio',
+        'Centrálne zamykanie',
+        'Elektrické okná',
+        'Multifunkčný volant',
+        'Posilňovač riadenia',
+        'Radenie pádlami pod volantom',
+        'Tónované skla',
+        'Vyhrievané sedačky',
+        'Vyhrievaný volant'
+      ],
+      section: 'Výbava'
+    },
+    {
+      id: 'features_safety',
+      label: 'Bezpečnosť',
+      type: 'checkbox',
+      options: [
+        'ABS',
+        'Airbag vodiča',
+        'Airbag spolujazdca',
+        'Asistent rozjazdu do kopca',
+        'Asistent zjazdu z kopca',
+        'ASR',
+        'ESP',
+        'Kontrola tlaku pneumatík',
+        'Systém upozornenia na vybočenie z jazdného pruhu',
+        'Automatické zastavenie pred prekážkou'
+      ],
+      section: 'Výbava'
+    }
+  ],
+
   // MOTOCYKLE
   motocykle: [
     {
