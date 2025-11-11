@@ -65,24 +65,6 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         </DialogHeader>
 
         <div className="space-y-4">
-          <Button
-            onClick={handleGoogleSignIn}
-            variant="outline"
-            className="w-full"
-          >
-            <Chrome className="mr-2 h-4 w-4" />
-            Pokračovať s Google
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Alebo</span>
-            </div>
-          </div>
-
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {isSignUp && (
               <div>
