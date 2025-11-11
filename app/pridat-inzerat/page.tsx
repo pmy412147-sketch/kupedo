@@ -289,13 +289,14 @@ export default function AddAdPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <Card className="p-6">
-            <h1 className="text-3xl font-bold mb-6">Pridať inzerát</h1>
+        <div className="container mx-auto px-4 max-w-4xl">
+          <Card className="p-8">
+            <h1 className="text-3xl font-bold mb-8">Pridať inzerát</h1>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <Label htmlFor="category">Kategória *</Label>
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Kategória */}
+              <div className="space-y-3">
+                <Label htmlFor="category" className="text-base font-semibold">Kategória *</Label>
                 <Select
                   value={formData.category_id}
                   onValueChange={(v) => {
@@ -304,7 +305,7 @@ export default function AddAdPage() {
                   }}
                   required
                 >
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="category" className="h-11">
                     <SelectValue placeholder="Vyberte kategóriu" />
                   </SelectTrigger>
                   <SelectContent>
@@ -384,15 +385,9 @@ export default function AddAdPage() {
                     </>
                   )}
 
-                  <div>
-                    <Label htmlFor="title">
-                      Nadpis *
-                      {formData.title && (
-                        <span className="text-sm text-gray-500 ml-2">
-                          (Ostáva {50 - formData.title.length} znakov)
-                        </span>
-                      )}
-                    </Label>
+                  {/* Nadpis */}
+                  <div className="space-y-3">
+                    <Label htmlFor="title" className="text-base font-semibold">Nadpis *</Label>
                     <Input
                       id="title"
                       value={formData.title}
@@ -400,13 +395,15 @@ export default function AddAdPage() {
                       placeholder="Stručný a výstižný názov"
                       maxLength={50}
                       required
+                      className="h-11"
                     />
                   </div>
 
-                  <div>
-                    <Label htmlFor="description">
+                  {/* Text inzerátu */}
+                  <div className="space-y-3">
+                    <Label htmlFor="description" className="text-base font-semibold">
                       Text inzerátu *
-                      <span className="text-sm text-gray-500 ml-2">
+                      <span className="text-sm text-gray-500 font-normal ml-2">
                         (Minimálne 20 znakov, Napísali ste {formData.description.length} znakov)
                       </span>
                     </Label>
@@ -415,8 +412,9 @@ export default function AddAdPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                       placeholder="Detailný popis..."
-                      rows={6}
+                      rows={8}
                       required
+                      className="resize-none"
                     />
                   </div>
 
@@ -480,25 +478,28 @@ export default function AddAdPage() {
                     </>
                   )}
 
+                  {/* Lokalita */}
                   <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="location">Mesto / Obec *</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="location" className="text-base font-semibold">Mesto / Obec *</Label>
                       <Input
                         id="location"
                         value={formData.location}
                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                         placeholder="napr. Bratislava"
                         required
+                        className="h-11"
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="postal_code">PSČ</Label>
+                    <div className="space-y-3">
+                      <Label htmlFor="postal_code" className="text-base font-semibold">PSČ</Label>
                       <Input
                         id="postal_code"
                         value={formData.postal_code}
                         onChange={(e) => setFormData({ ...formData, postal_code: e.target.value })}
                         placeholder="napr. 81101"
+                        className="h-11"
                       />
                     </div>
                   </div>
@@ -526,17 +527,20 @@ export default function AddAdPage() {
                     </div>
                   )}
 
-                  <div>
-                    <Label htmlFor="price">Cena * (€)</Label>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        id="price"
-                        type="number"
-                        value={formData.price}
-                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                        placeholder="0 = Dohodou"
-                      />
-                    </div>
+                  {/* Cena */}
+                  <div className="space-y-3">
+                    <Label htmlFor="price" className="text-base font-semibold">
+                      Cena * (€)
+                      <span className="text-sm text-gray-500 font-normal ml-2">0 = Dohodou</span>
+                    </Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                      placeholder="0 = Dohodou"
+                      className="h-11"
+                    />
                   </div>
 
                   {categoryType === 'real-estate' && (
@@ -577,28 +581,31 @@ export default function AddAdPage() {
 
                   {categoryType === 'vehicle' && (
                     <>
-                      <div className="border-t pt-6">
-                        <h2 className="text-xl font-semibold mb-4">Špecifikácie vozidla (nepovinné)</h2>
+                      {/* Špecifikácie vozidla */}
+                      <div className="border-t border-gray-200 pt-8 mt-8">
+                        <h2 className="text-xl font-bold mb-6">Špecifikácie vozidla (nepovinné)</h2>
                         <div className="grid grid-cols-2 gap-4">
-                          <div>
+                          <div className="space-y-2">
                             <Label htmlFor="brand">Značka</Label>
                             <Input
                               id="brand"
                               value={vehicleSpecs.brand}
                               onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, brand: e.target.value })}
                               placeholder="napr. Volkswagen"
+                              className="h-11"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
                             <Label htmlFor="model">Model</Label>
                             <Input
                               id="model"
                               value={vehicleSpecs.model}
                               onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, model: e.target.value })}
                               placeholder="napr. Tiguan"
+                              className="h-11"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
                             <Label htmlFor="year">Rok výroby</Label>
                             <Input
                               id="year"
@@ -606,9 +613,10 @@ export default function AddAdPage() {
                               value={vehicleSpecs.year}
                               onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, year: e.target.value })}
                               placeholder="napr. 2021"
+                              className="h-11"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
                             <Label htmlFor="mileage">Tachometer (km)</Label>
                             <Input
                               id="mileage"
@@ -616,35 +624,39 @@ export default function AddAdPage() {
                               value={vehicleSpecs.mileage}
                               onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, mileage: e.target.value })}
                               placeholder="napr. 190417"
+                              className="h-11"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
                             <Label htmlFor="fuel">Palivo</Label>
                             <Input
                               id="fuel"
                               value={vehicleSpecs.fuel}
                               onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, fuel: e.target.value })}
                               placeholder="napr. Diesel"
+                              className="h-11"
                             />
                           </div>
-                          <div>
+                          <div className="space-y-2">
                             <Label htmlFor="transmission">Prevodovka</Label>
                             <Input
                               id="transmission"
                               value={vehicleSpecs.transmission}
                               onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, transmission: e.target.value })}
                               placeholder="napr. Automat"
+                              className="h-11"
                             />
                           </div>
                         </div>
                       </div>
 
-                      <div className="border-t pt-6">
-                        <h2 className="text-xl font-semibold mb-4">Výbava (nepovinné)</h2>
-                        <div className="space-y-4">
+                      {/* Výbava */}
+                      <div className="border-t border-gray-200 pt-8 mt-8">
+                        <h2 className="text-xl font-bold mb-6">Výbava (nepovinné)</h2>
+                        <div className="space-y-6">
                           <div>
-                            <h3 className="font-semibold mb-2">Interiér</h3>
-                            <div className="grid grid-cols-2 gap-2">
+                            <h3 className="text-base font-semibold mb-4">Interiér</h3>
+                            <div className="grid grid-cols-2 gap-3">
                               {featureOptions.interior.map((feature) => (
                                 <div key={feature} className="flex items-center space-x-2">
                                   <Checkbox
@@ -652,7 +664,7 @@ export default function AddAdPage() {
                                     checked={vehicleFeatures.interior.includes(feature)}
                                     onCheckedChange={() => toggleFeature('interior', feature)}
                                   />
-                                  <label htmlFor={`interior-${feature}`} className="text-sm cursor-pointer">
+                                  <label htmlFor={`interior-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                     {feature}
                                   </label>
                                 </div>
@@ -661,8 +673,8 @@ export default function AddAdPage() {
                           </div>
 
                           <div>
-                            <h3 className="font-semibold mb-2">Bezpečnosť</h3>
-                            <div className="grid grid-cols-2 gap-2">
+                            <h3 className="text-base font-semibold mb-4">Bezpečnosť</h3>
+                            <div className="grid grid-cols-2 gap-3">
                               {featureOptions.safety.map((feature) => (
                                 <div key={feature} className="flex items-center space-x-2">
                                   <Checkbox
@@ -670,7 +682,7 @@ export default function AddAdPage() {
                                     checked={vehicleFeatures.safety.includes(feature)}
                                     onCheckedChange={() => toggleFeature('safety', feature)}
                                   />
-                                  <label htmlFor={`safety-${feature}`} className="text-sm cursor-pointer">
+                                  <label htmlFor={`safety-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                     {feature}
                                   </label>
                                 </div>
@@ -682,17 +694,18 @@ export default function AddAdPage() {
                     </>
                   )}
 
-                  <div className="border-t pt-6">
-                    <Label>Obrázky (max {maxImages})</Label>
-                    <div className="mt-2">
+                  {/* Obrázky */}
+                  <div className="border-t border-gray-200 pt-8 mt-8">
+                    <Label className="text-base font-semibold">Obrázky (max {maxImages})</Label>
+                    <div className="mt-4">
                       <label
                         htmlFor="images"
-                        className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
+                        className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                       >
-                        <div className="text-center">
-                          <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                          <p className="text-sm text-gray-600">Presuňte fotky sem</p>
-                          <p className="text-xs text-gray-500 mt-1">
+                        <div className="text-center p-4">
+                          <Upload className="mx-auto h-10 w-10 text-gray-400 mb-3" />
+                          <p className="text-base font-medium text-gray-700 dark:text-gray-300 mb-1">Presuňte fotky sem</p>
+                          <p className="text-sm text-gray-500">
                             Nahrajte až {maxImages} fotiek. Max. veľkosť jednej fotky je až 10 MB.
                           </p>
                         </div>
@@ -742,7 +755,7 @@ export default function AddAdPage() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full"
+                    className="w-full h-12 text-base font-semibold"
                     style={{ backgroundColor: '#2ECC71' }}
                   >
                     {loading ? 'Ukladám...' : 'Pridať inzerát'}
