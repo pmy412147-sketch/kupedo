@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
+import { ConsentBanner } from '@/components/ConsentBanner';
+import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,6 +22,17 @@ export default function RootLayout({
   return (
     <html lang="sk" suppressHydrationWarning>
       <head>
+        <Script
+          id="gtag-base"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+            `,
+          }}
+        />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7204460641314366"
@@ -31,6 +44,7 @@ export default function RootLayout({
           <AuthProvider>
             {children}
             <Toaster />
+            <ConsentBanner />
           </AuthProvider>
         </ThemeProvider>
       </body>
