@@ -1,11 +1,11 @@
 export const ADSENSE_CONFIG = {
   publisherId: 'ca-pub-7204460641314366',
-  enabled: process.env.NODE_ENV === 'production',
+  enabled: true,
   adSlots: {
-    inFeedAd: '1234567890',
-    stickyBanner: '0987654321',
+    inFeedAd: 'auto',
+    stickyBanner: 'auto',
   },
-  testMode: process.env.NODE_ENV !== 'production'
+  testMode: false
 };
 
 export interface AdSenseProps {

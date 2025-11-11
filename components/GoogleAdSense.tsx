@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ADSENSE_CONFIG } from '@/lib/adsense-config';
+import { getConsentFromCookie } from '@/lib/consent-manager';
 
 interface GoogleAdSenseProps {
   adSlot?: string;
@@ -26,21 +27,43 @@ export function GoogleAdSense({
 }: GoogleAdSenseProps) {
   const adRef = useRef<HTMLModElement>(null);
   const isAdPushed = useRef(false);
+  const [hasConsent, setHasConsent] = useState(false);
 
   useEffect(() => {
-    if (!ADSENSE_CONFIG.enabled) {
+    const checkConsent = () => {
+      const consent = getConsentFromCookie();
+      if (consent && consent.ad_storage) {
+        setHasConsent(true);
+      } else {
+        setHasConsent(false);
+      }
+    };
+
+    checkConsent();
+
+    const interval = setInterval(checkConsent, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!ADSENSE_CONFIG.enabled || !hasConsent) {
       return;
     }
 
-    try {
-      if (adRef.current && !isAdPushed.current) {
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
-        isAdPushed.current = true;
+    const timer = setTimeout(() => {
+      try {
+        if (adRef.current && !isAdPushed.current) {
+          (window.adsbygoogle = window.adsbygoogle || []).push({});
+          isAdPushed.current = true;
+        }
+      } catch (error) {
+        console.error('AdSense error:', error);
       }
-    } catch (error) {
-      console.error('AdSense error:', error);
-    }
-  }, []);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [hasConsent]);
 
   if (!ADSENSE_CONFIG.enabled && ADSENSE_CONFIG.testMode) {
     return (
@@ -55,6 +78,21 @@ export function GoogleAdSense({
 
   if (!ADSENSE_CONFIG.enabled) {
     return null;
+  }
+
+  if (!hasConsent) {
+    return (
+      <div className={`bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-900 rounded-xl border border-blue-200 dark:border-gray-700 flex items-center justify-center ${className}`} style={style}>
+        <div className="text-center p-6">
+          <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            Reklamy sa zobrazia po prijatí cookies
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-500">
+            Povoľte reklamné cookies na zobrazenie obsahu
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

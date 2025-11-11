@@ -24,7 +24,7 @@ export default function RootLayout({
       <head>
         <Script
           id="gtag-base"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
@@ -33,13 +33,14 @@ export default function RootLayout({
             `,
           }}
         />
-        <script
+      </head>
+      <body className={inter.className}>
+        <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7204460641314366"
           crossOrigin="anonymous"
+          strategy="afterInteractive"
         />
-      </head>
-      <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light">
           <AuthProvider>
             {children}

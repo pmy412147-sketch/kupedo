@@ -55,32 +55,36 @@ export function ConsentBanner() {
     }
   };
 
-  const handleAcceptAll = () => {
+  const handleAcceptAll = async () => {
     const allGranted: ConsentPreferences = {
       ad_storage: true,
       ad_user_data: true,
       ad_personalization: true,
       analytics_storage: true,
     };
-    saveConsent(allGranted);
+    await saveConsent(allGranted);
     setShowBanner(false);
+    window.location.reload();
   };
 
-  const handleRejectAll = () => {
+  const handleRejectAll = async () => {
     const allDenied: ConsentPreferences = {
       ad_storage: false,
       ad_user_data: false,
       ad_personalization: false,
       analytics_storage: false,
     };
-    saveConsent(allDenied);
+    await saveConsent(allDenied);
     setShowBanner(false);
   };
 
-  const handleSavePreferences = () => {
-    saveConsent(preferences);
+  const handleSavePreferences = async () => {
+    await saveConsent(preferences);
     setShowSettings(false);
     setShowBanner(false);
+    if (preferences.ad_storage) {
+      window.location.reload();
+    }
   };
 
   const handleOpenSettings = () => {
