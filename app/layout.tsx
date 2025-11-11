@@ -33,18 +33,18 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      <body className={inter.className}>
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7204460641314366"
           crossOrigin="anonymous"
         />
+      </head>
+      <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
-          disableTransitionOnChange
+          storageKey="kupado-theme"
         >
           <AuthProvider>
             {children}
