@@ -54,13 +54,16 @@ export function GoogleAdSense({
     const timer = setTimeout(() => {
       try {
         if (adRef.current && !isAdPushed.current) {
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-          isAdPushed.current = true;
+          const parent = adRef.current.parentElement;
+          if (parent && parent.offsetWidth > 0) {
+            (window.adsbygoogle = window.adsbygoogle || []).push({});
+            isAdPushed.current = true;
+          }
         }
       } catch (error) {
         console.error('AdSense error:', error);
       }
-    }, 100);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [hasConsent]);
@@ -96,7 +99,7 @@ export function GoogleAdSense({
   }
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={`relative w-full ${className}`} style={{ minWidth: '250px', ...style }}>
       <div className="absolute -top-5 left-0 text-[10px] text-gray-400 dark:text-gray-600 font-medium">
         Sponzorované
       </div>
@@ -105,7 +108,8 @@ export function GoogleAdSense({
         className="adsbygoogle"
         style={{
           display: 'block',
-          ...style
+          width: '100%',
+          minHeight: style?.minHeight || '250px'
         }}
         data-ad-client={ADSENSE_CONFIG.publisherId}
         data-ad-slot={adSlot}

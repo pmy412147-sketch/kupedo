@@ -366,7 +366,9 @@ export default function HomePage() {
                       view_count={ad.view_count}
                     />
                     {(index + 1) % 10 === 0 && index !== ads.length - 1 && (
-                      <AdSenseInFeed key={`ad-${index}`} />
+                      <div key={`ad-${index}`} className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4">
+                        <AdSenseInFeed />
+                      </div>
                     )}
                   </>
                 ))}

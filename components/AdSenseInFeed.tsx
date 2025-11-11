@@ -4,14 +4,13 @@ import { GoogleAdSense } from './GoogleAdSense';
 
 export function AdSenseInFeed() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full flex flex-col border border-gray-100 dark:border-gray-700 relative">
+    <div className="bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 min-h-[280px] w-full border border-gray-100 dark:border-gray-700 relative p-4">
       <GoogleAdSense
-        adFormat="fluid"
+        adFormat="auto"
         style={{
-          minHeight: '280px',
-          width: '100%'
+          minHeight: '250px'
         }}
-        className="w-full h-full"
+        className="w-full"
       />
     </div>
   );

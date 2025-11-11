@@ -13,8 +13,8 @@ export function AdSenseStickyBanner() {
 
   return (
     <>
-      <div className="hidden lg:block fixed bottom-6 right-6 z-40 w-80">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="hidden lg:block fixed bottom-6 right-6 z-40" style={{ width: '320px' }}>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden p-4">
           <div className="relative">
             <button
               onClick={() => setIsVisible(false)}
@@ -24,10 +24,9 @@ export function AdSenseStickyBanner() {
               <X className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             </button>
             <GoogleAdSense
-              adFormat="rectangle"
+              adFormat="auto"
               style={{
-                minHeight: '250px',
-                width: '100%'
+                minHeight: '250px'
               }}
               className="w-full"
             />
@@ -35,13 +34,12 @@ export function AdSenseStickyBanner() {
         </div>
       </div>
 
-      <div className="lg:hidden mt-8 mb-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden p-4">
+      <div className="lg:hidden mt-8 mb-4 w-full">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden p-4 w-full">
           <GoogleAdSense
             adFormat="auto"
             style={{
-              minHeight: '100px',
-              width: '100%'
+              minHeight: '100px'
             }}
             className="w-full"
           />
