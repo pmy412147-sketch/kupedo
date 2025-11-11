@@ -69,6 +69,19 @@ export function Header() {
                 <>
                   <Button
                     variant="ghost"
+                    onClick={() => router.push('/mince')}
+                    className="hidden md:flex items-center gap-2 px-4 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950 border-2 border-emerald-300 dark:border-emerald-700 bg-emerald-50/50 dark:bg-emerald-950/50 hover:scale-105 transition-all shadow-sm hover:shadow-md"
+                    title="Moje mince - Kliknite pre nákup"
+                  >
+                    <Coins className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    <div className="flex flex-col items-start">
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-500 font-medium leading-none">Moje mince</span>
+                      <span className="text-lg font-bold text-emerald-700 dark:text-emerald-300 leading-none">{coinBalance}</span>
+                    </div>
+                  </Button>
+
+                  <Button
+                    variant="ghost"
                     size="icon"
                     onClick={() => router.push('/oblubene')}
                     className="hidden md:inline-flex"
@@ -113,6 +126,10 @@ export function Header() {
                         <Menu className="mr-2 h-4 w-4" />
                         Moje inzeráty
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => router.push('/mince')} className="bg-emerald-50 dark:bg-emerald-950">
+                        <Coins className="mr-2 h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                        <span className="font-semibold">Moje mince ({coinBalance})</span>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => router.push('/dashboard')}>
                         <BarChart3 className="mr-2 h-4 w-4" />
                         Dashboard
@@ -149,6 +166,18 @@ export function Header() {
             >
               <Search className="h-5 w-5" />
               <span className="text-xs">Hľadať</span>
+            </button>
+            <button
+              onClick={() => router.push('/mince')}
+              className="flex flex-col items-center justify-center gap-1 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors"
+            >
+              <div className="relative">
+                <Coins className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {coinBalance > 99 ? '99+' : coinBalance}
+                </span>
+              </div>
+              <span className="text-xs font-semibold">Mince</span>
             </button>
             <button
               onClick={() => router.push('/oblubene')}
