@@ -11,18 +11,16 @@ export function AdSenseInFeed() {
             <div className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1 uppercase tracking-wide">
               Sponzorované
             </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              Reklama
-            </div>
           </div>
         </div>
       </div>
 
-      <div className="p-4 flex-1 flex flex-col justify-center">
+      <div className="p-4 flex flex-col flex-grow">
         <GoogleAdSense
           adFormat="auto"
           style={{
-            minHeight: '100px'
+            minHeight: '50px',
+            maxHeight: '90px'
           }}
           className="w-full"
         />
