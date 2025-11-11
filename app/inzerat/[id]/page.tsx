@@ -10,7 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
 import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square } from 'lucide-react';
 import { toast } from 'sonner';
-import { AdSenseStickyBanner } from '@/components/AdSenseStickyBanner';
+import { GoogleAdSense } from '@/components/GoogleAdSense';
 
 interface Ad {
   id: string;
@@ -682,10 +682,25 @@ export default function AdDetailPage() {
                   </Button>
                 </div>
               </Card>
+
+              <Card className="p-6">
+                <div className="text-center mb-3">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                    Sponzorované
+                  </p>
+                </div>
+                <GoogleAdSense
+                  adFormat="auto"
+                  style={{
+                    minHeight: '250px',
+                    maxHeight: '400px'
+                  }}
+                  className="w-full"
+                />
+              </Card>
             </div>
           </div>
         </div>
-        <AdSenseStickyBanner />
       </main>
     </>
   );
