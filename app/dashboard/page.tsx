@@ -186,79 +186,87 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto px-4 py-4 md:py-8 pb-20 md:pb-8">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-1">Sledujte výkonnosť vašich inzerátov</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1 text-sm md:text-base">Sledujte výkonnosť vašich inzerátov</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={loadDashboardData}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Obnoviť
+          <Button variant="outline" size="sm" onClick={loadDashboardData}>
+            <RefreshCw className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Obnoviť</span>
           </Button>
-          <Button variant="outline">
-            <Download className="h-4 w-4 mr-2" />
-            Exportovať
+          <Button variant="outline" size="sm">
+            <Download className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Exportovať</span>
           </Button>
         </div>
       </div>
 
       {/* Time Range Selector */}
-      <div className="flex gap-2 mb-6">
+      <div className="flex gap-2 mb-4 md:mb-6 overflow-x-auto">
         <Button
+          size="sm"
           variant={timeRange === '7d' ? 'default' : 'outline'}
           onClick={() => setTimeRange('7d')}
+          className="whitespace-nowrap"
         >
-          Posledných 7 dní
+          7 dní
         </Button>
         <Button
+          size="sm"
           variant={timeRange === '30d' ? 'default' : 'outline'}
           onClick={() => setTimeRange('30d')}
+          className="whitespace-nowrap"
         >
-          Posledných 30 dní
+          30 dní
         </Button>
         <Button
+          size="sm"
           variant={timeRange === 'all' ? 'default' : 'outline'}
           onClick={() => setTimeRange('all')}
+          className="whitespace-nowrap"
         >
           Všetko
         </Button>
       </div>
 
       {/* Coin Balance Card */}
-      <Card className="mb-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-200 dark:border-emerald-800">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Coins className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+      <Card className="mb-4 md:mb-6 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950 dark:to-teal-950 border-2 border-emerald-200 dark:border-emerald-800">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg md:text-xl">
+            <Coins className="h-5 w-5 md:h-6 md:w-6 text-emerald-600 dark:text-emerald-400" />
             Moje mince
           </CardTitle>
-          <CardDescription>Použite mince na topovanie vašich inzerátov</CardDescription>
+          <CardDescription className="text-xs md:text-sm">Použite mince na topovanie vašich inzerátov</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-5xl font-bold text-emerald-700 dark:text-emerald-300 mb-2">
+              <div className="text-4xl md:text-5xl font-bold text-emerald-700 dark:text-emerald-300 mb-1 md:mb-2">
                 {coinBalance}
               </div>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs md:text-sm text-muted-foreground">
                 Dostupných mincí
               </p>
             </div>
             <div className="flex flex-col gap-2">
               <Button
+                size="sm"
                 onClick={() => router.push('/mince')}
                 className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
-                Kúpiť mince
+                <span className="text-xs md:text-sm">Kúpiť</span>
               </Button>
               <Button
+                size="sm"
                 variant="outline"
                 onClick={() => router.push('/mince?tab=history')}
               >
                 <Clock className="h-4 w-4 mr-2" />
-                História
+                <span className="text-xs md:text-sm">História</span>
               </Button>
             </div>
           </div>
@@ -266,15 +274,15 @@ export default function Dashboard() {
       </Card>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Celkové zobrazenia</CardTitle>
-            <Eye className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-xs md:text-sm font-medium">Zobrazenia</CardTitle>
+            <Eye className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalViews.toLocaleString()}</div>
-            <p className="text-xs text-gray-500 mt-1">
+            <div className="text-xl md:text-2xl font-bold">{stats?.totalViews.toLocaleString()}</div>
+            <p className="text-[10px] md:text-xs text-gray-500 mt-1">
               +{stats?.viewsToday} dnes
             </p>
           </CardContent>
@@ -282,12 +290,12 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Interakcie</CardTitle>
-            <MessageSquare className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-xs md:text-sm font-medium">Interakcie</CardTitle>
+            <MessageSquare className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalInteractions}</div>
-            <p className="text-xs text-gray-500 mt-1">
+            <div className="text-xl md:text-2xl font-bold">{stats?.totalInteractions}</div>
+            <p className="text-[10px] md:text-xs text-gray-500 mt-1">
               {stats?.conversionRate.toFixed(1)}% konverzia
             </p>
           </CardContent>
@@ -295,12 +303,12 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Obľúbené</CardTitle>
-            <Heart className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-xs md:text-sm font-medium">Obľúbené</CardTitle>
+            <Heart className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalFavorites}</div>
-            <p className="text-xs text-gray-500 mt-1">
+            <div className="text-xl md:text-2xl font-bold">{stats?.totalFavorites}</div>
+            <p className="text-[10px] md:text-xs text-gray-500 mt-1">
               {stats?.totalAds} inzerátov
             </p>
           </CardContent>
@@ -308,12 +316,12 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Priemerná cena</CardTitle>
-            <DollarSign className="h-4 w-4 text-gray-500" />
+            <CardTitle className="text-xs md:text-sm font-medium">Priem. cena</CardTitle>
+            <DollarSign className="h-3 w-3 md:h-4 md:w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">€{stats?.avgPrice.toFixed(0)}</div>
-            <p className="text-xs text-gray-500 mt-1">
+            <div className="text-xl md:text-2xl font-bold">€{stats?.avgPrice.toFixed(0)}</div>
+            <p className="text-[10px] md:text-xs text-gray-500 mt-1">
               {stats?.activeAds} aktívnych
             </p>
           </CardContent>
@@ -322,11 +330,11 @@ export default function Dashboard() {
 
       {/* Detailed Analytics */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Prehľad</TabsTrigger>
-          <TabsTrigger value="performance">Výkonnosť</TabsTrigger>
-          <TabsTrigger value="traffic">Návštevnosť</TabsTrigger>
-          <TabsTrigger value="optimization">Optimalizácia</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="overview" className="text-xs md:text-sm">Prehľad</TabsTrigger>
+          <TabsTrigger value="performance" className="text-xs md:text-sm">Výkon</TabsTrigger>
+          <TabsTrigger value="traffic" className="text-xs md:text-sm">Návštevy</TabsTrigger>
+          <TabsTrigger value="optimization" className="text-xs md:text-sm">Tips</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
