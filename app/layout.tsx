@@ -43,8 +43,9 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem
+          enableSystem={true}
           storageKey="kupado-theme"
+          disableTransitionOnChange={false}
         >
           <AuthProvider>
             {children}
