@@ -583,69 +583,245 @@ export default function AddAdPage() {
                     <>
                       {/* Špecifikácie vozidla */}
                       <div className="border-t border-gray-200 pt-8 mt-8">
-                        <h2 className="text-xl font-bold mb-6">Špecifikácie vozidla (nepovinné)</h2>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="brand">Značka</Label>
-                            <Input
-                              id="brand"
-                              value={vehicleSpecs.brand}
-                              onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, brand: e.target.value })}
-                              placeholder="napr. Volkswagen"
-                              className="h-11"
-                            />
+                        <h2 className="text-xl font-bold mb-6">Špecifikácie vozidla</h2>
+
+                        {/* Základné údaje */}
+                        <div className="mb-6">
+                          <h3 className="text-base font-semibold mb-4 text-gray-700">Základné údaje</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="brand">Značka *</Label>
+                              <Input
+                                id="brand"
+                                value={vehicleSpecs.brand}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, brand: e.target.value })}
+                                placeholder="napr. Volkswagen"
+                                className="h-11"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="model">Model *</Label>
+                              <Input
+                                id="model"
+                                value={vehicleSpecs.model}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, model: e.target.value })}
+                                placeholder="napr. Tiguan"
+                                className="h-11"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="year">Rok výroby *</Label>
+                              <Input
+                                id="year"
+                                type="number"
+                                value={vehicleSpecs.year}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, year: e.target.value })}
+                                placeholder="napr. 2021"
+                                className="h-11"
+                                min="1900"
+                                max={new Date().getFullYear() + 1}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="mileage">Tachometer (km) *</Label>
+                              <Input
+                                id="mileage"
+                                type="number"
+                                value={vehicleSpecs.mileage}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, mileage: e.target.value })}
+                                placeholder="napr. 190417"
+                                className="h-11"
+                                min="0"
+                              />
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="model">Model</Label>
-                            <Input
-                              id="model"
-                              value={vehicleSpecs.model}
-                              onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, model: e.target.value })}
-                              placeholder="napr. Tiguan"
-                              className="h-11"
-                            />
+                        </div>
+
+                        {/* Technické parametre */}
+                        <div className="mb-6">
+                          <h3 className="text-base font-semibold mb-4 text-gray-700">Technické parametre</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="fuel">Palivo *</Label>
+                              <Select
+                                value={vehicleSpecs.fuel}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, fuel: v })}
+                              >
+                                <SelectTrigger id="fuel" className="h-11">
+                                  <SelectValue placeholder="Vyberte palivo" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Benzín">Benzín</SelectItem>
+                                  <SelectItem value="Diesel">Diesel</SelectItem>
+                                  <SelectItem value="Elektro">Elektro</SelectItem>
+                                  <SelectItem value="Hybrid">Hybrid</SelectItem>
+                                  <SelectItem value="Plug-in hybrid">Plug-in hybrid</SelectItem>
+                                  <SelectItem value="LPG">LPG</SelectItem>
+                                  <SelectItem value="CNG">CNG</SelectItem>
+                                  <SelectItem value="Vodík">Vodík</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="transmission">Prevodovka *</Label>
+                              <Select
+                                value={vehicleSpecs.transmission}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, transmission: v })}
+                              >
+                                <SelectTrigger id="transmission" className="h-11">
+                                  <SelectValue placeholder="Vyberte prevodovku" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Manuál">Manuál</SelectItem>
+                                  <SelectItem value="Automat">Automat</SelectItem>
+                                  <SelectItem value="Poloautomat">Poloautomat</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="power">Výkon (kW)</Label>
+                              <Input
+                                id="power"
+                                type="number"
+                                value={vehicleSpecs.power}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, power: e.target.value })}
+                                placeholder="napr. 110"
+                                className="h-11"
+                                min="0"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="engine">Objem motora (cm³)</Label>
+                              <Input
+                                id="engine"
+                                type="number"
+                                value={vehicleSpecs.engine}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, engine: e.target.value })}
+                                placeholder="napr. 1968"
+                                className="h-11"
+                                min="0"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="drive">Pohon</Label>
+                              <Select
+                                value={vehicleSpecs.drive}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, drive: v })}
+                              >
+                                <SelectTrigger id="drive" className="h-11">
+                                  <SelectValue placeholder="Vyberte pohon" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Predný">Predný</SelectItem>
+                                  <SelectItem value="Zadný">Zadný</SelectItem>
+                                  <SelectItem value="4x4">4x4 (AWD/4WD)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="emission">Emisná trieda</Label>
+                              <Select
+                                value={vehicleSpecs.emission}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, emission: v })}
+                              >
+                                <SelectTrigger id="emission" className="h-11">
+                                  <SelectValue placeholder="Vyberte emisnú triedu" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Euro 6">Euro 6</SelectItem>
+                                  <SelectItem value="Euro 5">Euro 5</SelectItem>
+                                  <SelectItem value="Euro 4">Euro 4</SelectItem>
+                                  <SelectItem value="Euro 3">Euro 3</SelectItem>
+                                  <SelectItem value="Iná">Iná</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="year">Rok výroby</Label>
-                            <Input
-                              id="year"
-                              type="number"
-                              value={vehicleSpecs.year}
-                              onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, year: e.target.value })}
-                              placeholder="napr. 2021"
-                              className="h-11"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="mileage">Tachometer (km)</Label>
-                            <Input
-                              id="mileage"
-                              type="number"
-                              value={vehicleSpecs.mileage}
-                              onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, mileage: e.target.value })}
-                              placeholder="napr. 190417"
-                              className="h-11"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="fuel">Palivo</Label>
-                            <Input
-                              id="fuel"
-                              value={vehicleSpecs.fuel}
-                              onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, fuel: e.target.value })}
-                              placeholder="napr. Diesel"
-                              className="h-11"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="transmission">Prevodovka</Label>
-                            <Input
-                              id="transmission"
-                              value={vehicleSpecs.transmission}
-                              onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, transmission: e.target.value })}
-                              placeholder="napr. Automat"
-                              className="h-11"
-                            />
+                        </div>
+
+                        {/* Karoséria a exteriér */}
+                        <div className="mb-6">
+                          <h3 className="text-base font-semibold mb-4 text-gray-700">Karoséria a exteriér</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="bodyType">Typ karosérie</Label>
+                              <Select
+                                value={vehicleSpecs.bodyType}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, bodyType: v })}
+                              >
+                                <SelectTrigger id="bodyType" className="h-11">
+                                  <SelectValue placeholder="Vyberte typ karosérie" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Sedan">Sedan</SelectItem>
+                                  <SelectItem value="Hatchback">Hatchback</SelectItem>
+                                  <SelectItem value="Combi">Combi</SelectItem>
+                                  <SelectItem value="SUV">SUV</SelectItem>
+                                  <SelectItem value="Kupé">Kupé</SelectItem>
+                                  <SelectItem value="Kabriolet">Kabriolet</SelectItem>
+                                  <SelectItem value="MPV">MPV</SelectItem>
+                                  <SelectItem value="Pick-up">Pick-up</SelectItem>
+                                  <SelectItem value="Dodávka">Dodávka</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="color">Farba</Label>
+                              <Select
+                                value={vehicleSpecs.color}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, color: v })}
+                              >
+                                <SelectTrigger id="color" className="h-11">
+                                  <SelectValue placeholder="Vyberte farbu" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Biela">Biela</SelectItem>
+                                  <SelectItem value="Čierna">Čierna</SelectItem>
+                                  <SelectItem value="Sivá">Sivá</SelectItem>
+                                  <SelectItem value="Strieborná">Strieborná</SelectItem>
+                                  <SelectItem value="Modrá">Modrá</SelectItem>
+                                  <SelectItem value="Červená">Červená</SelectItem>
+                                  <SelectItem value="Zelená">Zelená</SelectItem>
+                                  <SelectItem value="Žltá">Žltá</SelectItem>
+                                  <SelectItem value="Oranžová">Oranžová</SelectItem>
+                                  <SelectItem value="Hnedá">Hnedá</SelectItem>
+                                  <SelectItem value="Béžová">Béžová</SelectItem>
+                                  <SelectItem value="Zlatá">Zlatá</SelectItem>
+                                  <SelectItem value="Iná">Iná</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="seats">Počet sedadiel</Label>
+                              <Select
+                                value={vehicleSpecs.seats}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, seats: v })}
+                              >
+                                <SelectTrigger id="seats" className="h-11">
+                                  <SelectValue placeholder="Počet sedadiel" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="2">2</SelectItem>
+                                  <SelectItem value="4">4</SelectItem>
+                                  <SelectItem value="5">5</SelectItem>
+                                  <SelectItem value="6">6</SelectItem>
+                                  <SelectItem value="7">7</SelectItem>
+                                  <SelectItem value="8">8</SelectItem>
+                                  <SelectItem value="9">9</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="vin">VIN (voliteľné)</Label>
+                              <Input
+                                id="vin"
+                                value={vehicleSpecs.vin}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, vin: e.target.value.toUpperCase() })}
+                                placeholder="17-miestny VIN kód"
+                                className="h-11"
+                                maxLength={17}
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
