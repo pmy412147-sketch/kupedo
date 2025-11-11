@@ -46,6 +46,26 @@ export default function MincePage() {
     }
 
     fetchData();
+
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const canceled = params.get('canceled');
+
+    if (success === 'true') {
+      toast.success('Platba úspešná!', {
+        description: 'Vaše mince boli pripísané na účet. Môže to trvať niekoľko sekúnd.',
+        duration: 5000,
+      });
+      window.history.replaceState({}, '', '/mince');
+    }
+
+    if (canceled === 'true') {
+      toast.info('Platba zrušená', {
+        description: 'Vaša platba bola zrušená. Mince neboli odpísané.',
+        duration: 4000,
+      });
+      window.history.replaceState({}, '', '/mince');
+    }
   }, [user, router]);
 
   const fetchData = async () => {
