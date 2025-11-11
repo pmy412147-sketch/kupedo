@@ -204,48 +204,48 @@ export function Header() {
 
       {user && (
         <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 z-50">
-          <div className="grid grid-cols-5 h-14">
+          <div className="grid grid-cols-5 h-14 px-1">
             <button
               onClick={() => router.push('/')}
-              className="flex flex-col items-center justify-center gap-0.5 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors"
+              className="flex flex-col items-center justify-center gap-0 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors px-1"
             >
               <Search className="h-4 w-4" />
-              <span className="text-[10px]">Hľadať</span>
+              <span className="text-[9px]">Hľadať</span>
             </button>
             <button
               onClick={() => router.push('/mince')}
-              className="flex flex-col items-center justify-center gap-0.5 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors"
+              className="flex flex-col items-center justify-center gap-0 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 transition-colors px-1"
             >
               <div className="relative">
                 <Coins className="h-4 w-4" />
                 {coinBalance > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[8px] font-bold rounded-full w-3 h-3 flex items-center justify-center">
-                    {coinBalance > 9 ? '9+' : coinBalance}
+                  <span className="absolute -top-1 -right-1 bg-emerald-500 text-white text-[7px] font-bold rounded-full w-2.5 h-2.5 flex items-center justify-center">
+                    {coinBalance > 9 ? '9' : coinBalance}
                   </span>
                 )}
               </div>
-              <span className="text-[10px] font-semibold">Mince</span>
+              <span className="text-[9px] font-semibold">Mince</span>
             </button>
             <button
               onClick={() => router.push('/oblubene')}
-              className="flex flex-col items-center justify-center gap-0.5 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors"
+              className="flex flex-col items-center justify-center gap-0 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors px-1"
             >
               <Heart className="h-4 w-4" />
-              <span className="text-[10px]">Obľúbené</span>
+              <span className="text-[9px]">Obľúbené</span>
             </button>
             <button
               onClick={() => router.push('/pridat-inzerat')}
-              className="flex flex-col items-center justify-center gap-0.5 text-white bg-emerald-500 hover:bg-emerald-600 transition-colors"
+              className="flex flex-col items-center justify-center gap-0 text-white bg-emerald-500 hover:bg-emerald-600 transition-colors px-1"
             >
               <Plus className="h-5 w-5" />
-              <span className="text-[10px]">Pridať</span>
+              <span className="text-[9px]">Pridať</span>
             </button>
             <button
               onClick={() => router.push('/spravy')}
-              className="flex flex-col items-center justify-center gap-0.5 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors"
+              className="flex flex-col items-center justify-center gap-0 text-gray-600 dark:text-gray-400 hover:text-emerald-500 transition-colors px-1"
             >
               <MessageSquare className="h-4 w-4" />
-              <span className="text-[10px]">Správy</span>
+              <span className="text-[9px]">Správy</span>
             </button>
           </div>
         </nav>
