@@ -672,15 +672,36 @@ export default function AdDetailPage() {
                         ? JSON.stringify(value)
                         : value.toString();
 
-                      const displayKey = key
+                      const fieldTranslations: { [key: string]: string } = {
+                        'ram': 'RAM pamäť',
+                        'brand': 'Značka',
+                        'color': 'Farba',
+                        'model': 'Model',
+                        'storage': 'Úložisko',
+                        'warranty': 'Záruka',
+                        'condition': 'Stav',
+                        'batteryHealth': 'Stav batérie',
+                        'screenSize': 'Veľkosť displeja',
+                        'processor': 'Procesor',
+                        'camera': 'Fotoaparát',
+                        'operatingSystem': 'Operačný systém',
+                        'connectivity': 'Konektivita',
+                        'simCard': 'SIM karta',
+                        'accessories': 'Príslušenstvo',
+                        'memoryCard': 'Pamäťová karta',
+                        'dimensions': 'Rozmery',
+                        'weight': 'Hmotnosť',
+                      };
+
+                      const displayKey = fieldTranslations[key] || key
                         .replace(/([A-Z])/g, ' $1')
                         .replace(/^./, str => str.toUpperCase())
                         .trim();
 
                       return (
-                        <div key={key} className="flex justify-between py-2 border-b">
-                          <span className="text-gray-600">{displayKey}</span>
-                          <span className="font-semibold text-right">{displayValue}</span>
+                        <div key={key} className="flex flex-col sm:flex-row sm:justify-between py-3 border-b last:border-b-0 gap-1">
+                          <span className="text-gray-600 dark:text-gray-400 text-sm sm:text-base">{displayKey}</span>
+                          <span className="font-semibold text-gray-900 dark:text-white text-base sm:text-right break-words">{displayValue}</span>
                         </div>
                       );
                     })}
