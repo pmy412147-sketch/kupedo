@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, ChartBar as BarChart3, Coins } from 'lucide-react';
-import { useTheme } from 'next-themes';
 import { useRouter } from 'next/navigation';
 import { SearchWithSuggestions } from './SearchWithSuggestions';
 import { supabase } from '@/lib/supabase';
@@ -24,16 +23,17 @@ export function Header() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [coinBalance, setCoinBalance] = useState(0);
-  const { theme, setTheme } = useTheme();
   const router = useRouter();
-  const [currentTheme, setCurrentTheme] = useState<string>('light');
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    if (theme) {
-      setCurrentTheme(theme);
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+      setIsDark(true);
     }
-  }, [theme]);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -93,26 +93,30 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-2">
-              {mounted && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    setTheme(newTheme);
-                    setCurrentTheme(newTheme);
-                  }}
-                  className="relative w-10 h-10"
-                  aria-label="Prepnúť tému"
-                >
-                  {currentTheme === 'dark' ? (
-                    <Sun className="h-5 w-5" />
-                  ) : (
-                    <Moon className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">Prepnúť tému</span>
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  if (isDark) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    setIsDark(false);
+                  } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    setIsDark(true);
+                  }
+                }}
+                className="relative w-10 h-10"
+                aria-label="Prepnúť tému"
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+                <span className="sr-only">Prepnúť tému</span>
+              </Button>
 
               {user ? (
                 <>

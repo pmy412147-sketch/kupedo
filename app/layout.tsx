@@ -2,7 +2,6 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { ThemeProvider } from 'next-themes';
 import { Toaster } from '@/components/ui/sonner';
 import { ConsentBanner } from '@/components/ConsentBanner';
 import Script from 'next/script';
@@ -37,18 +36,11 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          storageKey="kupedo-theme"
-        >
-          <AuthProvider>
-            {children}
-            <Toaster />
-            <ConsentBanner />
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          {children}
+          <Toaster />
+          <ConsentBanner />
+        </AuthProvider>
       </body>
     </html>
   );
