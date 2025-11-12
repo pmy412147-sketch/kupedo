@@ -43,7 +43,7 @@ export default function RootLayout({
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
-          enableSystem={true}
+          enableSystem={false}
           storageKey="kupedo-theme"
           disableTransitionOnChange={false}
         >
