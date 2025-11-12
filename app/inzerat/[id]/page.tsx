@@ -36,18 +36,28 @@ interface Ad {
     transmission?: string;
     engine?: string;
     power?: string;
+    engineVolume?: string;
     drive?: string;
     emission?: string;
+    emissionClass?: string;
+    co2Emissions?: string;
+    doors?: number;
     seats?: number;
     color?: string;
     bodyType?: string;
+    condition?: string;
     vin?: string;
+    serviceHistory?: string;
+    lastServiceDate?: string;
+    lastServiceMileage?: number;
   };
   features?: {
     interior?: string[];
+    infotainment?: string[];
     exterior?: string[];
     safety?: string[];
-    infotainment?: string[];
+    other?: string[];
+    extra?: string[];
   };
   realEstate?: {
     type?: string;
@@ -446,10 +456,22 @@ export default function AdDetailPage() {
                               <span className="font-semibold">{ad.specs.seats} miest</span>
                             </div>
                           )}
+                          {ad.specs.doors && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">Počet dverí</span>
+                              <span className="font-semibold">{ad.specs.doors}</span>
+                            </div>
+                          )}
                           {ad.specs.color && (
                             <div className="flex justify-between py-2 border-b">
                               <span className="text-gray-600">Farba</span>
                               <span className="font-semibold">{ad.specs.color}</span>
+                            </div>
+                          )}
+                          {ad.specs.condition && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">Stav</span>
+                              <span className="font-semibold">{ad.specs.condition}</span>
                             </div>
                           )}
                           {ad.specs.vin && (
@@ -476,16 +498,22 @@ export default function AdDetailPage() {
                               <span className="font-semibold">{ad.specs.transmission}</span>
                             </div>
                           )}
-                          {ad.specs.engine && (
+                          {ad.specs.engineVolume && (
                             <div className="flex justify-between py-2 border-b">
                               <span className="text-gray-600">Motor</span>
-                              <span className="font-semibold">{ad.specs.engine}</span>
+                              <span className="font-semibold">{ad.specs.engineVolume}</span>
                             </div>
                           )}
                           {ad.specs.power && (
                             <div className="flex justify-between py-2 border-b">
                               <span className="text-gray-600">Výkon</span>
-                              <span className="font-semibold">{ad.specs.power}</span>
+                              <span className="font-semibold">{ad.specs.power} kW</span>
+                            </div>
+                          )}
+                          {ad.specs.engine && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">Objem motora</span>
+                              <span className="font-semibold">{ad.specs.engine} cm³</span>
                             </div>
                           )}
                           {ad.specs.drive && (
@@ -500,10 +528,38 @@ export default function AdDetailPage() {
                               <span className="font-semibold">{ad.specs.emission}</span>
                             </div>
                           )}
+                          {ad.specs.co2Emissions && (
+                            <div className="flex justify-between py-2 border-b">
+                              <span className="text-gray-600">Emisie CO₂</span>
+                              <span className="font-semibold">{ad.specs.co2Emissions}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
                   </Card>
+
+                  {(ad.specs.serviceHistory || ad.specs.lastServiceDate || ad.specs.lastServiceMileage) && (
+                    <Card className="p-6 mb-6">
+                      <h2 className="text-2xl font-bold mb-6">Stav vozidla</h2>
+                      <div className="space-y-3">
+                        {ad.specs.serviceHistory && (
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">História</span>
+                            <span className="font-semibold">{ad.specs.serviceHistory}</span>
+                          </div>
+                        )}
+                        {ad.specs.lastServiceDate && ad.specs.lastServiceMileage && (
+                          <div className="flex justify-between py-2 border-b">
+                            <span className="text-gray-600">Posledný servis</span>
+                            <span className="font-semibold">
+                              {new Date(ad.specs.lastServiceDate).toLocaleDateString('sk-SK')} pri {ad.specs.lastServiceMileage.toLocaleString()} km
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  )}
 
                   {ad.features && (
                     <Card className="p-6 mb-6">
@@ -557,6 +613,34 @@ export default function AdDetailPage() {
                             <h3 className="text-lg font-semibold mb-4">Bezpečnosť</h3>
                             <div className="space-y-2">
                               {ad.features.safety.map((feature, idx) => (
+                                <div key={idx} className="flex items-start gap-2">
+                                  <Check className="h-5 w-5 text-[#2ECC71] flex-shrink-0 mt-0.5" />
+                                  <span className="text-sm">{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {ad.features.other && ad.features.other.length > 0 && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-4">Ostatné</h3>
+                            <div className="space-y-2">
+                              {ad.features.other.map((feature, idx) => (
+                                <div key={idx} className="flex items-start gap-2">
+                                  <Check className="h-5 w-5 text-[#2ECC71] flex-shrink-0 mt-0.5" />
+                                  <span className="text-sm">{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {ad.features.extra && ad.features.extra.length > 0 && (
+                          <div>
+                            <h3 className="text-lg font-semibold mb-4">Extra</h3>
+                            <div className="space-y-2">
+                              {ad.features.extra.map((feature, idx) => (
                                 <div key={idx} className="flex items-start gap-2">
                                   <Check className="h-5 w-5 text-[#2ECC71] flex-shrink-0 mt-0.5" />
                                   <span className="text-sm">{feature}</span>

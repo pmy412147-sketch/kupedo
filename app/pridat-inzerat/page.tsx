@@ -52,19 +52,29 @@ export default function AddAdPage() {
     transmission: '',
     engine: '',
     power: '',
+    engineVolume: '',
     drive: '',
     emission: '',
+    emissionClass: '',
+    co2Emissions: '',
+    doors: '',
     seats: '',
     color: '',
     bodyType: '',
-    vin: ''
+    condition: '',
+    vin: '',
+    serviceHistory: '',
+    lastServiceDate: '',
+    lastServiceMileage: ''
   });
 
   const [vehicleFeatures, setVehicleFeatures] = useState({
     interior: [] as string[],
+    infotainment: [] as string[],
     exterior: [] as string[],
     safety: [] as string[],
-    infotainment: [] as string[]
+    other: [] as string[],
+    extra: [] as string[]
   });
 
   const [realEstateData, setRealEstateData] = useState({
@@ -85,47 +95,75 @@ export default function AddAdPage() {
 
   const featureOptions = {
     interior: [
-      'Adaptívny tempomat',
+      'Automatická klimatizácia',
+      'Automaticky nastaviteľný volant pri nástupe',
       'Autorádio',
+      'Bezkľúčové štartovanie',
       'Centrálne zamykanie',
+      'Elektrická parkovacia brzda',
       'Elektrické okná',
+      'Elektrické sedačky',
+      'Kožené sedačky',
+      'Kožený volant',
       'Multifunkčný volant',
+      'Pamäť nastavenia sedadiel',
+      'Palubný počítač',
       'Posilňovač riadenia',
       'Radenie pádlami pod volantom',
+      'Stop Start systém',
+      'Tempomat',
       'Tónované skla',
-      'Vyhrievané sedačky',
-      'Vyhrievaný volant'
+      'Ukotvenie pre detské sedačky',
+      'Vyhrievané sedačky'
+    ],
+    infotainment: [
+      'Android Auto',
+      'Apple CarPlay',
+      'Bezdrôtové nabíjanie telefónu',
+      'Bluetooth pripojenie',
+      'Navigácia',
+      'Virtuálny kokpit'
     ],
     exterior: [
       'Automatické denné svetlá',
       'Bezkľúčové odomykanie',
-      'Bezkľúčové štartovanie',
-      'Elektrická parkovacia brzda',
-      'Kožený volant',
-      'Palubný počítač',
-      'Posúvacie zadné sedadlá',
-      'Stop Start systém',
-      'Ukotvenie pre detské sedačky'
+      'Elektrické otváranie kufra',
+      'Elektrické zrkadlá',
+      'Hmlovky',
+      'LED predné svetlomety',
+      'LED svetlá na denné svietenie',
+      'Originálne hliníkové disky',
+      'Predný a zadný parkovací senzor',
+      'Pozdĺžne strešné nosiče',
+      'Zadné svetlá LED'
     ],
     safety: [
       'ABS',
       'Airbag vodiča',
       'Airbag spolujazdca',
+      'Airbags',
+      'Alarm',
       'Asistent rozjazdu do kopca',
       'Asistent zjazdu z kopca',
       'ASR',
+      'Automatické zastavenie pred prekážkou',
       'ESP',
       'Kontrola tlaku pneumatík',
-      'Systém upozornenia na vybočenie z jazdného pruhu',
-      'Automatické zastavenie pred prekážkou'
+      'Systém upozornenia na vybočenie z jazdného pruhu'
     ],
-    infotainment: [
-      'Android Auto',
-      'Apple CarPlay',
-      'Bluetooth pripojenie',
-      'Navigácia',
-      'MirrorLink',
-      'Virtuálny kokpit'
+    other: [
+      'Automatické diaľkové svetlá',
+      'Laktová opierka',
+      'Rozpoznávanie dopravných značiek',
+      'USB pripojenie (audio)',
+      'USB-C zásuvka',
+      'Voľba jazdného režimu'
+    ],
+    extra: [
+      'Automatické parkovanie',
+      'Kompresor - lepiaca súprava',
+      'Parkovacia kamera',
+      'Senzor dažďa'
     ]
   };
 
@@ -237,12 +275,20 @@ export default function AddAdPage() {
           if (vehicleSpecs.transmission) specs.transmission = vehicleSpecs.transmission;
           if (vehicleSpecs.engine) specs.engine = vehicleSpecs.engine;
           if (vehicleSpecs.power) specs.power = vehicleSpecs.power;
+          if (vehicleSpecs.engineVolume) specs.engineVolume = vehicleSpecs.engineVolume;
           if (vehicleSpecs.drive) specs.drive = vehicleSpecs.drive;
           if (vehicleSpecs.emission) specs.emission = vehicleSpecs.emission;
+          if (vehicleSpecs.emissionClass) specs.emissionClass = vehicleSpecs.emissionClass;
+          if (vehicleSpecs.co2Emissions) specs.co2Emissions = vehicleSpecs.co2Emissions;
+          if (vehicleSpecs.doors) specs.doors = parseInt(vehicleSpecs.doors);
           if (vehicleSpecs.seats) specs.seats = parseInt(vehicleSpecs.seats);
           if (vehicleSpecs.color) specs.color = vehicleSpecs.color;
           if (vehicleSpecs.bodyType) specs.bodyType = vehicleSpecs.bodyType;
+          if (vehicleSpecs.condition) specs.condition = vehicleSpecs.condition;
           if (vehicleSpecs.vin) specs.vin = vehicleSpecs.vin;
+          if (vehicleSpecs.serviceHistory) specs.serviceHistory = vehicleSpecs.serviceHistory;
+          if (vehicleSpecs.lastServiceDate) specs.lastServiceDate = vehicleSpecs.lastServiceDate;
+          if (vehicleSpecs.lastServiceMileage) specs.lastServiceMileage = parseInt(vehicleSpecs.lastServiceMileage);
 
           metadata.specs = specs;
         }
@@ -830,6 +876,22 @@ export default function AddAdPage() {
                               </Select>
                             </div>
                             <div className="space-y-2">
+                              <Label htmlFor="doors">Počet dverí</Label>
+                              <Select
+                                value={vehicleSpecs.doors}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, doors: v })}
+                              >
+                                <SelectTrigger id="doors" className="h-11">
+                                  <SelectValue placeholder="Počet dverí" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="2/3">2/3</SelectItem>
+                                  <SelectItem value="4/5">4/5</SelectItem>
+                                  <SelectItem value="6/7">6/7</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
                               <Label htmlFor="vin">VIN (voliteľné)</Label>
                               <Input
                                 id="vin"
@@ -838,6 +900,83 @@ export default function AddAdPage() {
                                 placeholder="17-miestny VIN kód"
                                 className="h-11"
                                 maxLength={17}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Dodatočné informácie */}
+                        <div className="mb-6">
+                          <h3 className="text-base font-semibold mb-4 text-gray-700">Stav vozidla</h3>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="condition">Stav</Label>
+                              <Select
+                                value={vehicleSpecs.condition}
+                                onValueChange={(v) => setVehicleSpecs({ ...vehicleSpecs, condition: v })}
+                              >
+                                <SelectTrigger id="condition" className="h-11">
+                                  <SelectValue placeholder="Vyberte stav" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="Nové">Nové</SelectItem>
+                                  <SelectItem value="Predvádzacie">Predvádzacie</SelectItem>
+                                  <SelectItem value="Jazdené">Jazdené</SelectItem>
+                                  <SelectItem value="Poškodené">Poškodené</SelectItem>
+                                  <SelectItem value="Veterán">Veterán</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="engineVolume">Motor (napr. xDrive30d)</Label>
+                              <Input
+                                id="engineVolume"
+                                value={vehicleSpecs.engineVolume}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, engineVolume: e.target.value })}
+                                placeholder="napr. xDrive30d, 2.0 TDI"
+                                className="h-11"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="emissionClass">Emisná kalkulačka</Label>
+                              <Input
+                                id="co2Emissions"
+                                value={vehicleSpecs.co2Emissions}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, co2Emissions: e.target.value })}
+                                placeholder="napr. 162 g/km"
+                                className="h-11"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="serviceHistory">História servisu</Label>
+                              <Input
+                                id="serviceHistory"
+                                value={vehicleSpecs.serviceHistory}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, serviceHistory: e.target.value })}
+                                placeholder="napr. Elektronická servisná knižka"
+                                className="h-11"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="lastServiceDate">Posledný servis (dátum)</Label>
+                              <Input
+                                id="lastServiceDate"
+                                type="date"
+                                value={vehicleSpecs.lastServiceDate}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, lastServiceDate: e.target.value })}
+                                className="h-11"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="lastServiceMileage">Posledný servis (km)</Label>
+                              <Input
+                                id="lastServiceMileage"
+                                type="number"
+                                value={vehicleSpecs.lastServiceMileage}
+                                onChange={(e) => setVehicleSpecs({ ...vehicleSpecs, lastServiceMileage: e.target.value })}
+                                placeholder="napr. 210845"
+                                className="h-11"
+                                min="0"
                               />
                             </div>
                           </div>
@@ -867,6 +1006,42 @@ export default function AddAdPage() {
                           </div>
 
                           <div>
+                            <h3 className="text-base font-semibold mb-4">Infotainment</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                              {featureOptions.infotainment.map((feature) => (
+                                <div key={feature} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`infotainment-${feature}`}
+                                    checked={vehicleFeatures.infotainment.includes(feature)}
+                                    onCheckedChange={() => toggleFeature('infotainment', feature)}
+                                  />
+                                  <label htmlFor={`infotainment-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    {feature}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className="text-base font-semibold mb-4">Exteriér</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                              {featureOptions.exterior.map((feature) => (
+                                <div key={feature} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`exterior-${feature}`}
+                                    checked={vehicleFeatures.exterior.includes(feature)}
+                                    onCheckedChange={() => toggleFeature('exterior', feature)}
+                                  />
+                                  <label htmlFor={`exterior-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    {feature}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
                             <h3 className="text-base font-semibold mb-4">Bezpečnosť</h3>
                             <div className="grid grid-cols-2 gap-3">
                               {featureOptions.safety.map((feature) => (
@@ -877,6 +1052,42 @@ export default function AddAdPage() {
                                     onCheckedChange={() => toggleFeature('safety', feature)}
                                   />
                                   <label htmlFor={`safety-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    {feature}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className="text-base font-semibold mb-4">Ostatné</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                              {featureOptions.other.map((feature) => (
+                                <div key={feature} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`other-${feature}`}
+                                    checked={vehicleFeatures.other.includes(feature)}
+                                    onCheckedChange={() => toggleFeature('other', feature)}
+                                  />
+                                  <label htmlFor={`other-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                    {feature}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <h3 className="text-base font-semibold mb-4">Extra</h3>
+                            <div className="grid grid-cols-2 gap-3">
+                              {featureOptions.extra.map((feature) => (
+                                <div key={feature} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`extra-${feature}`}
+                                    checked={vehicleFeatures.extra.includes(feature)}
+                                    onCheckedChange={() => toggleFeature('extra', feature)}
+                                  />
+                                  <label htmlFor={`extra-${feature}`} className="text-sm cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                     {feature}
                                   </label>
                                 </div>
