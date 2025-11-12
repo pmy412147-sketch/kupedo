@@ -140,7 +140,7 @@ export default function HomePage() {
                     placeholder="napr. iPhone 15, byt v Bratislave..."
                     value={heroFilters.searchQuery}
                     onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
-                    className="h-11 text-sm"
+                    className="h-11 text-sm text-gray-900"
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleHeroSearch();
@@ -190,7 +190,7 @@ export default function HomePage() {
                       placeholder="napr. 81101"
                       value={heroFilters.postalCode}
                       onChange={(e) => setHeroFilters({ ...heroFilters, postalCode: e.target.value })}
-                      className="h-10 text-xs"
+                      className="h-10 text-xs text-gray-900"
                     />
                   </div>
 
@@ -219,7 +219,7 @@ export default function HomePage() {
                       placeholder="0 €"
                       value={heroFilters.priceFrom}
                       onChange={(e) => setHeroFilters({ ...heroFilters, priceFrom: e.target.value })}
-                      className="h-10 text-xs"
+                      className="h-10 text-xs text-gray-900"
                     />
                   </div>
 
@@ -230,7 +230,7 @@ export default function HomePage() {
                       placeholder="∞ €"
                       value={heroFilters.priceTo}
                       onChange={(e) => setHeroFilters({ ...heroFilters, priceTo: e.target.value })}
-                      className="h-10 text-xs"
+                      className="h-10 text-xs text-gray-900"
                     />
                   </div>
                 </div>
