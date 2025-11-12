@@ -32,50 +32,52 @@ export default function MessagesPage() {
 
     const fetchConversations = async () => {
       try {
-        const { data: messages, error } = await supabase
-          .from('messages')
+        const { data: userConversations, error: convError } = await supabase
+          .from('conversations')
           .select('*')
-          .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
-          .order('created_at', { ascending: false });
+          .or(`participant_1.eq.${user.id},participant_2.eq.${user.id}`)
+          .order('last_message_at', { ascending: false });
 
-        if (error) {
-          console.error('Error fetching messages:', error);
+        if (convError) {
+          console.error('Error fetching conversations:', convError);
           return;
         }
 
-        if (!messages || messages.length === 0) {
+        if (!userConversations || userConversations.length === 0) {
           setConversations([]);
           return;
+        }
+
+        const conversationIds = userConversations.map(c => c.id);
+        const { data: messages, error: msgError } = await supabase
+          .from('messages')
+          .select('*')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        if (msgError) {
+          console.error('Error fetching messages:', msgError);
         }
 
         const conversationsMap = new Map<string, any>();
         const userIds = new Set<string>();
 
-        for (const msg of messages) {
-          const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
+        for (const conv of userConversations) {
+          const otherUserId = conv.participant_1 === user.id ? conv.participant_2 : conv.participant_1;
           userIds.add(otherUserId);
 
-          if (!conversationsMap.has(otherUserId)) {
-            conversationsMap.set(otherUserId, {
-              userId: otherUserId,
-              userName: 'Používateľ',
-              userAvatar: undefined,
-              lastMessage: msg.content,
-              lastMessageTime: msg.created_at,
-              unread: 0
-            });
-          } else {
-            const existing = conversationsMap.get(otherUserId);
-            if (new Date(msg.created_at) > new Date(existing.lastMessageTime)) {
-              existing.lastMessage = msg.content;
-              existing.lastMessageTime = msg.created_at;
-            }
-          }
+          const convMessages = messages?.filter(m => m.conversation_id === conv.id) || [];
+          const lastMsg = convMessages[0];
+          const unreadCount = convMessages.filter(m => m.sender_id !== user.id && !m.is_read).length;
 
-          if (msg.receiver_id === user.id && !msg.read) {
-            const conv = conversationsMap.get(otherUserId);
-            conv.unread++;
-          }
+          conversationsMap.set(otherUserId, {
+            userId: otherUserId,
+            userName: 'Používateľ',
+            userAvatar: undefined,
+            lastMessage: lastMsg?.content || 'Žiadne správy',
+            lastMessageTime: conv.last_message_at || conv.created_at,
+            unread: unreadCount
+          });
         }
 
         const { data: profiles } = await supabase
