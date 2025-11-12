@@ -40,7 +40,7 @@ export default function AddAdPage() {
     location: '',
     postal_code: '',
     street: '',
-    houseNumber: ''
+    house_number: ''
   });
 
   const [vehicleSpecs, setVehicleSpecs] = useState({
@@ -217,12 +217,12 @@ export default function AddAdPage() {
         updated_at: new Date().toISOString()
       };
 
+      // Build metadata object
+      const metadata: any = {};
+
       // Add universal category-specific data
       if (Object.keys(categorySpecificData).length > 0) {
-        adData.specs = {
-          ...(adData.specs || {}),
-          ...categorySpecificData
-        };
+        metadata.categorySpecific = categorySpecificData;
       }
 
       if (categoryType === 'vehicle') {
@@ -244,12 +244,12 @@ export default function AddAdPage() {
           if (vehicleSpecs.bodyType) specs.bodyType = vehicleSpecs.bodyType;
           if (vehicleSpecs.vin) specs.vin = vehicleSpecs.vin;
 
-          adData.specs = specs;
+          metadata.specs = specs;
         }
 
         const hasFeatures = Object.values(vehicleFeatures).some(arr => arr.length > 0);
         if (hasFeatures) {
-          adData.features = vehicleFeatures;
+          metadata.features = vehicleFeatures;
         }
       } else if (categoryType === 'real-estate') {
         const realEstate: any = {
@@ -266,7 +266,12 @@ export default function AddAdPage() {
         if (realEstateData.priceNote) realEstate.priceNote = realEstateData.priceNote;
         if (realEstateData.videoUrl) realEstate.videoUrl = realEstateData.videoUrl;
 
-        adData.realEstate = realEstate;
+        metadata.realEstate = realEstate;
+      }
+
+      // Only add metadata if it has content
+      if (Object.keys(metadata).length > 0) {
+        adData.metadata = metadata;
       }
 
       const { error: insertError } = await supabase
@@ -529,11 +534,11 @@ export default function AddAdPage() {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="houseNumber">Popisné číslo</Label>
+                        <Label htmlFor="house_number">Popisné číslo</Label>
                         <Input
-                          id="houseNumber"
-                          value={formData.houseNumber}
-                          onChange={(e) => setFormData({ ...formData, houseNumber: e.target.value })}
+                          id="house_number"
+                          value={formData.house_number}
+                          onChange={(e) => setFormData({ ...formData, house_number: e.target.value })}
                           placeholder="Číslo domu"
                         />
                       </div>
