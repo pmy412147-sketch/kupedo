@@ -34,9 +34,13 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 npm start
 ```
 
+QR kód sa zobrazí v termináli. Ak ho nevidíte, je už nastavený tunnel režim automaticky.
+
 4. **Naskenujte QR kód:**
-- Android: Otvorte Expo Go a naskenujte QR kód
-- iOS: Otvorte Kameru a naskenujte QR kód
+- **Android**: Otvorte Expo Go aplikáciu → Kliknite "Scan QR code" → Naskenujte QR kód z terminálu
+- **iOS**: Otvorte natívnu Kameru → Naskenujte QR kód → Kliknite na notifikáciu "Open in Expo Go"
+
+**DÔLEŽITÉ:** Musíte mať nainštalovanú aplikáciu **Expo Go** na telefóne!
 
 ## 📱 Funkcie
 
@@ -144,9 +148,18 @@ Push notifikácie sú nakonfigurované cez Expo Notifications.
 npm start -- --clear
 ```
 
-### Problémy s QR kódom
-- Uistite sa, že telefón a počítač sú na rovnakej WiFi sieti
-- Reštartujte Expo dev server
+### Nevidíte QR kód v termináli?
+Spustite s tunnel módom:
+```bash
+npx expo start --tunnel
+```
+
+Alebo ak QR kód stále nevidíte, použijte lokálnu IP adresu, ktorá sa zobrazí v termináli.
+
+### Problémy s pripojením
+- Uistite sa, že máte nainštalovanú aplikáciu **Expo Go** na telefóne
+- Telefón a počítač by mali byť na rovnakej WiFi sieti (ak nepoužívate tunnel)
+- Reštartujte Expo dev server: `npm start -- --clear`
 
 ### Chyby buildu
 ```bash
