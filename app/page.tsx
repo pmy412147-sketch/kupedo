@@ -120,7 +120,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4 lg:px-6 py-8 lg:py-0 h-full relative z-10 flex items-center">
             <div className="w-full lg:max-w-xl text-white">
               <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-3 lg:mb-4 leading-tight drop-shadow-lg">
-                Kúp. Predaj. Jednoducho.
+                Kúp. Predaj. Dohodni.
               </h1>
               <p className="text-base md:text-lg lg:text-xl mb-4 lg:mb-5 opacity-95 font-medium">
                 Slovenský marketplace pre všetko čo potrebujete. Rýchlo a bezpečne.

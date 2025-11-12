@@ -10,7 +10,7 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Kupedo.sk - Kúp. Predaj. Jednoducho.',
+  title: 'Kupedo.sk - Kúp. Predaj. Dohodni.',
   description: 'Slovenský marketplace pre všetko čo potrebujete',
 };
 
