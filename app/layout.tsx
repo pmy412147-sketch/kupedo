@@ -45,7 +45,6 @@ export default function RootLayout({
           defaultTheme="light"
           enableSystem={false}
           storageKey="kupedo-theme"
-          disableTransitionOnChange={false}
         >
           <AuthProvider>
             {children}
