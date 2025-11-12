@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { MapPin, MessageSquare, Heart, Edit, Eye, Clock } from 'lucide-react';
+import { MapPin, MessageSquare, Heart, Edit, Eye, Clock, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState, useEffect } from 'react';
@@ -19,9 +19,11 @@ interface AdCardProps {
   user_id: string;
   created_at?: string;
   view_count?: number;
+  is_boosted?: boolean;
+  boosted_until?: string;
 }
 
-export function AdCard({ id, title, price, location, images, user_id, created_at, view_count }: AdCardProps) {
+export function AdCard({ id, title, price, location, images, user_id, created_at, view_count, is_boosted, boosted_until }: AdCardProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [isFavorite, setIsFavorite] = useState(false);
@@ -88,7 +90,11 @@ export function AdCard({ id, title, price, location, images, user_id, created_at
   return (
     <Link href={`/inzerat/${id}`}>
       <div
-        className="group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 h-full flex flex-col border border-gray-100 dark:border-gray-700"
+        className={`group relative bg-white dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 h-full flex flex-col ${
+          is_boosted && boosted_until && new Date(boosted_until) > new Date()
+            ? 'border-2 border-amber-400 ring-2 ring-amber-200 dark:ring-amber-900'
+            : 'border border-gray-100 dark:border-gray-700'
+        }`}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -126,12 +132,20 @@ export function AdCard({ id, title, price, location, images, user_id, created_at
             />
           </button>
 
-          {view_count !== undefined && view_count > 0 && (
-            <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs">
-              <Eye className="h-3 w-3" />
-              <span>{view_count}</span>
-            </div>
-          )}
+          <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {is_boosted && boosted_until && new Date(boosted_until) > new Date() && (
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold shadow-lg animate-pulse">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>TOP</span>
+              </div>
+            )}
+            {view_count !== undefined && view_count > 0 && (
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-black/60 backdrop-blur-sm text-white text-xs">
+                <Eye className="h-3 w-3" />
+                <span>{view_count}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="p-4 flex flex-col flex-grow">

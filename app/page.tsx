@@ -40,6 +40,7 @@ export default function HomePage() {
         .from('ads')
         .select('*')
         .eq('status', 'active')
+        .order('is_boosted', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -392,6 +393,8 @@ export default function HomePage() {
                       user_id={ad.user_id}
                       created_at={ad.created_at}
                       view_count={ad.view_count}
+                      is_boosted={ad.is_boosted}
+                      boosted_until={ad.boosted_until}
                     />
                     {(index + 1) % 8 === 0 && index !== ads.length - 1 && (
                       <AdSenseInFeed key={`ad-${index}`} />

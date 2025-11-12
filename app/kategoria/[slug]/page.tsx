@@ -17,6 +17,8 @@ interface Ad {
   images: string[];
   user_id: string;
   category_id: string;
+  is_boosted?: boolean;
+  boosted_until?: string;
 }
 
 export default function CategoryPage() {
@@ -34,6 +36,7 @@ export default function CategoryPage() {
         .select('*')
         .eq('status', 'active')
         .eq('category_id', params.slug)
+        .order('is_boosted', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -106,6 +109,8 @@ export default function CategoryPage() {
                     location={ad.location}
                     images={ad.images}
                     user_id={ad.user_id}
+                    is_boosted={ad.is_boosted}
+                    boosted_until={ad.boosted_until}
                   />
                   {(index + 1) % 8 === 0 && index !== ads.length - 1 && (
                     <AdSenseInFeed key={`ad-${index}`} />
