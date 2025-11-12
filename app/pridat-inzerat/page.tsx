@@ -384,70 +384,6 @@ export default function AddAdPage() {
 
               {selectedCategory && (
                 <>
-                  {categoryType === 'real-estate' && (
-                    <>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="realEstateType">Typ *</Label>
-                          <Select
-                            value={realEstateData.type}
-                            onValueChange={(v) => setRealEstateData({ ...realEstateData, type: v })}
-                            required
-                          >
-                            <SelectTrigger id="realEstateType">
-                              <SelectValue placeholder="Vyberte typ" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {realEstateTypes.map((type) => (
-                                <SelectItem key={type} value={type}>
-                                  {type}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        <div>
-                          <Label htmlFor="kindCategory">Druh kategória *</Label>
-                          <Select
-                            value={realEstateData.kindCategory}
-                            onValueChange={(v) => setRealEstateData({ ...realEstateData, kindCategory: v, kind: '' })}
-                            required
-                          >
-                            <SelectTrigger id="kindCategory">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="byty">Byty</SelectItem>
-                              <SelectItem value="domy">Domy</SelectItem>
-                              <SelectItem value="pozemky">Pozemky</SelectItem>
-                              <SelectItem value="objekty">Objekty</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="kind">Druh *</Label>
-                        <Select
-                          value={realEstateData.kind}
-                          onValueChange={(v) => setRealEstateData({ ...realEstateData, kind: v })}
-                          required
-                        >
-                          <SelectTrigger id="kind">
-                            <SelectValue placeholder="Vyberte druh" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {realEstateKinds[realEstateData.kindCategory as keyof typeof realEstateKinds]?.map((kind) => (
-                              <SelectItem key={kind} value={kind}>
-                                {kind}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </>
-                  )}
 
                   {/* Nadpis */}
                   <div className="space-y-3">
@@ -482,65 +418,6 @@ export default function AddAdPage() {
                     />
                   </div>
 
-                  {categoryType === 'real-estate' && (
-                    <>
-                      <div className="grid grid-cols-3 gap-4">
-                        <div>
-                          <Label htmlFor="usableArea">Úžitková plocha (m²)</Label>
-                          <Input
-                            id="usableArea"
-                            type="number"
-                            step="0.01"
-                            value={realEstateData.usableArea}
-                            onChange={(e) => setRealEstateData({ ...realEstateData, usableArea: e.target.value })}
-                            placeholder="0"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="builtUpArea">Zastavaná plocha (m²)</Label>
-                          <Input
-                            id="builtUpArea"
-                            type="number"
-                            step="0.01"
-                            value={realEstateData.builtUpArea}
-                            onChange={(e) => setRealEstateData({ ...realEstateData, builtUpArea: e.target.value })}
-                            placeholder="0"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="landArea">Plocha pozemku (m²)</Label>
-                          <Input
-                            id="landArea"
-                            type="number"
-                            step="0.01"
-                            value={realEstateData.landArea}
-                            onChange={(e) => setRealEstateData({ ...realEstateData, landArea: e.target.value })}
-                            placeholder="0"
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="condition">Stav *</Label>
-                        <Select
-                          value={realEstateData.condition}
-                          onValueChange={(v) => setRealEstateData({ ...realEstateData, condition: v })}
-                          required
-                        >
-                          <SelectTrigger id="condition">
-                            <SelectValue placeholder="Vyberte stav" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {realEstateConditions.map((cond) => (
-                              <SelectItem key={cond} value={cond}>
-                                {cond}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </>
-                  )}
 
                   {/* Lokalita */}
                   <div className="grid grid-cols-2 gap-4">
@@ -568,28 +445,6 @@ export default function AddAdPage() {
                     </div>
                   </div>
 
-                  {categoryType === 'real-estate' && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="street">Ulica</Label>
-                        <Input
-                          id="street"
-                          value={formData.street}
-                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                          placeholder="Názov ulice"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="house_number">Popisné číslo</Label>
-                        <Input
-                          id="house_number"
-                          value={formData.house_number}
-                          onChange={(e) => setFormData({ ...formData, house_number: e.target.value })}
-                          placeholder="Číslo domu"
-                        />
-                      </div>
-                    </div>
-                  )}
 
                   {/* Cena */}
                   <div className="space-y-3">
@@ -607,41 +462,6 @@ export default function AddAdPage() {
                     />
                   </div>
 
-                  {categoryType === 'real-estate' && (
-                    <>
-                      <div>
-                        <Label htmlFor="energyCost">Energie (€/mesiac)</Label>
-                        <Input
-                          id="energyCost"
-                          type="number"
-                          step="0.01"
-                          value={realEstateData.energyCost}
-                          onChange={(e) => setRealEstateData({ ...realEstateData, energyCost: e.target.value })}
-                          placeholder="0"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="priceNote">Poznámka k cene</Label>
-                        <Input
-                          id="priceNote"
-                          value={realEstateData.priceNote}
-                          onChange={(e) => setRealEstateData({ ...realEstateData, priceNote: e.target.value })}
-                          placeholder="Voliteľná poznámka"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="videoUrl">Video</Label>
-                        <Input
-                          id="videoUrl"
-                          value={realEstateData.videoUrl}
-                          onChange={(e) => setRealEstateData({ ...realEstateData, videoUrl: e.target.value })}
-                          placeholder="Link na YouTube, videobhliadky.sk alebo matterport.com"
-                        />
-                      </div>
-                    </>
-                  )}
 
                   {(categoryType === 'vehicles' || categoryType === 'motorcycles') && (
                     <>

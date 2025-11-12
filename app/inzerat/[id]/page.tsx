@@ -71,6 +71,7 @@ interface Ad {
     priceNote?: string;
     videoUrl?: string;
   };
+  categorySpecific?: Record<string, any>;
 }
 
 interface UserProfile {
@@ -124,6 +125,7 @@ export default function AdDetailPage() {
             specs: adData.metadata.specs || undefined,
             features: adData.metadata.features || undefined,
             realEstate: adData.metadata.realEstate || undefined,
+            categorySpecific: adData.metadata.categorySpecific || undefined,
           };
         }
 
@@ -655,80 +657,33 @@ export default function AdDetailPage() {
                 </>
               )}
 
-              {ad.realEstate && (
+              {ad.categorySpecific && Object.keys(ad.categorySpecific).length > 0 && (
                 <Card className="p-6 mb-6">
-                  <h2 className="text-2xl font-bold mb-6">Vlastnosti nehnuteľnosti</h2>
+                  <h2 className="text-2xl font-bold mb-6">Vlastnosti</h2>
 
                   <div className="space-y-3">
-                    {ad.realEstate.type && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Typ</span>
-                        <span className="font-semibold">{ad.realEstate.type}</span>
-                      </div>
-                    )}
-                    {ad.realEstate.kind && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Druh</span>
-                        <span className="font-semibold">{ad.realEstate.kind}</span>
-                      </div>
-                    )}
-                    {ad.realEstate.usableArea && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Úžitková plocha</span>
-                        <span className="font-semibold">{ad.realEstate.usableArea} m²</span>
-                      </div>
-                    )}
-                    {ad.realEstate.builtUpArea && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Zastavená plocha</span>
-                        <span className="font-semibold">{ad.realEstate.builtUpArea} m²</span>
-                      </div>
-                    )}
-                    {ad.realEstate.landArea && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Plocha pozemku</span>
-                        <span className="font-semibold">{ad.realEstate.landArea} m²</span>
-                      </div>
-                    )}
-                    {ad.realEstate.condition && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Stav</span>
-                        <span className="font-semibold">{ad.realEstate.condition}</span>
-                      </div>
-                    )}
-                    {ad.realEstate.energyCost && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Energie</span>
-                        <span className="font-semibold">{ad.realEstate.energyCost} €/mesiac</span>
-                      </div>
-                    )}
-                    {ad.street && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">Ulica</span>
-                        <span className="font-semibold">{ad.street} {ad.houseNumber}</span>
-                      </div>
-                    )}
-                    {ad.postal_code && (
-                      <div className="flex justify-between py-2 border-b">
-                        <span className="text-gray-600">PSČ</span>
-                        <span className="font-semibold">{ad.postal_code}</span>
-                      </div>
-                    )}
-                  </div>
+                    {Object.entries(ad.categorySpecific).map(([key, value]) => {
+                      if (!value || (Array.isArray(value) && value.length === 0)) return null;
 
-                  {ad.realEstate.videoUrl && (
-                    <div className="mt-6 pt-6 border-t">
-                      <h3 className="font-semibold mb-2">Video</h3>
-                      <a
-                        href={ad.realEstate.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline break-all"
-                      >
-                        {ad.realEstate.videoUrl}
-                      </a>
-                    </div>
-                  )}
+                      const displayValue = Array.isArray(value)
+                        ? value.join(', ')
+                        : typeof value === 'object'
+                        ? JSON.stringify(value)
+                        : value.toString();
+
+                      const displayKey = key
+                        .replace(/([A-Z])/g, ' $1')
+                        .replace(/^./, str => str.toUpperCase())
+                        .trim();
+
+                      return (
+                        <div key={key} className="flex justify-between py-2 border-b">
+                          <span className="text-gray-600">{displayKey}</span>
+                          <span className="font-semibold text-right">{displayValue}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </Card>
               )}
             </div>
