@@ -32,7 +32,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .maybeSingle();
 
     if (data) {
-      setUserProfile(data);
+      const { data: adminData } = await supabase
+        .from('admin_users')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      const profileWithAdmin = {
+        ...data,
+        admin_role: adminData?.role || null
+      };
+
+      setUserProfile(profileWithAdmin);
+      return profileWithAdmin;
     }
     return data;
   };

@@ -30,6 +30,7 @@ export type Profile = {
   is_dealer: boolean;
   created_at: string;
   updated_at: string;
+  admin_role?: string | null;
 };
 
 export type Ad = {
