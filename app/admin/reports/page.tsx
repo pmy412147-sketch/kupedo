@@ -40,7 +40,7 @@ export default function AdminReportsPage() {
         .from('ad_reports')
         .select(`
           *,
-          ad:advertisements(title, user_id),
+          ad:ads(title, user_id),
           reporter:profiles!ad_reports_reporter_id_fkey(display_name)
         `)
         .order('created_at', { ascending: false });
@@ -74,7 +74,7 @@ export default function AdminReportsPage() {
 
     try {
       const { error } = await supabase
-        .from('advertisements')
+        .from('ads')
         .delete()
         .eq('id', adId);
 
