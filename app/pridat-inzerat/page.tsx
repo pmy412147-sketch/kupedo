@@ -225,7 +225,7 @@ export default function AddAdPage() {
         metadata.categorySpecific = categorySpecificData;
       }
 
-      if (categoryType === 'vehicle') {
+      if (categoryType === 'vehicles' || categoryType === 'motorcycles') {
         const hasSpecs = Object.values(vehicleSpecs).some(v => v !== '');
         if (hasSpecs) {
           const specs: any = {};
@@ -597,7 +597,7 @@ export default function AddAdPage() {
                     </>
                   )}
 
-                  {categoryType === 'vehicle' && (
+                  {(categoryType === 'vehicles' || categoryType === 'motorcycles') && (
                     <>
                       {/* Špecifikácie vozidla */}
                       <div className="border-t border-gray-200 pt-8 mt-8">
