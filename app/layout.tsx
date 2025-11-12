@@ -22,17 +22,14 @@ export default function RootLayout({
   return (
     <html lang="sk" suppressHydrationWarning>
       <head>
-        <Script
-          id="gtag-base"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-            `,
-          }}
-        />
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <Script id="gtag-base" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+          `}
+        </Script>
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7204460641314366"

@@ -382,9 +382,8 @@ export default function HomePage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {ads.map((ad, index) => (
-                  <>
+                  <React.Fragment key={ad.id}>
                     <AdCard
-                      key={ad.id}
                       id={ad.id}
                       title={ad.title}
                       price={ad.price}
@@ -397,9 +396,9 @@ export default function HomePage() {
                       boosted_until={ad.boosted_until}
                     />
                     {(index + 1) % 8 === 0 && index !== ads.length - 1 && (
-                      <AdSenseInFeed key={`ad-${index}`} />
+                      <AdSenseInFeed />
                     )}
-                  </>
+                  </React.Fragment>
                 ))}
               </div>
             )}
