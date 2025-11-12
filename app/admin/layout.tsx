@@ -28,17 +28,26 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        toast.error('Musíte byť prihlásený');
-        router.push('/');
-      } else if (!userProfile?.admin_role) {
-        toast.error('Nemáte admin prístup');
-        router.push('/');
-      } else {
-        setChecking(false);
+    const checkAdminAccess = async () => {
+      if (!loading) {
+        if (!user) {
+          toast.error('Musíte byť prihlásený');
+          router.push('/');
+          return;
+        }
+
+        if (userProfile) {
+          if (!userProfile.admin_role) {
+            toast.error('Nemáte admin prístup');
+            router.push('/');
+          } else {
+            setChecking(false);
+          }
+        }
       }
-    }
+    };
+
+    checkAdminAccess();
   }, [user, userProfile, loading, router]);
 
   const handleSignOut = async () => {
