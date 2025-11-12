@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
 import { AlertCircle, CheckCircle, Trash2, Eye } from 'lucide-react';
-import { Header } from '@/components/Header';
 
 interface AdReport {
   id: string;
@@ -30,29 +29,10 @@ export default function AdminReportsPage() {
   const router = useRouter();
   const [reports, setReports] = useState<AdReport[]>([]);
   const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-
-  const handleAuth = () => {
-    if (password === 'a') {
-      setAuthenticated(true);
-      localStorage.setItem('admin_auth', 'true');
-    } else {
-      alert('Nesprávne heslo!');
-    }
-  };
 
   useEffect(() => {
-    if (localStorage.getItem('admin_auth') === 'true') {
-      setAuthenticated(true);
-    }
+    loadReports();
   }, []);
-
-  useEffect(() => {
-    if (authenticated) {
-      loadReports();
-    }
-  }, [authenticated]);
 
   const loadReports = async () => {
     try {
@@ -125,153 +105,118 @@ export default function AdminReportsPage() {
     }
   };
 
-  if (!authenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Card className="p-8 w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-4">Admin prístup</h1>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleAuth()}
-            placeholder="Zadajte heslo"
-            className="w-full px-4 py-2 border rounded mb-4"
-          />
-          <Button onClick={handleAuth} className="w-full">
-            Prihlásiť sa
-          </Button>
-        </Card>
-      </div>
-    );
-  }
-
   return (
-    <>
-      <Header />
-      <main className="min-h-screen bg-gray-50 py-8">
-        <div className="container mx-auto px-4 max-w-6xl">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">Nahlásené inzeráty</h1>
-            <Button
-              variant="outline"
-              onClick={() => {
-                localStorage.removeItem('admin_auth');
-                setAuthenticated(false);
-              }}
-            >
-              Odhlásiť sa
-            </Button>
-          </div>
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Nahlásené inzeráty</h1>
+      </div>
 
-          {loading ? (
-            <div className="text-center py-12">Načítavam...</div>
-          ) : reports.length === 0 ? (
-            <Card className="p-12 text-center">
-              <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-500">Žiadne nahlásenia</p>
+      {loading ? (
+        <div className="text-center py-12">Načítavam...</div>
+      ) : reports.length === 0 ? (
+        <Card className="p-12 text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <p className="text-gray-500">Žiadne nahlásenia</p>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {reports.map((report) => (
+            <Card key={report.id} className="p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">
+                    {report.ad?.title || 'Inzerát bol vymazaný'}
+                  </h3>
+                  <Badge
+                    variant={
+                      report.status === 'pending'
+                        ? 'default'
+                        : report.status === 'reviewed'
+                        ? 'secondary'
+                        : 'outline'
+                    }
+                  >
+                    {report.status === 'pending'
+                      ? 'Čaká na vyriešenie'
+                      : report.status === 'reviewed'
+                      ? 'Preskúmané'
+                      : 'Vyriešené'}
+                  </Badge>
+                </div>
+                <span className="text-sm text-gray-500">
+                  {new Date(report.created_at).toLocaleDateString('sk-SK')}
+                </span>
+              </div>
+
+              <div className="space-y-2 mb-4">
+                <p className="text-sm">
+                  <strong>Dôvod:</strong> {report.reason}
+                </p>
+                {report.description && (
+                  <p className="text-sm">
+                    <strong>Popis:</strong> {report.description}
+                  </p>
+                )}
+                <p className="text-sm">
+                  <strong>Nahlásil:</strong> {report.reporter?.display_name || 'Neznámy'}
+                </p>
+              </div>
+
+              <div className="flex gap-2 flex-wrap">
+                {report.ad && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => router.push(`/inzerat/${report.ad_id}`)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Zobraziť inzerát
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteAd(report.ad_id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Vymazať inzerát
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => deleteUser(report.ad.user_id)}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Vymazať používateľa
+                    </Button>
+                  </>
+                )}
+
+                {report.status === 'pending' && (
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => updateReportStatus(report.id, 'reviewed')}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Označiť ako preskúmané
+                  </Button>
+                )}
+
+                {report.status === 'reviewed' && (
+                  <Button
+                    size="sm"
+                    onClick={() => updateReportStatus(report.id, 'resolved')}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    Vyriešené
+                  </Button>
+                )}
+              </div>
             </Card>
-          ) : (
-            <div className="space-y-4">
-              {reports.map((report) => (
-                <Card key={report.id} className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">
-                        {report.ad?.title || 'Inzerát bol vymazaný'}
-                      </h3>
-                      <Badge
-                        variant={
-                          report.status === 'pending'
-                            ? 'default'
-                            : report.status === 'reviewed'
-                            ? 'secondary'
-                            : 'outline'
-                        }
-                      >
-                        {report.status === 'pending'
-                          ? 'Čaká na vyriešenie'
-                          : report.status === 'reviewed'
-                          ? 'Preskúmané'
-                          : 'Vyriešené'}
-                      </Badge>
-                    </div>
-                    <span className="text-sm text-gray-500">
-                      {new Date(report.created_at).toLocaleDateString('sk-SK')}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2 mb-4">
-                    <p className="text-sm">
-                      <strong>Dôvod:</strong> {report.reason}
-                    </p>
-                    {report.description && (
-                      <p className="text-sm">
-                        <strong>Popis:</strong> {report.description}
-                      </p>
-                    )}
-                    <p className="text-sm">
-                      <strong>Nahlásil:</strong> {report.reporter?.display_name || 'Neznámy'}
-                    </p>
-                  </div>
-
-                  <div className="flex gap-2 flex-wrap">
-                    {report.ad && (
-                      <>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => router.push(`/inzerat/${report.ad_id}`)}
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Zobraziť inzerát
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => deleteAd(report.ad_id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Vymazať inzerát
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => deleteUser(report.ad.user_id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Vymazať používateľa
-                        </Button>
-                      </>
-                    )}
-
-                    {report.status === 'pending' && (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => updateReportStatus(report.id, 'reviewed')}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Označiť ako preskúmané
-                      </Button>
-                    )}
-
-                    {report.status === 'reviewed' && (
-                      <Button
-                        size="sm"
-                        onClick={() => updateReportStatus(report.id, 'resolved')}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Vyriešené
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
-      </main>
-    </>
+      )}
+    </div>
   );
 }
