@@ -93,13 +93,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => {
-                    if (theme === 'dark' || resolvedTheme === 'dark') {
-                      setTheme('light');
-                    } else {
-                      setTheme('dark');
-                    }
-                  }}
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                   className="relative w-10 h-10"
                   aria-label="Prepnúť tému"
                 >
