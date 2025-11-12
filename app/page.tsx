@@ -111,7 +111,7 @@ export default function HomePage() {
           <div className="absolute inset-y-0 right-0 w-1/2 hidden lg:flex items-center justify-center pointer-events-none pr-8">
             <img
               src="/ChatGPT Image 24. 10. 2025, 15_11_32 (1).png"
-              alt="Dealio Illustration"
+              alt="Kupedo Illustration"
               style={{ height: '105%' }}
               className="w-auto object-contain drop-shadow-2xl"
             />
@@ -120,10 +120,10 @@ export default function HomePage() {
           <div className="container mx-auto px-4 lg:px-6 py-8 lg:py-0 h-full relative z-10 flex items-center">
             <div className="w-full lg:max-w-xl text-white">
               <h1 className="text-3xl md:text-4xl lg:text-6xl font-bold mb-3 lg:mb-4 leading-tight drop-shadow-lg">
-                Kúp. Predaj. Dohodni.
+                Kúp. Predaj. Jednoducho.
               </h1>
               <p className="text-base md:text-lg lg:text-xl mb-4 lg:mb-5 opacity-95 font-medium">
-                Moderný trh pre všetko. Rýchlo, jednoducho a bezpečne.
+                Slovenský marketplace pre všetko čo potrebujete. Rýchlo a bezpečne.
               </p>
               <div className="flex gap-2 mb-4 lg:mb-6">
                 <div className="w-2.5 h-2.5 bg-white rounded-full opacity-100"></div>

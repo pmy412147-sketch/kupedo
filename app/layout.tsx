@@ -10,8 +10,8 @@ import Script from 'next/script';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Dealio.sk - Kúp. Predaj. Dohodni.',
-  description: 'Slovenský marketplace pre nehnuteľnosti a automobily',
+  title: 'Kupedo.sk - Kúp. Predaj. Jednoducho.',
+  description: 'Slovenský marketplace pre všetko čo potrebujete',
 };
 
 export default function RootLayout({
@@ -44,7 +44,7 @@ export default function RootLayout({
           attribute="class"
           defaultTheme="light"
           enableSystem={true}
-          storageKey="kupado-theme"
+          storageKey="kupedo-theme"
           disableTransitionOnChange={false}
         >
           <AuthProvider>

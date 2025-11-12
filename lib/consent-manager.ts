@@ -98,7 +98,7 @@ export async function getConsentFromDatabase(
 export function getConsentFromCookie(): ConsentPreferences | null {
   if (typeof document === 'undefined') return null;
 
-  const CONSENT_COOKIE_NAME = 'dealio_consent_preferences';
+  const CONSENT_COOKIE_NAME = 'kupedo_consent_preferences';
   const cookies = document.cookie.split(';');
   const consentCookie = cookies.find((cookie) =>
     cookie.trim().startsWith(`${CONSENT_COOKIE_NAME}=`)
@@ -122,7 +122,7 @@ export function saveConsentToCookie(
   const expiryDate = new Date();
   expiryDate.setDate(expiryDate.getDate() + expiryDays);
 
-  const CONSENT_COOKIE_NAME = 'dealio_consent_preferences';
+  const CONSENT_COOKIE_NAME = 'kupedo_consent_preferences';
   document.cookie = `${CONSENT_COOKIE_NAME}=${JSON.stringify(preferences)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
 }
 

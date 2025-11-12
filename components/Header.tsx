@@ -82,8 +82,8 @@ export function Header() {
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/ChatGPT Image 6. 11. 2025, 12_07_09.png" alt="Kupado" className="w-10 h-10" />
-              <span className="text-xl font-bold text-[#2C3E50] dark:text-white">Kupado.sk</span>
+              <img src="/ChatGPT Image 6. 11. 2025, 12_07_09.png" alt="Kupedo" className="w-10 h-10" />
+              <span className="text-xl font-bold text-[#2C3E50] dark:text-white">Kupedo.sk</span>
             </Link>
 
             <div className="hidden md:flex flex-1 max-w-xl mx-8">
