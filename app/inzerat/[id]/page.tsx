@@ -12,6 +12,7 @@ import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight
 import { toast } from 'sonner';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
 import { ImageLightbox } from '@/components/ImageLightbox';
+import { FinancingCalculator } from '@/components/FinancingCalculator';
 
 interface Ad {
   id: string;
@@ -688,71 +689,72 @@ export default function AdDetailPage() {
               )}
             </div>
 
-            <div className="lg:col-span-1">
-              <Card className="p-6 mb-6 sticky top-20">
-                <div className="text-4xl font-bold text-[#2ECC71] mb-6">
-                  {ad.price > 0 ? `${ad.price} €` : 'Dohodou'}
-                </div>
+            <div className="lg:col-span-1 space-y-6">
+              <div className="sticky top-20 space-y-6">
+                <Card className="p-6">
+                  <div className="text-4xl font-bold text-[#2ECC71] mb-6">
+                    {ad.price > 0 ? `${ad.price} €` : 'Dohodou'}
+                  </div>
 
-                {user && user.uid !== ad.user_id && (
-                  <div className="space-y-3 mb-6">
-                    <Button
-                      onClick={handleContactSeller}
-                      className="w-full"
-                      style={{ backgroundColor: '#2ECC71' }}
-                    >
-                      <MessageSquare className="h-4 w-4 mr-2" />
-                      Kontaktovať predajcu
-                    </Button>
+                  {user && user.uid !== ad.user_id && (
+                    <div className="space-y-3 mb-6">
+                      <Button
+                        onClick={handleContactSeller}
+                        className="w-full"
+                        style={{ backgroundColor: '#2ECC71' }}
+                      >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Kontaktovať predajcu
+                      </Button>
 
+                      <Button
+                        onClick={toggleFavorite}
+                        variant="outline"
+                        className="w-full"
+                      >
+                        <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
+                        {isFavorite ? 'Odstániť z obľúbených' : 'Pridať do obľúbených'}
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="border-t pt-6">
+                    <h3 className="font-semibold mb-4">Predajca</h3>
+                    <div className="flex items-center gap-3 mb-4">
+                      <Avatar>
+                        <AvatarImage src={seller?.avatar_url} />
+                        <AvatarFallback>{seller?.name?.[0] || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{seller?.name}</p>
+                      </div>
+                    </div>
                     <Button
-                      onClick={toggleFavorite}
                       variant="outline"
                       className="w-full"
+                      onClick={() => router.push(`/profil/${ad.user_id}`)}
                     >
-                      <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-                      {isFavorite ? 'Odstániť z obľúbených' : 'Pridať do obľúbených'}
+                      <User className="h-4 w-4 mr-2" />
+                      Zobraziť profil
                     </Button>
                   </div>
-                )}
+                </Card>
 
-                <div className="border-t pt-6">
-                  <h3 className="font-semibold mb-4">Predajca</h3>
-                  <div className="flex items-center gap-3 mb-4">
-                    <Avatar>
-                      <AvatarImage src={seller?.avatar_url} />
-                      <AvatarFallback>{seller?.name?.[0] || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{seller?.name}</p>
-                    </div>
+                <Card className="p-6">
+                  <div className="text-center mb-3">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                      Sponzorované
+                    </p>
                   </div>
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => router.push(`/profil/${ad.user_id}`)}
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Zobraziť profil
-                  </Button>
-                </div>
-              </Card>
+                  <div style={{ minHeight: '250px', maxHeight: '400px' }} className="w-full bg-gray-100 rounded flex items-center justify-center">
+                    <p className="text-gray-400">Reklamný banner</p>
+                  </div>
+                </Card>
 
-              <Card className="p-6">
-                <div className="text-center mb-3">
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                    Sponzorované
-                  </p>
-                </div>
-                <GoogleAdSense
-                  adFormat="auto"
-                  style={{
-                    minHeight: '250px',
-                    maxHeight: '400px'
-                  }}
-                  className="w-full"
-                />
-              </Card>
+                {ad.category_id === 'auto' && ad.price > 0 && (
+                  <FinancingCalculator vehiclePrice={ad.price} />
+                )}
+              </div>
             </div>
           </div>
         </div>
