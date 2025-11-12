@@ -1,56 +1,65 @@
 # Rýchly štart - Kupedo Mobile
 
-## 1. Nainštalujte Expo Go na telefón
+## ⚠️ DÔLEŽITÉ: Lokálne testovanie
 
-### Android
-- Otvorte **Google Play Store**
-- Vyhľadajte **"Expo Go"**
-- Nainštalujte aplikáciu
+Táto mobilná aplikácia je určená na **lokálne testovanie** na vašom počítači.
 
-### iOS
-- Otvorte **App Store**
-- Vyhľadajte **"Expo Go"**
-- Nainštalujte aplikáciu
+### Čo potrebujete:
 
-## 2. Spustite aplikáciu
+1. **Váš vlastný počítač** (Windows/Mac/Linux)
+2. **Smartfón** s aplikáciou Expo Go
+3. **Rovnakú WiFi sieť** pre počítač aj telefón
 
+## 📱 Kroky na spustenie
+
+### 1. Nainštalujte závislosti
 ```bash
 cd mobile
 npm install
+```
+
+### 2. Nainštalujte Expo Go na telefón
+
+**Android:**
+- [Google Play Store - Expo Go](https://play.google.com/store/apps/details?id=host.exp.exponent)
+
+**iOS:**
+- [App Store - Expo Go](https://apps.apple.com/app/expo-go/id982107779)
+
+### 3. Spustite server
+```bash
 npm start
 ```
 
-## 3. Naskenujte QR kód
+### 4. Pripojte telefón
 
 V termináli sa zobrazí QR kód.
 
 **Android:**
-1. Otvorte aplikáciu **Expo Go**
-2. Kliknite na **"Scan QR code"**
-3. Naskenujte QR kód z terminálu
+1. Otvorte **Expo Go**
+2. Kliknite **"Scan QR code"**
+3. Naskenujte QR kód
 
 **iOS:**
-1. Otvorte natívnu **Kameru**
+1. Otvorte **Kameru**
 2. Naskenujte QR kód
-3. Kliknite na notifikáciu **"Open in Expo Go"**
+3. Kliknite **"Open in Expo Go"**
 
-## Problémy?
+## 🚀 Alternatíva: Tunnel režim
 
-### Nevidíte QR kód?
+Ak QR kód nefunguje:
 ```bash
-npx expo start --tunnel
+npm run start:tunnel
 ```
 
-### Aplikácia sa nespustí?
+## 📦 Production build
+
+Pre APK/IPA:
 ```bash
-npm start -- --clear
+npm install -g eas-cli
+eas build --platform android
 ```
 
-### Ešte stále problémy?
-- Skontrolujte či máte nainštalovanú aplikáciu **Expo Go**
-- Uistite sa, že telefón a počítač sú na rovnakej WiFi sieti
-- Skúste reštartovať server
+## Viac info
 
-## To je všetko!
-
-Aplikácia by sa teraz mala otvoriť na vašom telefóne a môžete začať testovať!
+- [Expo docs](https://docs.expo.dev/)
