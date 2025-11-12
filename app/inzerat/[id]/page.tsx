@@ -9,11 +9,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
-import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square, Phone } from 'lucide-react';
+import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square, Phone, Flag, Star } from 'lucide-react';
 import { toast } from 'sonner';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
 import { ImageLightbox } from '@/components/ImageLightbox';
 import { FinancingCalculator } from '@/components/FinancingCalculator';
+import { ReportAdModal } from '@/components/ReportAdModal';
+import { ReviewModal } from '@/components/ReviewModal';
 
 interface Ad {
   id: string;
@@ -94,6 +96,8 @@ export default function AdDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchAd = async () => {
@@ -748,6 +752,15 @@ export default function AdDetailPage() {
                         <Heart className={`h-4 w-4 mr-2 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
                         {isFavorite ? 'Odstániť z obľúbených' : 'Pridať do obľúbených'}
                       </Button>
+
+                      <Button
+                        onClick={() => setReportModalOpen(true)}
+                        variant="outline"
+                        className="w-full text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200"
+                      >
+                        <Flag className="h-4 w-4 mr-2" />
+                        Nahlásiť inzerát
+                      </Button>
                     </div>
                   )}
 
@@ -764,12 +777,23 @@ export default function AdDetailPage() {
                     </div>
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full mb-2"
                       onClick={() => router.push(`/profil/${ad.user_id}`)}
                     >
                       <User className="h-4 w-4 mr-2" />
                       Zobraziť profil
                     </Button>
+
+                    {user && user.uid !== ad.user_id && (
+                      <Button
+                        variant="outline"
+                        className="w-full border-yellow-500 text-yellow-600 hover:bg-yellow-50"
+                        onClick={() => setReviewModalOpen(true)}
+                      >
+                        <Star className="h-4 w-4 mr-2" />
+                        Pridať recenziu
+                      </Button>
+                    )}
                   </div>
                 </Card>
 
@@ -799,6 +823,24 @@ export default function AdDetailPage() {
           initialIndex={selectedImage}
           onClose={() => setLightboxOpen(false)}
         />
+      )}
+
+      {ad && (
+        <>
+          <ReportAdModal
+            open={reportModalOpen}
+            onOpenChange={setReportModalOpen}
+            adId={ad.id}
+            adTitle={ad.title}
+          />
+          <ReviewModal
+            open={reviewModalOpen}
+            onOpenChange={setReviewModalOpen}
+            revieweeId={ad.user_id}
+            revieweeName={seller?.name || 'Predávajúci'}
+            adId={ad.id}
+          />
+        </>
       )}
       <Footer />
     </>
