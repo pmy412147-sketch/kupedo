@@ -39,9 +39,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
+          defaultTheme="system"
+          enableSystem={true}
           storageKey="kupedo-theme"
+          disableTransitionOnChange
         >
           <AuthProvider>
             {children}

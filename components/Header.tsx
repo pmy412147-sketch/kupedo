@@ -94,12 +94,14 @@ export function Header() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    const newTheme = resolvedTheme === 'dark' ? 'light' : 'dark';
-                    setTheme(newTheme);
+                    if (theme === 'dark' || resolvedTheme === 'dark') {
+                      setTheme('light');
+                    } else {
+                      setTheme('dark');
+                    }
                   }}
                   className="relative w-10 h-10"
                   aria-label="Prepnúť tému"
-                  title={resolvedTheme === 'dark' ? 'Prepnúť na svetlú tému' : 'Prepnúť na tmavú tému'}
                 >
                   <Sun className="h-5 w-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                   <Moon className="h-5 w-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
