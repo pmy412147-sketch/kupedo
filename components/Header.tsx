@@ -24,12 +24,16 @@ export function Header() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [coinBalance, setCoinBalance] = useState(0);
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
+  const [currentTheme, setCurrentTheme] = useState<string>('light');
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (theme) {
+      setCurrentTheme(theme);
+    }
+  }, [theme]);
 
   useEffect(() => {
     if (user) {
@@ -93,12 +97,19 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  onClick={() => {
+                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                    setTheme(newTheme);
+                    setCurrentTheme(newTheme);
+                  }}
                   className="relative w-10 h-10"
                   aria-label="Prepnúť tému"
                 >
-                  <Sun className="h-5 w-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="h-5 w-5 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                  {currentTheme === 'dark' ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
                   <span className="sr-only">Prepnúť tému</span>
                 </Button>
               )}
