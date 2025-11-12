@@ -187,7 +187,14 @@ export function Header() {
                         <BarChart3 className="mr-2 h-4 w-4" />
                         Dashboard
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={signOut}>
+                      <DropdownMenuItem onClick={async () => {
+                        try {
+                          await signOut();
+                          router.push('/');
+                        } catch (error) {
+                          console.error('Sign out error:', error);
+                        }
+                      }}>
                         <LogOut className="mr-2 h-4 w-4" />
                         Odhlásiť sa
                       </DropdownMenuItem>
