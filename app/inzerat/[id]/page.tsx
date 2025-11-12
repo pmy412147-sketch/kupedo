@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { useParams, useRouter } from 'next/navigation';
-import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square } from 'lucide-react';
+import { MapPin, Calendar, Heart, MessageSquare, User, ChevronLeft, ChevronRight, Check, Home, Maximize, Square, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 import { GoogleAdSense } from '@/components/GoogleAdSense';
 import { ImageLightbox } from '@/components/ImageLightbox';
@@ -24,6 +25,7 @@ interface Ad {
   postal_code: string;
   street?: string;
   houseNumber?: string;
+  phone?: string;
   user_id: string;
   images: string[];
   status: string;
@@ -262,7 +264,7 @@ export default function AdDetailPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8">
+      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8 pb-24 md:pb-8">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
@@ -728,6 +730,16 @@ export default function AdDetailPage() {
                         Kontaktovať predajcu
                       </Button>
 
+                      {ad.phone && (
+                        <Button
+                          onClick={() => window.location.href = `tel:${ad.phone}`}
+                          className="w-full bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          Zavolať
+                        </Button>
+                      )}
+
                       <Button
                         onClick={toggleFavorite}
                         variant="outline"
@@ -788,6 +800,7 @@ export default function AdDetailPage() {
           onClose={() => setLightboxOpen(false)}
         />
       )}
+      <Footer />
     </>
   );
 }

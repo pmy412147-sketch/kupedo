@@ -77,7 +77,7 @@ export default function FavoritesPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8">
+      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8 pb-24 md:pb-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6">Obľúbené inzeráty</h1>
 

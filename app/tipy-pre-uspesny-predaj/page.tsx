@@ -9,7 +9,7 @@ export default function TipsPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-gradient-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
+      <main className="min-h-screen bg-gradient-to-b from-emerald-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 pb-24 md:pb-12">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white">

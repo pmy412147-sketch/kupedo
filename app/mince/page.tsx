@@ -211,7 +211,7 @@ export default function MincePage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 pb-24 md:pb-0">
       <Header />
 
       <main className="flex-1 container mx-auto px-4 py-8">

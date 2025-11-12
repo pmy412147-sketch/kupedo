@@ -40,7 +40,8 @@ export default function AddAdPage() {
     location: '',
     postal_code: '',
     street: '',
-    house_number: ''
+    house_number: '',
+    phone: ''
   });
 
   const [vehicleSpecs, setVehicleSpecs] = useState({
@@ -352,7 +353,7 @@ export default function AddAdPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8">
+      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8 pb-24 md:pb-8">
         <div className="container mx-auto px-4 max-w-4xl">
           <Card className="p-8">
             <h1 className="text-3xl font-bold mb-8">Pridať inzerát</h1>
@@ -460,6 +461,25 @@ export default function AddAdPage() {
                       placeholder="0 = Dohodou"
                       className="h-11"
                     />
+                  </div>
+
+                  {/* Telefónne číslo */}
+                  <div className="space-y-3">
+                    <Label htmlFor="phone" className="text-base font-semibold">
+                      Telefónne číslo
+                      <span className="text-sm text-gray-500 font-normal ml-2">(Nezobrazuje sa verejne)</span>
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+421 XXX XXX XXX"
+                      className="h-11"
+                    />
+                    <p className="text-sm text-gray-500">
+                      Číslo sa nezobrazuje verejne. Používatelia uvidia len tlačidlo na zavolanie.
+                    </p>
                   </div>
 
 

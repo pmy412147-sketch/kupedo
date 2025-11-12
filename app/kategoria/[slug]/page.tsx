@@ -74,7 +74,7 @@ export default function CategoryPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900">
+      <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 pb-24 md:pb-0">
         <div className="bg-gradient-to-r from-[#2ECC71] to-[#27AE60] text-white py-12 mb-8">
           <div className="container mx-auto px-4">
             <h1 className="text-3xl md:text-4xl font-bold">
