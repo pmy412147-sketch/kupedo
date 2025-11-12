@@ -95,13 +95,16 @@ export default function SettingsPage() {
         const fileExt = avatarFile.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('avatars')
           .upload(fileName, avatarFile, {
-            upsert: true
+            upsert: true,
+            contentType: avatarFile.type
           });
 
         if (uploadError) {
+          console.error('Upload error:', uploadError);
+          alert(`Chyba pri nahrávaní obrázka: ${uploadError.message}`);
           throw uploadError;
         }
 
