@@ -38,14 +38,14 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors">
+                <Link href="/ako-nakupovat-bezpecne" className="hover:text-emerald-400 transition-colors">
                   Ako nakupovať bezpečne
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors">
+                <Link href="/casto-kladene-otazky" className="hover:text-emerald-400 transition-colors">
                   Často kladené otázky
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -64,14 +64,14 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors">
+                <Link href="/cennik-sluzieb" className="hover:text-emerald-400 transition-colors">
                   Cenník služieb
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-emerald-400 transition-colors">
+                <Link href="/tipy-pre-uspesny-predaj" className="hover:text-emerald-400 transition-colors">
                   Tipy pre úspešný predaj
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -105,18 +105,18 @@ export function Footer() {
               © 2025 Kupado.sk. Všetky práva vyhradené.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
-              <a href="#" className="hover:text-emerald-400 transition-colors">
+              <Link href="/obchodne-podmienky" className="hover:text-emerald-400 transition-colors">
                 Obchodné podmienky
-              </a>
-              <a href="#" className="hover:text-emerald-400 transition-colors">
+              </Link>
+              <Link href="/ochrana-osobnych-udajov" className="hover:text-emerald-400 transition-colors">
                 Ochrana osobných údajov
-              </a>
-              <a href="#" className="hover:text-emerald-400 transition-colors">
+              </Link>
+              <Link href="/pravidla-pouzivania" className="hover:text-emerald-400 transition-colors">
                 Pravidlá používania
-              </a>
-              <a href="#" className="hover:text-emerald-400 transition-colors">
+              </Link>
+              <Link href="/o-nas" className="hover:text-emerald-400 transition-colors">
                 O nás
-              </a>
+              </Link>
             </div>
           </div>
         </div>

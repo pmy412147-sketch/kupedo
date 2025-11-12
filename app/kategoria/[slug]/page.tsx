@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { AdCard } from '@/components/AdCard';
 import { FilterBar, FilterValues } from '@/components/FilterBar';
 import { supabase } from '@/lib/supabase';
@@ -121,6 +122,7 @@ export default function CategoryPage() {
           )}
         </div>
       </main>
+      <Footer />
     </>
   );
 }
