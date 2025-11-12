@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { FilterBar, FilterValues } from '@/components/FilterBar';
