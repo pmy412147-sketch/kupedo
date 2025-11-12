@@ -124,6 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
       options: {
         data: {
+          display_name: name,
           full_name: name,
         },
       },
@@ -131,8 +132,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error;
 
+    // Profile is automatically created by database trigger
+    // Wait a moment for the trigger to complete
     if (data.user) {
-      await createUserProfile(data.user.id, email, name);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await fetchUserProfile(data.user.id);
     }
   };
 
