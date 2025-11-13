@@ -112,17 +112,17 @@ export default function ProfileScreen({ navigation, route }: any) {
   const uploadAvatar = async (uri: string) => {
     try {
       const response = await fetch(uri);
-      const blob = await response.blob();
+      const arrayBuffer = await response.arrayBuffer();
       const fileExt = uri.split('.').pop()?.toLowerCase() || 'jpg';
       const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
 
-      console.log('Uploading avatar:', fileName, 'Size:', blob.size);
+      console.log('Uploading avatar:', fileName, 'Size:', arrayBuffer.byteLength);
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(fileName, blob, {
+        .upload(fileName, arrayBuffer, {
           contentType: `image/${fileExt}`,
-          upsert: false,
+          cacheControl: '3600',
         });
 
       if (uploadError) throw uploadError;

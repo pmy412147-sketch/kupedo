@@ -238,30 +238,9 @@ export default function AdDetailScreen({ route, navigation }: any) {
             <Text style={styles.title}>{ad.title}</Text>
           </View>
 
-          {/* Price and Action Buttons Card */}
+          {/* Price Card */}
           <View style={styles.priceCard}>
             <Text style={styles.price}>{formatPrice(ad.price)}</Text>
-
-            {user && user.id !== ad.user_id && (
-              <View style={styles.actionButtons}>
-                <TouchableOpacity style={styles.mainActionButton} onPress={handleContact}>
-                  <Text style={styles.mainActionButtonText}>💬 Kontaktovať predajcu</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.favoriteActionButton} onPress={toggleFavorite}>
-                  <Text style={styles.favoriteActionButtonText}>
-                    {isFavorite ? '❤️ Pridať do obľúbených' : '🤍 Pridať do obľúbených'}
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.reportButton}
-                  onPress={() => setReportModalVisible(true)}
-                >
-                  <Text style={styles.reportButtonText}>🚩 Nahlásiť inzerát</Text>
-                </TouchableOpacity>
-              </View>
-            )}
           </View>
 
           {/* Meta info */}
@@ -278,6 +257,28 @@ export default function AdDetailScreen({ route, navigation }: any) {
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Popis</Text>
               <Text style={styles.description}>{ad.description}</Text>
+            </View>
+          )}
+
+          {/* Action Buttons */}
+          {user && user.id !== ad.user_id && (
+            <View style={styles.actionButtonsSection}>
+              <TouchableOpacity style={styles.mainActionButton} onPress={handleContact}>
+                <Text style={styles.mainActionButtonText}>💬 Kontaktovať predajcu</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.favoriteActionButton} onPress={toggleFavorite}>
+                <Text style={styles.favoriteActionButtonText}>
+                  {isFavorite ? '❤️ Pridať do obľúbených' : '🤍 Pridať do obľúbených'}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.reportButton}
+                onPress={() => setReportModalVisible(true)}
+              >
+                <Text style={styles.reportButtonText}>🚩 Nahlásiť inzerát</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -487,8 +488,18 @@ const styles = StyleSheet.create({
     color: colors.emerald[600],
     marginBottom: spacing.md,
   },
-  actionButtons: {
+  actionButtonsSection: {
+    backgroundColor: colors.white,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
     gap: spacing.sm,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   mainActionButton: {
     backgroundColor: colors.emerald[500],
