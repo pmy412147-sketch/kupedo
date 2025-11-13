@@ -12,21 +12,24 @@ import {
   RefreshControl
 } from 'react-native';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import { categories } from '../constants/categories';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
-import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen({ navigation }: any) {
+  const { user } = useAuth();
   const [ads, setAds] = useState<any[]>([]);
+  const [userCoins, setUserCoins] = useState(0);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadAds();
-  }, []);
+    if (user) loadUserCoins();
+  }, [user]);
 
   const loadAds = async () => {
     try {
@@ -48,9 +51,27 @@ export default function HomeScreen({ navigation }: any) {
     }
   };
 
+  const loadUserCoins = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('user_coins')
+        .select('coins')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      if (data) setUserCoins(data.coins);
+    } catch (error) {
+      console.error('Error loading user coins:', error);
+    }
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     loadAds();
+    if (user) loadUserCoins();
   };
 
   const handleSearch = () => {
@@ -70,24 +91,37 @@ export default function HomeScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" backgroundColor={colors.white} />
 
-      <LinearGradient
-        colors={[colors.emerald[400], colors.teal[500], colors.cyan[600]]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
+      {/* Header s logom a mincami */}
+      <View style={styles.topHeader}>
+        <View style={styles.logoContainer}>
+          <Text style={styles.logo}>Kupedo</Text>
+        </View>
+        {user && (
+          <TouchableOpacity
+            style={styles.coinsButton}
+            onPress={() => navigation.navigate('Profile', { screen: 'Coins' })}
+          >
+            <Text style={styles.coinIcon}>🪙</Text>
+            <Text style={styles.coinCount}>{userCoins}</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
-        <View style={styles.headerContent}>
-          <Text style={styles.title}>Kúp. Predaj. Dohodni.</Text>
-          <Text style={styles.subtitle}>
-            Slovenský marketplace pre všetko čo potrebujete
-          </Text>
-
+        {/* Search bar */}
+        <View style={styles.searchSection}>
           <View style={styles.searchContainer}>
             <TextInput
               style={styles.searchInput}
-              placeholder="napr. iPhone 15, byt v Bratislave..."
+              placeholder="Čo hľadáte?"
               placeholderTextColor={colors.gray[400]}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -102,22 +136,11 @@ export default function HomeScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         </View>
-      </LinearGradient>
 
-      <ScrollView
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
+        {/* Kategórie */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Kategórie</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesScroll}
-          >
+          <View style={styles.categoriesGrid}>
             {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
@@ -132,14 +155,15 @@ export default function HomeScreen({ navigation }: any) {
                 </Text>
               </TouchableOpacity>
             ))}
-          </ScrollView>
+          </View>
         </View>
 
+        {/* Najnovšie inzeráty */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Najnovšie inzeráty</Text>
             <TouchableOpacity onPress={() => navigation.navigate('Ads')}>
-              <Text style={styles.seeAllText}>Zobraziť všetky</Text>
+              <Text style={styles.seeAllText}>Všetky →</Text>
             </TouchableOpacity>
           </View>
 
@@ -192,41 +216,8 @@ export default function HomeScreen({ navigation }: any) {
           )}
         </View>
 
-        <View style={styles.statsSection}>
-          <Text style={styles.statsSectionTitle}>Prečo si vybrať Kupado.sk?</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>👥</Text>
-              <Text style={styles.statNumber}>50K+</Text>
-              <Text style={styles.statLabel}>Aktívnych používateľov</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>📦</Text>
-              <Text style={styles.statNumber}>100K+</Text>
-              <Text style={styles.statLabel}>Aktívnych inzerátov</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>🛡️</Text>
-              <Text style={styles.statNumber}>100%</Text>
-              <Text style={styles.statLabel}>Bezpečné transakcie</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Text style={styles.statIcon}>📈</Text>
-              <Text style={styles.statNumber}>500+</Text>
-              <Text style={styles.statLabel}>Denných transakcií</Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={{ height: 100 }} />
+        <View style={{ height: 80 }} />
       </ScrollView>
-
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => navigation.navigate('CreateAd')}
-      >
-        <Text style={styles.floatingButtonText}>+ Pridať inzerát</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -234,35 +225,61 @@ export default function HomeScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background.secondary,
   },
-  header: {
-    paddingTop: 50,
-    paddingBottom: spacing.lg,
+  topHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: spacing.md,
+    paddingTop: 50,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
-  headerContent: {
-    gap: spacing.md,
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  title: {
-    fontSize: typography.fontSize['3xl'],
+  logo: {
+    fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
-    color: colors.white,
-    marginBottom: spacing.xs,
+    color: colors.emerald[600],
   },
-  subtitle: {
+  coinsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.emerald[50],
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.full,
+    gap: spacing.xs,
+  },
+  coinIcon: {
+    fontSize: 18,
+  },
+  coinCount: {
     fontSize: typography.fontSize.base,
-    color: colors.white,
-    opacity: 0.95,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.emerald[700],
+  },
+  content: {
+    flex: 1,
+  },
+  searchSection: {
+    backgroundColor: colors.white,
+    padding: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   searchContainer: {
     flexDirection: 'row',
-    marginTop: spacing.sm,
     gap: spacing.sm,
   },
   searchInput: {
     flex: 1,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: colors.gray[100],
     borderRadius: borderRadius.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 2,
@@ -270,20 +287,20 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   searchButton: {
-    backgroundColor: colors.white,
+    width: 44,
+    height: 44,
+    backgroundColor: colors.emerald[500],
     borderRadius: borderRadius.lg,
-    paddingHorizontal: spacing.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   searchButtonText: {
     fontSize: 20,
   },
-  content: {
-    flex: 1,
-  },
   section: {
-    paddingTop: spacing.lg,
+    paddingVertical: spacing.md,
+    backgroundColor: colors.white,
+    marginTop: spacing.sm,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -293,46 +310,47 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   sectionTitle: {
-    fontSize: typography.fontSize.xl,
+    fontSize: typography.fontSize.lg,
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.md,
   },
   seeAllText: {
     fontSize: typography.fontSize.sm,
     color: colors.emerald[600],
     fontWeight: typography.fontWeight.semibold,
   },
-  categoriesScroll: {
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
+  categoriesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: spacing.xs,
+    justifyContent: 'center',
   },
   categoryCard: {
-    width: 120,
+    width: (width - spacing.md * 2) / 4 - spacing.xs * 2,
+    alignItems: 'center',
+    padding: spacing.sm,
+    margin: spacing.xs,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
-    padding: spacing.md,
-    alignItems: 'center',
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   categoryIconContainer: {
     width: 48,
     height: 48,
-    borderRadius: borderRadius.full,
+    borderRadius: borderRadius.lg,
     backgroundColor: colors.emerald[50],
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
   },
   categoryIcon: {
     fontSize: 24,
   },
   categoryName: {
-    fontSize: typography.fontSize.xs,
+    fontSize: typography.fontSize.xs - 1,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
     textAlign: 'center',
@@ -356,19 +374,16 @@ const styles = StyleSheet.create({
   adsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: spacing.md,
-    gap: spacing.sm,
+    paddingHorizontal: spacing.xs,
   },
   adCard: {
-    width: (width - spacing.md * 2 - spacing.sm) / 2,
+    width: (width - spacing.md * 2) / 2,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     overflow: 'hidden',
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    margin: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.border.light,
   },
   adImage: {
     width: '100%',
@@ -408,7 +423,7 @@ const styles = StyleSheet.create({
     height: 36,
   },
   adPrice: {
-    fontSize: typography.fontSize.lg,
+    fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.bold,
     color: colors.emerald[600],
     marginBottom: 4,
@@ -416,64 +431,5 @@ const styles = StyleSheet.create({
   adLocation: {
     fontSize: typography.fontSize.xs,
     color: colors.text.secondary,
-  },
-  statsSection: {
-    marginTop: spacing.xl,
-    marginHorizontal: spacing.md,
-    backgroundColor: colors.emerald[50],
-    borderRadius: borderRadius.xl,
-    padding: spacing.lg,
-  },
-  statsSectionTitle: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    textAlign: 'center',
-    marginBottom: spacing.lg,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.md,
-  },
-  statCard: {
-    width: (width - spacing.md * 4 - spacing.lg * 2) / 2,
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  statIcon: {
-    fontSize: 32,
-    marginBottom: spacing.sm,
-  },
-  statNumber: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: 4,
-  },
-  statLabel: {
-    fontSize: typography.fontSize.xs,
-    color: colors.text.secondary,
-    textAlign: 'center',
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: spacing.lg,
-    left: spacing.md,
-    right: spacing.md,
-    backgroundColor: colors.emerald[500],
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  floatingButtonText: {
-    color: colors.white,
-    fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
   },
 });
