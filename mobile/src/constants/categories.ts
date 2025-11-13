@@ -1,0 +1,22 @@
+export const categories = [
+  { id: 'zvierata', name: 'Zvieratá', slug: 'zvierata', description: 'Psy, Mačky, Kone, ...', icon: '🐾' },
+  { id: 'deti', name: 'Deti', slug: 'deti', description: 'Autosedačky, Kočíky, ...', icon: '👶' },
+  { id: 'reality', name: 'Reality', slug: 'reality', description: 'Byty predaj, Domy...', icon: '🏠' },
+  { id: 'praca', name: 'Práca', slug: 'praca', description: 'Administratíva, Brigády, ...', icon: '💼' },
+  { id: 'auto', name: 'Auto', slug: 'auto', description: 'Škoda, Fiat, VW, ...', icon: '🚗' },
+  { id: 'motocykle', name: 'Motocykle', slug: 'motocykle', description: 'Cestné motocykle, Skútre, ...', icon: '🏍️' },
+  { id: 'stroje', name: 'Stroje', slug: 'stroje', description: 'Drevoobrábacie, Kovoobrábacie ...', icon: '🔧' },
+  { id: 'dom-zahrada', name: 'Dom a záhrada', slug: 'dom-zahrada', description: 'Kosačky, Kotle, Bojlery ...', icon: '🌳' },
+  { id: 'pc', name: 'PC', slug: 'pc', description: 'Notebooky, Počítače, ...', icon: '💻' },
+  { id: 'mobily', name: 'Mobily', slug: 'mobily', description: 'Apple, Google, Samsung, ...', icon: '📱' },
+  { id: 'foto', name: 'Foto', slug: 'foto', description: 'Fotoaparáty, Videokamery, ...', icon: '📷' },
+  { id: 'elektro', name: 'Elektro', slug: 'elektro', description: 'Autorádia, Chladničky, ...', icon: '📺' },
+  { id: 'sport', name: 'Šport', slug: 'sport', description: 'Horské bicykle, Lyže, ...', icon: '⚽' },
+  { id: 'hudba', name: 'Hudba', slug: 'hudba', description: 'Bicie nástroje, Skúšobne ...', icon: '🎵' },
+  { id: 'vstupenky', name: 'Vstupenky', slug: 'vstupenky', description: 'Letenky, Hudba, Koncerty, ...', icon: '🎫' },
+  { id: 'knihy', name: 'Knihy', slug: 'knihy', description: 'Beletria, Učebnice, ...', icon: '📚' },
+  { id: 'nabytok', name: 'Nábytok', slug: 'nabytok', description: 'Kuchyne, Sedacie súpravy ...', icon: '🛋️' },
+  { id: 'oblecenie', name: 'Oblečenie', slug: 'oblecenie', description: 'Obuv, Šperky, Hodinky ...', icon: '👕' },
+  { id: 'sluzby', name: 'Služby', slug: 'sluzby', description: 'Doučovanie, Ubytovanie, ...', icon: '✨' },
+  { id: 'ostatne', name: 'Ostatné', slug: 'ostatne', description: 'Starožitnosti, Zberateľstvo ...', icon: '📦' }
+];
