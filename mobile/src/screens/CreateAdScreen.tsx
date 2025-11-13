@@ -45,21 +45,19 @@ export default function CreateAdScreen({ navigation }: any) {
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsMultipleSelection: true,
+        allowsMultipleSelection: false,
         quality: 0.8,
-        selectionLimit: 10 - images.length,
+        allowsEditing: true,
+        aspect: [4, 3],
       });
 
-      if (!result.canceled && result.assets) {
+      if (!result.canceled && result.assets && result.assets[0]) {
         setUploading(true);
-        const uploadedUrls: string[] = [];
+        const url = await uploadImage(result.assets[0].uri);
 
-        for (const asset of result.assets) {
-          const url = await uploadImage(asset.uri);
-          if (url) uploadedUrls.push(url);
+        if (url) {
+          setImages([...images, url]);
         }
-
-        setImages([...images, ...uploadedUrls]);
         setUploading(false);
       }
     } catch (error) {

@@ -15,9 +15,9 @@ interface CoinPackage {
   id: string;
   name: string;
   coins: number;
-  price: number;
+  price_eur: string;
   bonus_coins: number;
-  popular: boolean;
+  display_order: number;
 }
 
 export default function CoinsScreen({ navigation }: any) {
@@ -36,7 +36,8 @@ export default function CoinsScreen({ navigation }: any) {
       const { data, error } = await supabase
         .from('coin_packages')
         .select('*')
-        .order('price', { ascending: true });
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
 
       if (error) throw error;
       if (data) setPackages(data);
@@ -67,7 +68,7 @@ export default function CoinsScreen({ navigation }: any) {
   const handleBuyPackage = (pkg: CoinPackage) => {
     Alert.alert(
       'Kúpiť mince',
-      `Chcete kúpiť ${pkg.coins + pkg.bonus_coins} mincí za ${pkg.price}€?`,
+      `Chcete kúpiť ${pkg.coins + pkg.bonus_coins} mincí za ${formatPrice(pkg.price_eur)}?`,
       [
         { text: 'Zrušiť', style: 'cancel' },
         {
@@ -82,13 +83,13 @@ export default function CoinsScreen({ navigation }: any) {
     Alert.alert('Info', 'Platobný systém bude pridaný neskôr. Momentálne je táto funkcia len demo.');
   };
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price: string) => {
     return new Intl.NumberFormat('sk-SK', {
       style: 'currency',
       currency: 'EUR',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
-    }).format(price);
+    }).format(parseFloat(price));
   };
 
   return (
@@ -115,11 +116,11 @@ export default function CoinsScreen({ navigation }: any) {
               key={pkg.id}
               style={[
                 styles.packageCard,
-                pkg.popular && styles.packageCardPopular,
+                pkg.name === 'Popular' && styles.packageCardPopular,
               ]}
               onPress={() => handleBuyPackage(pkg)}
             >
-              {pkg.popular && (
+              {pkg.name === 'Popular' && (
                 <View style={styles.popularBadge}>
                   <Text style={styles.popularText}>⭐ POPULÁRNE</Text>
                 </View>
@@ -142,19 +143,19 @@ export default function CoinsScreen({ navigation }: any) {
                 </View>
               )}
 
-              <Text style={styles.packagePrice}>{formatPrice(pkg.price)}</Text>
+              <Text style={styles.packagePrice}>{formatPrice(pkg.price_eur)}</Text>
 
               <TouchableOpacity
                 style={[
                   styles.buyButton,
-                  pkg.popular && styles.buyButtonPopular,
+                  pkg.name === 'Popular' && styles.buyButtonPopular,
                 ]}
                 onPress={() => handleBuyPackage(pkg)}
               >
                 <Text
                   style={[
                     styles.buyButtonText,
-                    pkg.popular && styles.buyButtonTextPopular,
+                    pkg.name === 'Popular' && styles.buyButtonTextPopular,
                   ]}
                 >
                   Kúpiť
