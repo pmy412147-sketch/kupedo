@@ -4,6 +4,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { setupNotificationListeners } from './src/services/notificationService';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
@@ -187,9 +189,18 @@ function AppNavigator() {
 }
 
 export default function App() {
+  const navigationRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (navigationRef.current) {
+      const cleanup = setupNotificationListeners(navigationRef.current);
+      return cleanup;
+    }
+  }, []);
+
   return (
     <AuthProvider>
-      <NavigationContainer>
+      <NavigationContainer ref={navigationRef}>
         <AppNavigator />
         <StatusBar style="auto" />
       </NavigationContainer>
