@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function LoginScreen({ navigation }: any) {
@@ -27,7 +27,11 @@ export default function LoginScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <Text style={styles.logoIcon}>🛒</Text>
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.logoIcon}
+          resizeMode="contain"
+        />
         <Text style={styles.logoText}>Kupedo</Text>
       </View>
       <Text style={styles.title}>Vitajte späť!</Text>
@@ -81,7 +85,8 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   logoIcon: {
-    fontSize: 48,
+    width: 56,
+    height: 56,
   },
   logoText: {
     fontSize: 36,
