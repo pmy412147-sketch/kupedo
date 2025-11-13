@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -48,7 +48,16 @@ export default function ChatScreen({ route }: any) {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim()) {
+      Alert.alert('Chyba', 'Správa nemôže byť prázdna');
+      return;
+    }
+
+    console.log('Sending message:', {
+      conversation_id: conversationId,
+      sender_id: user?.id,
+      content: newMessage.trim(),
+    });
 
     try {
       const { data, error } = await supabase.from('messages').insert({
@@ -59,13 +68,16 @@ export default function ChatScreen({ route }: any) {
 
       if (error) {
         console.error('Error sending message:', error);
+        Alert.alert('Chyba', `Nepodarilo sa odoslať správu: ${error.message}`);
         return;
       }
 
+      console.log('Message sent successfully:', data);
       setNewMessage('');
       flatListRef.current?.scrollToEnd();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Unexpected error:', err);
+      Alert.alert('Chyba', `Neočakávaná chyba: ${err?.message || 'Neznáma chyba'}`);
     }
   };
 

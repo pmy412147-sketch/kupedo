@@ -10,6 +10,7 @@ import {
   StatusBar,
   Linking,
   Share,
+  Alert,
 } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -123,9 +124,19 @@ export default function AdDetailScreen({ route, navigation }: any) {
       return;
     }
 
-    if (!ad) return;
+    if (!ad) {
+      Alert.alert('Chyba', 'Inzerát sa nenašiel');
+      return;
+    }
+
+    if (ad.user_id === user.id) {
+      Alert.alert('Info', 'Nemôžete kontaktovať svoj vlastný inzerát');
+      return;
+    }
 
     try {
+      console.log('Looking for conversation between:', user.id, 'and', ad.user_id);
+
       const { data: existingConversation, error: searchError } = await supabase
         .from('conversations')
         .select('id')
@@ -134,11 +145,15 @@ export default function AdDetailScreen({ route, navigation }: any) {
 
       if (searchError) {
         console.error('Error searching conversation:', searchError);
+        Alert.alert('Chyba', `Nepodarilo sa nájsť konverzáciu: ${searchError.message}`);
+        return;
       }
 
       if (existingConversation) {
+        console.log('Found existing conversation:', existingConversation.id);
         navigation.navigate('Chat', { conversationId: existingConversation.id });
       } else {
+        console.log('Creating new conversation');
         const { data: newConversation, error: createError } = await supabase
           .from('conversations')
           .insert({
@@ -151,15 +166,20 @@ export default function AdDetailScreen({ route, navigation }: any) {
 
         if (createError) {
           console.error('Error creating conversation:', createError);
+          Alert.alert('Chyba', `Nepodarilo sa vytvoriť konverzáciu: ${createError.message}`);
           return;
         }
 
         if (newConversation) {
+          console.log('Created new conversation:', newConversation.id);
           navigation.navigate('Chat', { conversationId: newConversation.id });
+        } else {
+          Alert.alert('Chyba', 'Nepodarilo sa vytvoriť konverzáciu');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error in handleContact:', error);
+      Alert.alert('Chyba', `Neočakávaná chyba: ${error?.message || 'Neznáma chyba'}`);
     }
   };
 
