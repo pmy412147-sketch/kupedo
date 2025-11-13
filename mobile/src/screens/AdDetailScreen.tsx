@@ -126,31 +126,40 @@ export default function AdDetailScreen({ route, navigation }: any) {
     if (!ad) return;
 
     try {
-      const { data: existingConversation } = await supabase
+      const { data: existingConversation, error: searchError } = await supabase
         .from('conversations')
         .select('id')
-        .or(`and(user1_id.eq.${user.id},user2_id.eq.${ad.user_id}),and(user1_id.eq.${ad.user_id},user2_id.eq.${user.id})`)
+        .or(`and(participant_1.eq.${user.id},participant_2.eq.${ad.user_id}),and(participant_1.eq.${ad.user_id},participant_2.eq.${user.id})`)
         .maybeSingle();
+
+      if (searchError) {
+        console.error('Error searching conversation:', searchError);
+      }
 
       if (existingConversation) {
         navigation.navigate('Chat', { conversationId: existingConversation.id });
       } else {
-        const { data: newConversation } = await supabase
+        const { data: newConversation, error: createError } = await supabase
           .from('conversations')
           .insert({
-            user1_id: user.id,
-            user2_id: ad.user_id,
+            participant_1: user.id,
+            participant_2: ad.user_id,
             ad_id: id,
           })
           .select()
           .single();
+
+        if (createError) {
+          console.error('Error creating conversation:', createError);
+          return;
+        }
 
         if (newConversation) {
           navigation.navigate('Chat', { conversationId: newConversation.id });
         }
       }
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      console.error('Error in handleContact:', error);
     }
   };
 

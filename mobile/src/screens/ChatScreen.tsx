@@ -50,15 +50,22 @@ export default function ChatScreen({ route }: any) {
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
 
-    const { error } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      sender_id: user?.id,
-      content: newMessage,
-    });
+    try {
+      const { data, error } = await supabase.from('messages').insert({
+        conversation_id: conversationId,
+        sender_id: user?.id,
+        content: newMessage.trim(),
+      }).select();
 
-    if (!error) {
+      if (error) {
+        console.error('Error sending message:', error);
+        return;
+      }
+
       setNewMessage('');
       flatListRef.current?.scrollToEnd();
+    } catch (err) {
+      console.error('Unexpected error:', err);
     }
   };
 

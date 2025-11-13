@@ -14,17 +14,21 @@ export default function MessagesScreen({ navigation }: any) {
   }, [user]);
 
   const loadConversations = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('conversations')
-      .select('*, user1:profiles!user1_id(*), user2:profiles!user2_id(*), ad:advertisements(*)')
-      .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`)
-      .order('updated_at', { ascending: false });
+      .select('*, participant1:profiles!participant_1(*), participant2:profiles!participant_2(*), ad:advertisements!ad_id(*)')
+      .or(`participant_1.eq.${user?.id},participant_2.eq.${user?.id}`)
+      .order('last_message_at', { ascending: false });
 
+    if (error) {
+      console.error('Error loading conversations:', error);
+      return;
+    }
     if (data) setConversations(data);
   };
 
   const getOtherUser = (conversation: any) => {
-    return conversation.user1_id === user?.id ? conversation.user2 : conversation.user1;
+    return conversation.participant_1 === user?.id ? conversation.participant2 : conversation.participant1;
   };
 
   return (
