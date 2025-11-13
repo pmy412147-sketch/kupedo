@@ -352,7 +352,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
 
               <TouchableOpacity
                 style={styles.viewProfileButton}
-                onPress={() => navigation.navigate('Profile', { profileId: ad.user_id })}
+                onPress={() => navigation.navigate('ViewProfile', { profileId: ad.user_id })}
               >
                 <Text style={styles.viewProfileButtonText}>👤 Zobraziť profil</Text>
               </TouchableOpacity>

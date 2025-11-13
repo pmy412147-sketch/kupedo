@@ -17,6 +17,8 @@ import ChatScreen from './src/screens/ChatScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import CoinsScreen from './src/screens/CoinsScreen';
+import MyAdsScreen from './src/screens/MyAdsScreen';
+import BoostAdScreen from './src/screens/BoostAdScreen';
 import { colors, spacing, typography } from './src/theme/colors';
 
 const Stack = createNativeStackNavigator();
@@ -63,12 +65,12 @@ function MainTabs() {
         }}
       />
       <Tab.Screen
-        name="Categories"
-        component={AdListScreen}
+        name="MyAds"
+        component={MyAdsScreen}
         options={{
-          title: 'Kategórie',
+          title: 'Moje inzeráty',
           tabBarIcon: ({ color, size }) => (
-            <Text style={{ fontSize: 24 }}>📂</Text>
+            <Text style={{ fontSize: 24 }}>📋</Text>
           ),
         }}
       />
@@ -187,6 +189,28 @@ function AppNavigator() {
             component={CreateAdScreen}
             options={{
               title: 'Upraviť inzerát',
+              headerStyle: {
+                backgroundColor: colors.white,
+              },
+              headerTintColor: colors.text.primary,
+            }}
+          />
+          <Stack.Screen
+            name="BoostAd"
+            component={BoostAdScreen}
+            options={{
+              title: 'TOP-ovať inzerát',
+              headerStyle: {
+                backgroundColor: colors.white,
+              },
+              headerTintColor: colors.text.primary,
+            }}
+          />
+          <Stack.Screen
+            name="ViewProfile"
+            component={ProfileScreen}
+            options={{
+              title: 'Profil používateľa',
               headerStyle: {
                 backgroundColor: colors.white,
               },
