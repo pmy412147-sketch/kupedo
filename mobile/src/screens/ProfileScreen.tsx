@@ -1,121 +1,287 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
 
-export default function ProfileScreen({ navigation }: any) {
-  const { user, signOut } = useAuth();
+interface Ad {
+  id: string;
+  title: string;
+  price: number;
+  location: string;
+  images: string[];
+  created_at: string;
+  view_count: number;
+}
+
+export default function ProfileScreen({ navigation, route }: any) {
+  const { user } = useAuth();
+  const profileId = route?.params?.profileId || user?.id;
+  const isOwnProfile = user?.id === profileId;
+
   const [profile, setProfile] = useState<any>(null);
-  const [adCount, setAdCount] = useState(0);
-  const [userCoins, setUserCoins] = useState(0);
+  const [userAds, setUserAds] = useState<Ad[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [coinBalance, setCoinBalance] = useState(0);
+  const [activeTab, setActiveTab] = useState<'ads' | 'reviews'>('ads');
 
   useEffect(() => {
-    if (user) {
-      loadProfile();
-      loadAdCount();
-      loadUserCoins();
+    if (profileId) {
+      fetchProfileData();
+      if (isOwnProfile) {
+        fetchCoinBalance();
+      }
     }
-  }, [user]);
+  }, [profileId]);
 
-  const loadProfile = async () => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user?.id)
-      .single();
+  const fetchCoinBalance = async () => {
+    if (!user) return;
 
-    if (data) setProfile(data);
-  };
-
-  const loadAdCount = async () => {
-    const { count } = await supabase
-      .from('ads')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user?.id);
-
-    setAdCount(count || 0);
-  };
-
-  const loadUserCoins = async () => {
     const { data } = await supabase
       .from('user_coins')
       .select('balance')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .maybeSingle();
 
-    if (data) setUserCoins(data.balance || 0);
+    if (data) {
+      setCoinBalance(data.balance);
+    }
   };
 
-  const handleSignOut = async () => {
-    Alert.alert('Odhlásiť sa', 'Naozaj sa chcete odhlásiť?', [
-      { text: 'Zrušiť', style: 'cancel' },
-      {
-        text: 'Odhlásiť',
-        style: 'destructive',
-        onPress: async () => {
-          await signOut();
-        },
-      },
-    ]);
+  const fetchProfileData = async () => {
+    try {
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', profileId)
+        .single();
+
+      if (profileData) {
+        setProfile(profileData);
+      }
+
+      const { data: adsData } = await supabase
+        .from('ads')
+        .select('*')
+        .eq('user_id', profileId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      setUserAds(adsData || []);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const formatMemberSince = (date: string) => {
+    const diffInDays = Math.floor((Date.now() - new Date(date).getTime()) / (1000 * 60 * 60 * 24));
+    if (diffInDays < 30) return `pred ${diffInDays} dňami`;
+    if (diffInDays < 365) return `pred ${Math.floor(diffInDays / 30)} mesiacmi`;
+    return `pred ${Math.floor(diffInDays / 365)} rokmi`;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.emerald[500]} />
+      </View>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Profil nenájdený</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        {profile?.avatar_url ? (
-          <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
-        ) : (
-          <View style={[styles.avatar, styles.avatarPlaceholder]}>
-            <Text style={styles.avatarText}>
-              {profile?.name?.[0] || user?.email?.[0] || '?'}
-            </Text>
+      {/* Profile Header Card */}
+      <View style={styles.profileCard}>
+        <View style={styles.profileHeader}>
+          {/* Avatar */}
+          {profile.avatar_url ? (
+            <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
+          ) : (
+            <View style={[styles.avatar, styles.avatarPlaceholder]}>
+              <Text style={styles.avatarText}>
+                {profile.display_name?.[0] || 'U'}
+              </Text>
+            </View>
+          )}
+
+          <View style={styles.profileInfo}>
+            <Text style={styles.profileName}>{profile.display_name || 'Používateľ'}</Text>
+
+            {/* Badges */}
+            <View style={styles.badgesContainer}>
+              {profile.verified_email && (
+                <View style={[styles.badge, styles.badgeEmail]}>
+                  <Text style={styles.badgeText}>✉️ Email overený</Text>
+                </View>
+              )}
+            </View>
+
+            {/* Member Since */}
+            <View style={styles.memberSince}>
+              <Text style={styles.memberSinceIcon}>📅</Text>
+              <Text style={styles.memberSinceText}>
+                Člen {formatMemberSince(profile.member_since)}
+              </Text>
+            </View>
           </View>
-        )}
-        <Text style={styles.name}>{profile?.name || 'Používateľ'}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-      </View>
 
-      <View style={styles.stats}>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>{adCount}</Text>
-          <Text style={styles.statLabel}>Inzeráty</Text>
+          {/* Contact Button - Only show if NOT own profile */}
+          {!isOwnProfile && (
+            <TouchableOpacity
+              style={styles.contactButton}
+              onPress={() => navigation.navigate('Chat', { userId: profileId })}
+            >
+              <Text style={styles.contactButtonText}>💬 Kontaktovať</Text>
+            </TouchableOpacity>
+          )}
         </View>
-        <View style={styles.stat}>
-          <Text style={styles.statValue}>🪙 {userCoins}</Text>
-          <Text style={styles.statLabel}>Mince</Text>
+
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          {isOwnProfile && (
+            <TouchableOpacity
+              style={[styles.statCard, styles.statCardCoins]}
+              onPress={() => navigation.navigate('Coins')}
+            >
+              <View style={styles.statHeader}>
+                <Text style={styles.statIcon}>🪙</Text>
+                <Text style={styles.statLabel}>Moje mince</Text>
+              </View>
+              <Text style={styles.statValue}>{coinBalance}</Text>
+              <Text style={styles.statSubtext}>🛒 Kliknite pre nákup</Text>
+            </TouchableOpacity>
+          )}
+
+          <View style={styles.statCard}>
+            <View style={styles.statHeader}>
+              <Text style={styles.statIcon}>⭐</Text>
+              <Text style={styles.statLabel}>Hodnotenie</Text>
+            </View>
+            <Text style={styles.statValue}>{profile.rating_average || '0.0'}</Text>
+            <Text style={styles.statSubtext}>{profile.rating_count} recenzií</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <View style={styles.statHeader}>
+              <Text style={styles.statIcon}>📦</Text>
+              <Text style={styles.statLabel}>Inzeráty</Text>
+            </View>
+            <Text style={styles.statValue}>{userAds.length}</Text>
+            <Text style={styles.statSubtext}>aktívnych</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <View style={styles.statHeader}>
+              <Text style={styles.statIcon}>📈</Text>
+              <Text style={styles.statLabel}>Predaných</Text>
+            </View>
+            <Text style={styles.statValue}>{profile.total_sales || 0}</Text>
+            <Text style={styles.statSubtext}>produktov</Text>
+          </View>
+
+          <View style={styles.statCard}>
+            <View style={styles.statHeader}>
+              <Text style={styles.statIcon}>✅</Text>
+              <Text style={styles.statLabel}>Overenia</Text>
+            </View>
+            <Text style={styles.statValue}>
+              {[profile.verified_email, profile.verified_phone, profile.verified_id].filter(Boolean).length}/3
+            </Text>
+            <Text style={styles.statSubtext}>dokončené</Text>
+          </View>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Ads')}>
-          <Text style={styles.menuIcon}>📝</Text>
-          <Text style={styles.menuText}>Moje inzeráty</Text>
-          <Text style={styles.menuArrow}>›</Text>
+      {/* Tabs */}
+      <View style={styles.tabsContainer}>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'ads' && styles.tabActive]}
+          onPress={() => setActiveTab('ads')}
+        >
+          <Text style={[styles.tabText, activeTab === 'ads' && styles.tabTextActive]}>
+            Inzeráty ({userAds.length})
+          </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Favorites')}>
-          <Text style={styles.menuIcon}>❤️</Text>
-          <Text style={styles.menuText}>Obľúbené</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>⚙️</Text>
-          <Text style={styles.menuText}>Nastavenia</Text>
-          <Text style={styles.menuArrow}>›</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.menuItem}>
-          <Text style={styles.menuIcon}>❓</Text>
-          <Text style={styles.menuText}>Pomoc</Text>
-          <Text style={styles.menuArrow}>›</Text>
+        <TouchableOpacity
+          style={[styles.tab, activeTab === 'reviews' && styles.tabActive]}
+          onPress={() => setActiveTab('reviews')}
+        >
+          <Text style={[styles.tabText, activeTab === 'reviews' && styles.tabTextActive]}>
+            Recenzie (0)
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-        <Text style={styles.signOutText}>Odhlásiť sa</Text>
-      </TouchableOpacity>
+      {/* Tab Content */}
+      {activeTab === 'ads' && (
+        <View style={styles.tabContent}>
+          {userAds.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>📦</Text>
+              <Text style={styles.emptyText}>Žiadne aktívne inzeráty</Text>
+            </View>
+          ) : (
+            <View style={styles.adsGrid}>
+              {userAds.map((ad) => (
+                <TouchableOpacity
+                  key={ad.id}
+                  style={styles.adCard}
+                  onPress={() => navigation.navigate('AdDetail', { id: ad.id })}
+                >
+                  <View style={styles.adImageContainer}>
+                    {ad.images[0] ? (
+                      <Image source={{ uri: ad.images[0] }} style={styles.adImage} />
+                    ) : (
+                      <View style={styles.adImagePlaceholder}>
+                        <Text style={styles.adImagePlaceholderText}>Bez obrázku</Text>
+                      </View>
+                    )}
+                    {ad.view_count > 0 && (
+                      <View style={styles.viewCount}>
+                        <Text style={styles.viewCountText}>👁 {ad.view_count}</Text>
+                      </View>
+                    )}
+                  </View>
+                  <View style={styles.adInfo}>
+                    <Text style={styles.adTitle} numberOfLines={2}>{ad.title}</Text>
+                    <Text style={styles.adPrice}>€{ad.price}</Text>
+                    <Text style={styles.adLocation}>📍 {ad.location}</Text>
+                    <Text style={styles.adDate}>🕐 {new Date(ad.created_at).toLocaleDateString('sk-SK')}</Text>
+                  </View>
+                  {isOwnProfile && (
+                    <TouchableOpacity
+                      style={styles.editButton}
+                      onPress={() => navigation.navigate('EditAd', { id: ad.id })}
+                    >
+                      <Text style={styles.editButtonText}>✏️ Upraviť inzerát</Text>
+                    </TouchableOpacity>
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+      )}
+
+      {activeTab === 'reviews' && (
+        <View style={styles.tabContent}>
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>⭐</Text>
+            <Text style={styles.emptyText}>Žiadne recenzie</Text>
+          </View>
+        </View>
+      )}
 
       <View style={{ height: 100 }} />
     </ScrollView>
@@ -127,171 +293,259 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.secondary,
   },
-  header: {
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: spacing.xl,
+    backgroundColor: colors.background.secondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+  },
+  errorText: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.secondary,
+  },
+  profileCard: {
     backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
+    padding: spacing.lg,
+    marginBottom: spacing.sm,
+  },
+  profileHeader: {
+    marginBottom: spacing.lg,
   },
   avatar: {
-    width: 100,
-    height: 100,
+    width: 128,
+    height: 128,
     borderRadius: borderRadius.full,
+    borderWidth: 4,
+    borderColor: colors.emerald[100],
     marginBottom: spacing.md,
   },
   avatarPlaceholder: {
-    backgroundColor: colors.emerald[500],
+    backgroundColor: colors.emerald[100],
     justifyContent: 'center',
     alignItems: 'center',
   },
   avatarText: {
+    fontSize: 48,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.emerald[700],
+  },
+  profileInfo: {
+    marginBottom: spacing.md,
+  },
+  profileName: {
     fontSize: typography.fontSize['3xl'],
     fontWeight: typography.fontWeight.bold,
-    color: colors.white,
-  },
-  name: {
-    fontSize: typography.fontSize.xl,
-    fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
-  email: {
+  badgesContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+    marginBottom: spacing.sm,
+  },
+  badge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.md,
+  },
+  badgeEmail: {
+    backgroundColor: colors.emerald[100],
+  },
+  badgeText: {
+    fontSize: typography.fontSize.xs,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.emerald[700],
+  },
+  memberSince: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  memberSinceIcon: {
+    fontSize: 16,
+  },
+  memberSinceText: {
     fontSize: typography.fontSize.sm,
     color: colors.text.secondary,
   },
-  stats: {
-    flexDirection: 'row',
-    backgroundColor: colors.white,
-    marginTop: spacing.sm,
-    paddingVertical: spacing.lg,
-  },
-  stat: {
-    flex: 1,
-    alignItems: 'center',
-    borderRightWidth: 1,
-    borderRightColor: colors.border.light,
-  },
-  statValue: {
-    fontSize: typography.fontSize['2xl'],
-    fontWeight: typography.fontWeight.bold,
-    color: colors.text.primary,
-    marginBottom: spacing.xs,
-  },
-  statLabel: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-  },
-  section: {
-    backgroundColor: colors.white,
-    marginTop: spacing.sm,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border.light,
-  },
-  menuIcon: {
-    fontSize: 24,
-    marginRight: spacing.md,
-  },
-  menuText: {
-    flex: 1,
-    fontSize: typography.fontSize.base,
-    color: colors.text.primary,
-  },
-  menuArrow: {
-    fontSize: typography.fontSize['2xl'],
-    color: colors.text.secondary,
-  },
-  signOutButton: {
-    backgroundColor: colors.status.error,
-    margin: spacing.md,
-    padding: spacing.md,
+  contactButton: {
+    backgroundColor: colors.emerald[500],
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
     borderRadius: borderRadius.lg,
     alignItems: 'center',
   },
-  signOutText: {
+  contactButtonText: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.bold,
     color: colors.white,
   },
-});
-
-const oldStyles = StyleSheet.create({
-  oldContainer: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 30,
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#007AFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 15,
-  },
-  avatarText: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  email: {
-    fontSize: 14,
-    color: '#666',
-  },
-  stats: {
-    backgroundColor: '#fff',
-    padding: 20,
-    marginTop: 15,
+  statsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: spacing.md,
   },
-  stat: {
+  statCard: {
+    backgroundColor: colors.gray[50],
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    flex: 1,
+    minWidth: '45%',
+  },
+  statCardCoins: {
+    backgroundColor: colors.emerald[50],
+    borderWidth: 2,
+    borderColor: colors.emerald[200],
+  },
+  statHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
   },
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#007AFF',
+  statIcon: {
+    fontSize: 16,
   },
   statLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 5,
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
   },
-  menu: {
-    marginTop: 15,
+  statValue: {
+    fontSize: typography.fontSize['2xl'],
+    fontWeight: typography.fontWeight.bold,
+    color: colors.text.primary,
   },
-  menuItem: {
-    backgroundColor: '#fff',
-    padding: 15,
+  statSubtext: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.white,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.border.light,
   },
-  menuItemText: {
-    fontSize: 16,
-    color: '#000',
+  tab: {
+    flex: 1,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
-  signOutItem: {
-    marginTop: 15,
+  tabActive: {
+    borderBottomColor: colors.emerald[500],
   },
-  signOutText: {
-    color: '#FF3B30',
+  tabText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+  },
+  tabTextActive: {
+    color: colors.emerald[500],
+    fontWeight: typography.fontWeight.semibold,
+  },
+  tabContent: {
+    backgroundColor: colors.white,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+  },
+  emptyState: {
+    paddingVertical: spacing['3xl'],
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    fontSize: 64,
+    marginBottom: spacing.md,
+  },
+  emptyText: {
+    fontSize: typography.fontSize.base,
+    color: colors.text.secondary,
+  },
+  adsGrid: {
+    gap: spacing.md,
+  },
+  adCard: {
+    backgroundColor: colors.white,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+    overflow: 'hidden',
+  },
+  adImageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 200,
+    backgroundColor: colors.gray[100],
+  },
+  adImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  adImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  adImagePlaceholderText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  viewCount: {
+    position: 'absolute',
+    top: spacing.sm,
+    left: spacing.sm,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: borderRadius.md,
+  },
+  viewCountText: {
+    fontSize: typography.fontSize.xs,
+    color: colors.white,
+  },
+  adInfo: {
+    padding: spacing.md,
+  },
+  adTitle: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  adPrice: {
+    fontSize: typography.fontSize.xl,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.emerald[600],
+    marginBottom: spacing.xs,
+  },
+  adLocation: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    marginBottom: spacing.xs,
+  },
+  adDate: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+  },
+  editButton: {
+    backgroundColor: colors.gray[100],
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderTopColor: colors.border.light,
+  },
+  editButtonText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
   },
 });
