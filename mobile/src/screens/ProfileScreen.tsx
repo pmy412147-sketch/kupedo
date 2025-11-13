@@ -40,11 +40,11 @@ export default function ProfileScreen({ navigation }: any) {
   const loadUserCoins = async () => {
     const { data } = await supabase
       .from('user_coins')
-      .select('coins')
+      .select('balance')
       .eq('user_id', user?.id)
       .maybeSingle();
 
-    if (data) setUserCoins(data.coins);
+    if (data) setUserCoins(data.balance || 0);
   };
 
   const handleSignOut = async () => {

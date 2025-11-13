@@ -57,12 +57,12 @@ export default function HomeScreen({ navigation }: any) {
     try {
       const { data, error } = await supabase
         .from('user_coins')
-        .select('coins')
+        .select('balance')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
-      if (data) setUserCoins(data.coins);
+      if (data) setUserCoins(data.balance || 0);
     } catch (error) {
       console.error('Error loading user coins:', error);
     }
@@ -101,7 +101,7 @@ export default function HomeScreen({ navigation }: any) {
         {user && (
           <TouchableOpacity
             style={styles.coinsButton}
-            onPress={() => navigation.navigate('Profile', { screen: 'Coins' })}
+            onPress={() => navigation.navigate('Coins')}
           >
             <Text style={styles.coinIcon}>🪙</Text>
             <Text style={styles.coinCount}>{userCoins}</Text>
@@ -140,7 +140,11 @@ export default function HomeScreen({ navigation }: any) {
         {/* Kategórie */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Kategórie</Text>
-          <View style={styles.categoriesGrid}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.categoriesCarousel}
+          >
             {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
@@ -155,7 +159,7 @@ export default function HomeScreen({ navigation }: any) {
                 </Text>
               </TouchableOpacity>
             ))}
-          </View>
+          </ScrollView>
         </View>
 
         {/* Najnovšie inzeráty */}
@@ -321,17 +325,14 @@ const styles = StyleSheet.create({
     color: colors.emerald[600],
     fontWeight: typography.fontWeight.semibold,
   },
-  categoriesGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingHorizontal: spacing.xs,
-    justifyContent: 'center',
+  categoriesCarousel: {
+    paddingHorizontal: spacing.md,
+    gap: spacing.sm,
   },
   categoryCard: {
-    width: (width - spacing.md * 2) / 4 - spacing.xs * 2,
+    width: 90,
     alignItems: 'center',
     padding: spacing.sm,
-    margin: spacing.xs,
     backgroundColor: colors.white,
     borderRadius: borderRadius.lg,
     borderWidth: 1,

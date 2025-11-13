@@ -14,6 +14,7 @@ import MessagesScreen from './src/screens/MessagesScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import CoinsScreen from './src/screens/CoinsScreen';
 import { colors, spacing, typography } from './src/theme/colors';
 
 const Stack = createNativeStackNavigator();
@@ -162,6 +163,17 @@ function AppNavigator() {
             component={FavoritesScreen}
             options={{
               title: 'Obľúbené',
+              headerStyle: {
+                backgroundColor: colors.white,
+              },
+              headerTintColor: colors.text.primary,
+            }}
+          />
+          <Stack.Screen
+            name="Coins"
+            component={CoinsScreen}
+            options={{
+              title: 'Mince',
               headerStyle: {
                 backgroundColor: colors.white,
               },
