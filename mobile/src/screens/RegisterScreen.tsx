@@ -39,6 +39,10 @@ export default function RegisterScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoIcon}>🛒</Text>
+        <Text style={styles.logoText}>Kupedo</Text>
+      </View>
       <Text style={styles.title}>Vytvoriť účet</Text>
 
       <TextInput
@@ -89,6 +93,21 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
     backgroundColor: '#fff',
+  },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 40,
+    gap: 8,
+  },
+  logoIcon: {
+    fontSize: 48,
+  },
+  logoText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#10b981',
   },
   title: {
     fontSize: 28,

@@ -96,6 +96,7 @@ export default function HomeScreen({ navigation }: any) {
       {/* Header s logom a mincami */}
       <View style={styles.topHeader}>
         <View style={styles.logoContainer}>
+          <Text style={styles.logoIcon}>🛒</Text>
           <Text style={styles.logo}>Kupedo</Text>
         </View>
         {user && (
@@ -245,6 +246,10 @@ const styles = StyleSheet.create({
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.xs,
+  },
+  logoIcon: {
+    fontSize: 28,
   },
   logo: {
     fontSize: typography.fontSize['2xl'],
