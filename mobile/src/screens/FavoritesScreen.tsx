@@ -16,7 +16,7 @@ export default function FavoritesScreen({ navigation }: any) {
   const loadFavorites = async () => {
     const { data } = await supabase
       .from('favorites')
-      .select('*, ad:advertisements(*)')
+      .select('*, ad:ads(*)')
       .eq('user_id', user?.id)
       .order('created_at', { ascending: false });
 

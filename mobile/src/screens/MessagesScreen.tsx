@@ -16,7 +16,7 @@ export default function MessagesScreen({ navigation }: any) {
   const loadConversations = async () => {
     const { data, error } = await supabase
       .from('conversations')
-      .select('*, participant1:profiles!participant_1(*), participant2:profiles!participant_2(*), ad:advertisements!ad_id(*)')
+      .select('*, participant1:profiles!participant_1(*), participant2:profiles!participant_2(*), ad:ads!ad_id(*)')
       .or(`participant_1.eq.${user?.id},participant_2.eq.${user?.id}`)
       .order('last_message_at', { ascending: false });
 

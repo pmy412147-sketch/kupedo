@@ -78,8 +78,7 @@ export default function MyAdsPage() {
   };
 
   const handleBoost = (ad: Ad) => {
-    setSelectedAd(ad);
-    setBoostModalOpen(true);
+    router.push(`/topovat-inzerat/${ad.id}`);
   };
 
   const handleBoostSuccess = () => {

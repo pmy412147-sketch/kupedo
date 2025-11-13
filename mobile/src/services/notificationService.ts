@@ -34,14 +34,17 @@ export const registerForPushNotifications = async (userId: string) => {
       return null;
     }
 
-    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: 'your-project-id-here'
+    });
+    const token = tokenData.data;
     console.log('Push token:', token);
 
     await savePushToken(userId, token);
 
     return token;
   } catch (error) {
-    console.error('Error registering for push notifications:', error);
+    console.log('Push notifications not available in Expo Go. Use development build for full functionality.');
     return null;
   }
 };

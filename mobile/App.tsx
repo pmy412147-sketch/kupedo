@@ -182,6 +182,17 @@ function AppNavigator() {
               headerTintColor: colors.text.primary,
             }}
           />
+          <Stack.Screen
+            name="EditAd"
+            component={CreateAdScreen}
+            options={{
+              title: 'Upraviť inzerát',
+              headerStyle: {
+                backgroundColor: colors.white,
+              },
+              headerTintColor: colors.text.primary,
+            }}
+          />
         </>
       )}
     </Stack.Navigator>

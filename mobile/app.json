@@ -6,6 +6,12 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "sdkVersion": "54.0.0",
+    "owner": "kupedo",
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id-here"
+      }
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
