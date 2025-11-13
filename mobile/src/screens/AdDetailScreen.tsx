@@ -68,14 +68,6 @@ export default function AdDetailScreen({ route, navigation }: any) {
     }
   };
 
-  const incrementViewCount = async () => {
-    try {
-      await supabase.rpc('increment_view_count', { ad_id: id });
-    } catch (error) {
-      console.error('Error incrementing view count:', error);
-    }
-  };
-
   const checkFavorite = async () => {
     if (!user) return;
 
@@ -93,9 +85,28 @@ export default function AdDetailScreen({ route, navigation }: any) {
     }
   };
 
+  const incrementViewCount = async () => {
+    try {
+      const { data: currentAd } = await supabase
+        .from('ads')
+        .select('view_count')
+        .eq('id', id)
+        .single();
+
+      if (currentAd) {
+        await supabase
+          .from('ads')
+          .update({ view_count: (currentAd.view_count || 0) + 1 })
+          .eq('id', id);
+      }
+    } catch (error) {
+      console.error('Error incrementing view count:', error);
+    }
+  };
+
   const toggleFavorite = async () => {
     if (!user) {
-      navigation.navigate('Login');
+      Alert.alert('Prihlásenie', 'Musíte sa prihlásiť');
       return;
     }
 
@@ -107,80 +118,26 @@ export default function AdDetailScreen({ route, navigation }: any) {
           .eq('user_id', user.id)
           .eq('ad_id', id);
         setIsFavorite(false);
+        Alert.alert('Úspech', 'Odstránené z obľúbených');
       } else {
         await supabase
           .from('favorites')
           .insert({ user_id: user.id, ad_id: id });
         setIsFavorite(true);
+        Alert.alert('Úspech', 'Pridané do obľúbených');
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      Alert.alert('Chyba', 'Nepodarilo sa pridať do obľúbených');
     }
   };
 
-  const handleContact = async () => {
+  const handleContact = () => {
     if (!user) {
-      navigation.navigate('Login');
+      Alert.alert('Prihlásenie', 'Musíte sa prihlásiť');
       return;
     }
-
-    if (!ad) {
-      Alert.alert('Chyba', 'Inzerát sa nenašiel');
-      return;
-    }
-
-    if (ad.user_id === user.id) {
-      Alert.alert('Info', 'Nemôžete kontaktovať svoj vlastný inzerát');
-      return;
-    }
-
-    try {
-      console.log('Looking for conversation between:', user.id, 'and', ad.user_id);
-
-      const { data: existingConversation, error: searchError } = await supabase
-        .from('conversations')
-        .select('id')
-        .or(`and(participant_1.eq.${user.id},participant_2.eq.${ad.user_id}),and(participant_1.eq.${ad.user_id},participant_2.eq.${user.id})`)
-        .maybeSingle();
-
-      if (searchError) {
-        console.error('Error searching conversation:', searchError);
-        Alert.alert('Chyba', `Nepodarilo sa nájsť konverzáciu: ${searchError.message}`);
-        return;
-      }
-
-      if (existingConversation) {
-        console.log('Found existing conversation:', existingConversation.id);
-        navigation.navigate('Chat', { conversationId: existingConversation.id });
-      } else {
-        console.log('Creating new conversation');
-        const { data: newConversation, error: createError } = await supabase
-          .from('conversations')
-          .insert({
-            participant_1: user.id,
-            participant_2: ad.user_id,
-            ad_id: id,
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating conversation:', createError);
-          Alert.alert('Chyba', `Nepodarilo sa vytvoriť konverzáciu: ${createError.message}`);
-          return;
-        }
-
-        if (newConversation) {
-          console.log('Created new conversation:', newConversation.id);
-          navigation.navigate('Chat', { conversationId: newConversation.id });
-        } else {
-          Alert.alert('Chyba', 'Nepodarilo sa vytvoriť konverzáciu');
-        }
-      }
-    } catch (error: any) {
-      console.error('Error in handleContact:', error);
-      Alert.alert('Chyba', `Neočakávaná chyba: ${error?.message || 'Neznáma chyba'}`);
-    }
+    navigation.navigate('Chat', { userId: ad.user_id, adId: id });
   };
 
   const handleCall = () => {
@@ -192,7 +149,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `${ad.title} - ${formatPrice(ad.price)}\n\nPozrite si tento inzerát na Kupado.sk`,
+        message: `Pozrite si tento inzerát: ${ad.title}`,
       });
     } catch (error) {
       console.error('Error sharing:', error);
@@ -272,23 +229,47 @@ export default function AdDetailScreen({ route, navigation }: any) {
         )}
 
         <View style={styles.content}>
-          <View style={styles.header}>
-            <View style={styles.headerTop}>
-              <Text style={styles.title}>{ad.title}</Text>
-              <TouchableOpacity onPress={toggleFavorite} style={styles.favoriteButton}>
-                <Text style={styles.favoriteIcon}>{isFavorite ? '❤️' : '🤍'}</Text>
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.price}>{formatPrice(ad.price)}</Text>
-            <View style={styles.meta}>
-              <Text style={styles.metaText}>📍 {ad.location}</Text>
-              <Text style={styles.metaText}>📅 {formatDate(ad.created_at)}</Text>
-              {ad.view_count > 0 && (
-                <Text style={styles.metaText}>👁️ {ad.view_count} zobrazení</Text>
-              )}
-            </View>
+          {/* Title */}
+          <View style={styles.titleSection}>
+            <Text style={styles.title}>{ad.title}</Text>
           </View>
 
+          {/* Price and Action Buttons Card */}
+          <View style={styles.priceCard}>
+            <Text style={styles.price}>{formatPrice(ad.price)}</Text>
+
+            {user && user.id !== ad.user_id && (
+              <View style={styles.actionButtons}>
+                <TouchableOpacity style={styles.mainActionButton} onPress={handleContact}>
+                  <Text style={styles.mainActionButtonText}>💬 Kontaktovať predajcu</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.favoriteActionButton} onPress={toggleFavorite}>
+                  <Text style={styles.favoriteActionButtonText}>
+                    {isFavorite ? '❤️ Pridať do obľúbených' : '🤍 Pridať do obľúbených'}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.reportButton}
+                  onPress={() => Alert.alert('Nahlásiť inzerát', 'Funkcia bude dostupná čoskoro')}
+                >
+                  <Text style={styles.reportButtonText}>🚩 Nahlásiť inzerát</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+
+          {/* Meta info */}
+          <View style={styles.metaSection}>
+            <Text style={styles.metaText}>📍 {ad.location}</Text>
+            <Text style={styles.metaText}>📅 {formatDate(ad.created_at)}</Text>
+            {ad.view_count > 0 && (
+              <Text style={styles.metaText}>👁️ {ad.view_count} zobrazení</Text>
+            )}
+          </View>
+
+          {/* Description */}
           {ad.description && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Popis</Text>
@@ -296,6 +277,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
             </View>
           )}
 
+          {/* Specs */}
           {ad.specs && Object.keys(ad.specs).length > 0 && (
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>Špecifikácie</Text>
@@ -346,9 +328,10 @@ export default function AdDetailScreen({ route, navigation }: any) {
             </View>
           )}
 
+          {/* Seller Card */}
           {seller && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Predávajúci</Text>
+            <View style={styles.sellerSection}>
+              <Text style={styles.sectionTitle}>Predajca</Text>
               <View style={styles.sellerCard}>
                 {seller.avatar_url ? (
                   <Image
@@ -358,41 +341,36 @@ export default function AdDetailScreen({ route, navigation }: any) {
                 ) : (
                   <View style={[styles.avatar, styles.avatarPlaceholder]}>
                     <Text style={styles.avatarText}>
-                      {seller.name?.charAt(0).toUpperCase() || '?'}
+                      {seller.display_name?.charAt(0).toUpperCase() || 'P'}
                     </Text>
                   </View>
                 )}
                 <View style={styles.sellerInfo}>
-                  <Text style={styles.sellerName}>{seller.name || 'Používateľ'}</Text>
-                  <Text style={styles.sellerMeta}>
-                    Člen od {new Date(seller.created_at).getFullYear()}
-                  </Text>
+                  <Text style={styles.sellerName}>{seller.display_name || 'Používateľ'}</Text>
                 </View>
               </View>
+
+              <TouchableOpacity
+                style={styles.viewProfileButton}
+                onPress={() => navigation.navigate('Profile', { profileId: ad.user_id })}
+              >
+                <Text style={styles.viewProfileButtonText}>👤 Zobraziť profil</Text>
+              </TouchableOpacity>
+
+              {user && user.id !== ad.user_id && (
+                <TouchableOpacity
+                  style={styles.reviewButton}
+                  onPress={() => Alert.alert('Pridať recenziu', 'Funkcia bude dostupná čoskoro')}
+                >
+                  <Text style={styles.reviewButtonText}>⭐ Pridať recenziu</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
-          <View style={{ height: 100 }} />
+          <View style={{ height: 20 }} />
         </View>
       </ScrollView>
-
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareButtonText}>📤</Text>
-        </TouchableOpacity>
-
-        {ad.phone && (
-          <TouchableOpacity style={styles.callButton} onPress={handleCall}>
-            <Text style={styles.callButtonText}>📞 Zavolať</Text>
-          </TouchableOpacity>
-        )}
-
-        {user?.id !== ad.user_id && (
-          <TouchableOpacity style={styles.contactButton} onPress={handleContact}>
-            <Text style={styles.contactButtonText}>💬 Napísať správu</Text>
-          </TouchableOpacity>
-        )}
-      </View>
     </View>
   );
 }
@@ -400,7 +378,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
+    backgroundColor: colors.background.secondary,
   },
   loadingContainer: {
     flex: 1,
@@ -462,40 +440,75 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
   },
   content: {
-    paddingBottom: spacing.xxl,
+    backgroundColor: colors.white,
   },
-  header: {
+  titleSection: {
     padding: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.border.light,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: spacing.sm,
-  },
   title: {
-    flex: 1,
     fontSize: typography.fontSize['2xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.text.primary,
-    marginRight: spacing.sm,
   },
-  favoriteButton: {
-    padding: spacing.xs,
-  },
-  favoriteIcon: {
-    fontSize: 28,
+  priceCard: {
+    padding: spacing.md,
+    backgroundColor: colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   price: {
     fontSize: typography.fontSize['3xl'],
     fontWeight: typography.fontWeight.bold,
     color: colors.emerald[600],
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
-  meta: {
+  actionButtons: {
+    gap: spacing.sm,
+  },
+  mainActionButton: {
+    backgroundColor: colors.emerald[500],
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.sm + 2,
+    alignItems: 'center',
+  },
+  mainActionButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.white,
+  },
+  favoriteActionButton: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  favoriteActionButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+  },
+  reportButton: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#ef4444',
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.sm,
+    alignItems: 'center',
+  },
+  reportButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: '#ef4444',
+  },
+  metaSection: {
+    padding: spacing.md,
     gap: spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border.light,
   },
   metaText: {
     fontSize: typography.fontSize.sm,
@@ -534,25 +547,31 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
   },
+  sellerSection: {
+    padding: spacing.md,
+    backgroundColor: colors.white,
+  },
   sellerCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
+    marginBottom: spacing.md,
   },
   avatar: {
-    width: 56,
-    height: 56,
+    width: 48,
+    height: 48,
     borderRadius: borderRadius.full,
     backgroundColor: colors.gray[200],
   },
   avatarPlaceholder: {
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: colors.emerald[100],
   },
   avatarText: {
     fontSize: typography.fontSize.xl,
     fontWeight: typography.fontWeight.bold,
-    color: colors.text.secondary,
+    color: colors.emerald[700],
   },
   sellerInfo: {
     flex: 1,
@@ -561,64 +580,32 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
-    marginBottom: 2,
   },
-  sellerMeta: {
-    fontSize: typography.fontSize.sm,
-    color: colors.text.secondary,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    padding: spacing.md,
+  viewProfileButton: {
     backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border.light,
-    gap: spacing.sm,
-    shadowColor: colors.black,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 10,
-  },
-  shareButton: {
-    width: 48,
-    height: 48,
-    backgroundColor: colors.gray[100],
+    borderWidth: 1,
+    borderColor: colors.border.default,
     borderRadius: borderRadius.lg,
-    justifyContent: 'center',
+    paddingVertical: spacing.sm,
     alignItems: 'center',
+    marginBottom: spacing.sm,
   },
-  shareButtonText: {
-    fontSize: 20,
-  },
-  callButton: {
-    flex: 1,
-    backgroundColor: colors.gray[100],
-    borderRadius: borderRadius.lg,
-    paddingVertical: spacing.sm + 2,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  callButtonText: {
+  viewProfileButtonText: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
   },
-  contactButton: {
-    flex: 2,
-    backgroundColor: colors.emerald[500],
+  reviewButton: {
+    backgroundColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#FFA500',
     borderRadius: borderRadius.lg,
-    paddingVertical: spacing.sm + 2,
-    justifyContent: 'center',
+    paddingVertical: spacing.sm,
     alignItems: 'center',
   },
-  contactButtonText: {
+  reviewButtonText: {
     fontSize: typography.fontSize.base,
-    fontWeight: typography.fontWeight.bold,
-    color: colors.white,
+    fontWeight: typography.fontWeight.semibold,
+    color: '#FFA500',
   },
 });
