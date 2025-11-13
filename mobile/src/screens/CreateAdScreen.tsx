@@ -69,26 +69,35 @@ export default function CreateAdScreen({ navigation }: any) {
 
   const uploadImage = async (uri: string): Promise<string | null> => {
     try {
+      // Read file as ArrayBuffer
       const response = await fetch(uri);
-      const blob = await response.blob();
+      const arrayBuffer = await response.arrayBuffer();
       const fileName = `${user?.id}/${Date.now()}.jpg`;
+
+      console.log('Uploading image:', fileName, 'Size:', arrayBuffer.byteLength);
 
       const { data, error } = await supabase.storage
         .from('ad-images')
-        .upload(fileName, blob, {
+        .upload(fileName, arrayBuffer, {
           contentType: 'image/jpeg',
           cacheControl: '3600',
         });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Upload error:', error);
+        throw error;
+      }
+
+      console.log('Image uploaded successfully:', data);
 
       const { data: urlData } = supabase.storage
         .from('ad-images')
         .getPublicUrl(fileName);
 
       return urlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading image:', error);
+      Alert.alert('Chyba', `Nepodarilo sa nahrať obrázok: ${error?.message || 'Neznáma chyba'}`);
       return null;
     }
   };
