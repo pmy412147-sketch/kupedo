@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
@@ -83,6 +84,70 @@ export default function ProfileScreen({ navigation, route }: any) {
     return `pred ${Math.floor(diffInDays / 365)} rokmi`;
   };
 
+  const handleChangeAvatar = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Chyba', 'Potrebujeme povolenie na prístup k fotkám');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const image = result.assets[0];
+        await uploadAvatar(image.uri);
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error);
+      Alert.alert('Chyba', 'Nepodarilo sa vybrať obrázok');
+    }
+  };
+
+  const uploadAvatar = async (uri: string) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const fileExt = uri.split('.').pop()?.toLowerCase() || 'jpg';
+      const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+
+      console.log('Uploading avatar:', fileName, 'Size:', blob.size);
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, blob, {
+          contentType: `image/${fileExt}`,
+          upsert: false,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      const avatarUrl = urlData.publicUrl;
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: avatarUrl })
+        .eq('id', user?.id);
+
+      if (updateError) throw updateError;
+
+      Alert.alert('Úspech', 'Profilová fotka bola zmenená');
+      fetchProfileData();
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      Alert.alert('Chyba', error.message || 'Nepodarilo sa nahrať fotku');
+    }
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -105,15 +170,25 @@ export default function ProfileScreen({ navigation, route }: any) {
       <View style={styles.profileCard}>
         <View style={styles.profileHeader}>
           {/* Avatar */}
-          {profile.avatar_url ? (
-            <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarText}>
-                {profile.display_name?.[0] || 'U'}
-              </Text>
-            </View>
-          )}
+          <View style={styles.avatarContainer}>
+            {profile.avatar_url ? (
+              <Image source={{ uri: profile.avatar_url }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarPlaceholder]}>
+                <Text style={styles.avatarText}>
+                  {profile.display_name?.[0] || 'U'}
+                </Text>
+              </View>
+            )}
+            {isOwnProfile && (
+              <TouchableOpacity
+                style={styles.changeAvatarButton}
+                onPress={handleChangeAvatar}
+              >
+                <Text style={styles.changeAvatarText}>📷</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
           <View style={styles.profileInfo}>
             <Text style={styles.profileName}>{profile.display_name || 'Používateľ'}</Text>
@@ -318,13 +393,16 @@ const styles = StyleSheet.create({
   profileHeader: {
     marginBottom: spacing.lg,
   },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: spacing.md,
+  },
   avatar: {
     width: 128,
     height: 128,
     borderRadius: borderRadius.full,
     borderWidth: 4,
     borderColor: colors.emerald[100],
-    marginBottom: spacing.md,
   },
   avatarPlaceholder: {
     backgroundColor: colors.emerald[100],
@@ -335,6 +413,27 @@ const styles = StyleSheet.create({
     fontSize: 48,
     fontWeight: typography.fontWeight.bold,
     color: colors.emerald[700],
+  },
+  changeAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: colors.emerald[500],
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: colors.white,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  changeAvatarText: {
+    fontSize: 20,
   },
   profileInfo: {
     marginBottom: spacing.md,

@@ -15,6 +15,8 @@ import {
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import ReviewModal from '../components/ReviewModal';
+import ReportAdModal from '../components/ReportAdModal';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +28,8 @@ export default function AdDetailScreen({ route, navigation }: any) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [reviewModalVisible, setReviewModalVisible] = useState(false);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
 
   useEffect(() => {
     loadAd();
@@ -252,7 +256,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
 
                 <TouchableOpacity
                   style={styles.reportButton}
-                  onPress={() => Alert.alert('Nahlásiť inzerát', 'Funkcia bude dostupná čoskoro')}
+                  onPress={() => setReportModalVisible(true)}
                 >
                   <Text style={styles.reportButtonText}>🚩 Nahlásiť inzerát</Text>
                 </TouchableOpacity>
@@ -360,7 +364,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
               {user && user.id !== ad.user_id && (
                 <TouchableOpacity
                   style={styles.reviewButton}
-                  onPress={() => Alert.alert('Pridať recenziu', 'Funkcia bude dostupná čoskoro')}
+                  onPress={() => setReviewModalVisible(true)}
                 >
                   <Text style={styles.reviewButtonText}>⭐ Pridať recenziu</Text>
                 </TouchableOpacity>
@@ -371,6 +375,25 @@ export default function AdDetailScreen({ route, navigation }: any) {
           <View style={{ height: 20 }} />
         </View>
       </ScrollView>
+
+      {user && ad && (
+        <>
+          <ReviewModal
+            visible={reviewModalVisible}
+            onClose={() => setReviewModalVisible(false)}
+            revieweeId={ad.user_id}
+            userId={user.id}
+            adId={id}
+          />
+
+          <ReportAdModal
+            visible={reportModalVisible}
+            onClose={() => setReportModalVisible(false)}
+            adId={id}
+            userId={user.id}
+          />
+        </>
+      )}
     </View>
   );
 }
