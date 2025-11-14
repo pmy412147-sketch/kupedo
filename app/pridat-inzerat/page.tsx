@@ -355,54 +355,61 @@ export default function AddAdPage() {
     <>
       <Header />
       <main className="min-h-screen bg-[#F8F9FA] dark:bg-gray-900 py-8 pb-24 md:pb-8">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <Card className="p-8">
-            <h1 className="text-3xl font-bold mb-8">Pridať inzerát</h1>
-
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Kategória */}
-              <div className="space-y-3">
-                <Label htmlFor="category" className="text-base font-semibold">Kategória *</Label>
-                <Select
-                  value={formData.category_id}
-                  onValueChange={(v) => {
-                    setFormData({ ...formData, category_id: v });
-                    setSelectedCategory(v);
-                  }}
-                  required
-                >
-                  <SelectTrigger id="category" className="h-11">
-                    <SelectValue placeholder="Vyberte kategóriu" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.slug}>
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            {/* AI Assistant - Left Sidebar (sticky na desktop) */}
+            {selectedCategory && user && (
+              <div className="lg:col-span-4 order-2 lg:order-1">
+                <div className="lg:sticky lg:top-24">
+                  <InlineAIAssistant
+                    formData={{
+                      title: formData.title,
+                      description: formData.description,
+                      price: formData.price,
+                      category_id: formData.category_id,
+                      images: previews,
+                    }}
+                    onSuggestion={(field, value) => {
+                      setFormData({ ...formData, [field]: value });
+                    }}
+                    userId={user.id}
+                  />
+                </div>
               </div>
+            )}
 
-              {selectedCategory && (
-                <>
+            {/* Main Form - Right Side */}
+            <div className={selectedCategory && user ? "lg:col-span-8 order-1 lg:order-2" : "lg:col-span-12"}>
+              <Card className="p-8">
+                <h1 className="text-3xl font-bold mb-8">Pridať inzerát</h1>
 
-                  {/* AI Assistant */}
-                  {user && (
-                    <InlineAIAssistant
-                      formData={{
-                        title: formData.title,
-                        description: formData.description,
-                        price: formData.price,
-                        category_id: formData.category_id,
-                        images: previews,
+                <form onSubmit={handleSubmit} className="space-y-8">
+                  {/* Kategória */}
+                  <div className="space-y-3">
+                    <Label htmlFor="category" className="text-base font-semibold">Kategória *</Label>
+                    <Select
+                      value={formData.category_id}
+                      onValueChange={(v) => {
+                        setFormData({ ...formData, category_id: v });
+                        setSelectedCategory(v);
                       }}
-                      onSuggestion={(field, value) => {
-                        setFormData({ ...formData, [field]: value });
-                      }}
-                      userId={user.id}
-                    />
-                  )}
+                      required
+                    >
+                      <SelectTrigger id="category" className="h-11">
+                        <SelectValue placeholder="Vyberte kategóriu" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat.id} value={cat.slug}>
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {selectedCategory && (
+                    <>
 
                   {/* Nadpis */}
                   <div className="space-y-3">
@@ -1031,21 +1038,22 @@ export default function AddAdPage() {
                     )}
                   </div>
 
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-12 text-base font-semibold"
-                    style={{ backgroundColor: '#2ECC71' }}
-                  >
-                    {loading ? 'Ukladám...' : 'Pridať inzerát'}
-                  </Button>
-                </>
-              )}
-            </form>
-          </Card>
+                      <Button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full h-12 text-base font-semibold"
+                        style={{ backgroundColor: '#2ECC71' }}
+                      >
+                        {loading ? 'Ukladám...' : 'Pridať inzerát'}
+                      </Button>
+                    </>
+                  )}
+                </form>
+              </Card>
+            </div>
+          </div>
         </div>
       </main>
-
     </>
   );
 }

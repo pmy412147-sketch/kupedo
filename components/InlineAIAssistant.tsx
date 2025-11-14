@@ -145,7 +145,7 @@ export function InlineAIAssistant({ formData, onSuggestion, userId }: InlineAIAs
   if (!formData.category_id) return null;
 
   return (
-    <Card className="p-4 bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200 sticky top-20 z-10">
+    <Card className="p-4 bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200">
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-emerald-600" />
