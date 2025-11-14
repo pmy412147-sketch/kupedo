@@ -69,9 +69,10 @@ export async function performEnhancedSearch(
 
   if (parsed.filters.roomCount !== undefined) {
     filteredAds = filteredAds.filter(ad => {
-      if (!ad.metadata) return false;
-
-      const metadata = ad.metadata;
+      const metadata = ad.metadata || {};
+      const title = (ad.title || '').toLowerCase();
+      const description = (ad.description || '').toLowerCase();
+      const combinedText = `${title} ${description}`;
 
       if (metadata.rooms !== undefined) {
         return metadata.rooms === parsed.filters.roomCount;
@@ -81,14 +82,11 @@ export async function performEnhancedSearch(
         return metadata.roomCount === parsed.filters.roomCount;
       }
 
-      const title = (ad.title || '').toLowerCase();
-      const description = (ad.description || '').toLowerCase();
-      const combinedText = `${title} ${description}`;
-
       const roomCount = parsed.filters.roomCount!;
       const patterns = [
         new RegExp(`\\b${roomCount}\\s*[-\\s]?\\s*izbov`, 'i'),
         new RegExp(`\\b${roomCount}\\s*izbov`, 'i'),
+        new RegExp(`\\b${roomCount}\\s*izb[^o]`, 'i'),
       ];
 
       if (roomCount === 1) {
@@ -96,7 +94,7 @@ export async function performEnhancedSearch(
       } else if (roomCount === 2) {
         patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i);
       } else if (roomCount === 3) {
-        patterns.push(/\btrojizbov/i);
+        patterns.push(/\btrojizbov/i, /\btrojizb/i);
       } else if (roomCount === 4) {
         patterns.push(/\bštvoriizbov/i);
       } else if (roomCount === 5) {
@@ -293,33 +291,11 @@ async function performFallbackSearch(
   if (parsed.filters.roomCount !== undefined) {
     console.log('[FallbackSearch] Filtering by room count:', parsed.filters.roomCount);
     filteredAds = filteredAds.filter(ad => {
-      if (!ad.metadata) {
-        const title = (ad.title || '').toLowerCase();
-        const description = (ad.description || '').toLowerCase();
-        const combinedText = `${title} ${description}`;
+      const metadata = ad.metadata || {};
+      const title = (ad.title || '').toLowerCase();
+      const description = (ad.description || '').toLowerCase();
+      const combinedText = `${title} ${description}`;
 
-        const roomCount = parsed.filters.roomCount!;
-        const patterns = [
-          new RegExp(`\\b${roomCount}\\s*[-\\s]?\\s*izbov`, 'i'),
-          new RegExp(`\\b${roomCount}\\s+izbov`, 'i'),
-        ];
-
-        if (roomCount === 1) {
-          patterns.push(/\bgarsónk/i, /\bjednoizbov/i);
-        } else if (roomCount === 2) {
-          patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i);
-        } else if (roomCount === 3) {
-          patterns.push(/\btrojizbov/i, /\btrojizb/i);
-        } else if (roomCount === 4) {
-          patterns.push(/\bštvoriizbov/i);
-        } else if (roomCount === 5) {
-          patterns.push(/\bpäťizbov/i);
-        }
-
-        return patterns.some(pattern => pattern.test(combinedText));
-      }
-
-      const metadata = ad.metadata;
       if (metadata.rooms !== undefined) {
         return metadata.rooms === parsed.filters.roomCount;
       }
@@ -327,7 +303,26 @@ async function performFallbackSearch(
         return metadata.roomCount === parsed.filters.roomCount;
       }
 
-      return false;
+      const roomCount = parsed.filters.roomCount!;
+      const patterns = [
+        new RegExp(`\\b${roomCount}\\s*[-\\s]?\\s*izbov`, 'i'),
+        new RegExp(`\\b${roomCount}\\s+izbov`, 'i'),
+        new RegExp(`\\b${roomCount}\\s*izb[^o]`, 'i'),
+      ];
+
+      if (roomCount === 1) {
+        patterns.push(/\bgarsónk/i, /\bjednoizbov/i);
+      } else if (roomCount === 2) {
+        patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i);
+      } else if (roomCount === 3) {
+        patterns.push(/\btrojizbov/i, /\btrojizb/i);
+      } else if (roomCount === 4) {
+        patterns.push(/\bštvoriizbov/i);
+      } else if (roomCount === 5) {
+        patterns.push(/\bpäťizbov/i);
+      }
+
+      return patterns.some(pattern => pattern.test(combinedText));
     });
     console.log('[FallbackSearch] After room count filter:', filteredAds.length, 'ads');
   }

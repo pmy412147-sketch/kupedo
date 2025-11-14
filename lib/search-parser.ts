@@ -24,6 +24,7 @@ const SLOVAK_STOP_WORDS = [
 const ROOM_COUNT_PATTERNS = [
   { pattern: /(\d+)\s*[-\s]?\s*izbov[ýáéíóúyě]/gi, type: 'numeric' },
   { pattern: /(\d+)\s+izbov/gi, type: 'numeric' },
+  { pattern: /(\d+)\s*izb[^o]/gi, type: 'numeric' },
   { pattern: /garsónk[aáu]/gi, rooms: 1 },
   { pattern: /dvojgarsónk[aáu]/gi, rooms: 2 },
   { pattern: /jednoizbov[ýáéíóúy]/gi, rooms: 1 },
@@ -35,10 +36,10 @@ const ROOM_COUNT_PATTERNS = [
 ];
 
 const PROPERTY_TYPE_PATTERNS = [
-  { pattern: /\bbyt\w*/gi, type: 'byt' },
+  { pattern: /\bb[ayáý]t\w*/gi, type: 'byt' },
   { pattern: /\bdom\w*/gi, type: 'dom' },
   { pattern: /\bpozemok\w*/gi, type: 'pozemok' },
-  { pattern: /\bgará[žz]\w*/gi, type: 'garž' },
+  { pattern: /\bgará[žz]\w*/gi, type: 'garáž' },
   { pattern: /\bchata\w*/gi, type: 'chata' },
   { pattern: /\bchalupa\w*/gi, type: 'chalupa' },
   { pattern: /\bapartmán\w*/gi, type: 'apartmán' },

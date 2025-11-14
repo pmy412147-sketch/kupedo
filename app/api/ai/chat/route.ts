@@ -179,7 +179,7 @@ function detectSearchIntent(message: string): { isSearch: boolean; query: string
   const lowerMessage = message.toLowerCase();
   const hasSearchIntent = searchKeywords.some(keyword => lowerMessage.includes(keyword));
 
-  const hasProductKeywords = /\b(byt|dom|auto|mobil|bicykel|noteboook|telefón|telefon|laptop|pc|chata|pozemok|garáž|garaz)\w*/i.test(message);
+  const hasProductKeywords = /\b(b[ay\u00e1\u00fd]t|dom|auto|mobil|bicykel|notebook|telef\u00f3n|telefon|laptop|pc|chata|pozemok|gar\u00e1\u017e|garaz|izbov|izb)\w*/i.test(message);
 
   if (!hasSearchIntent && !hasProductKeywords) {
     return { isSearch: false, query: null };
@@ -189,8 +189,8 @@ function detectSearchIntent(message: string): { isSearch: boolean; query: string
 
   let cleanQuery = message
     .replace(/^(ahoj|dobr[ýú] de[ňn]|zdravím|čau|nazdar|dobrý večer|dobré ráno|dobré popoludnie|hej|čaute|čaves)[,\s!]*/gi, '')
-    .replace(/\b(hľadám|hladam|nájdi|najdi|ukáž|ukaz|chcem|potrebujem|kúpiť|kupit|predať|predat|hľadaj|hladaj|ponúkni|ponukni|ukažte|ukazte|máš|mas|nájdeš|najdes)\b/gi, '')
-    .replace(/\b(mi|ma|ti|ta|si|sa|me)\b/gi, '')
+    .replace(/\b(hľadám|hladam|nájdi|najdi|ukáž|ukaz|chcem|potrebujem|kúpiť|kupit|predať|predat|hľadaj|hladaj|ponúkni|ponukni|ukažte|ukazte)\b/gi, '')
+    .replace(/\b(mi|ma|ti|ta)\b/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
 
