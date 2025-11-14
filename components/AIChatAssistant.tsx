@@ -127,7 +127,7 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
         setTimeout(() => {
           router.push(`/?search=${encodeURIComponent(data.searchQuery)}`);
           setIsOpen(false);
-        }, 1500);
+        }, 800);
       }
     } catch (error: any) {
       console.error('Error sending message:', error);

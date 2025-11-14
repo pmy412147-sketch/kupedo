@@ -57,18 +57,21 @@ export async function POST(req: NextRequest) {
     let response: string;
 
     try {
-      const promptWithSearch = searchResults && searchResults.length > 0
-        ? `${message}\n\nNašiel som ${searchResults.length} inzerátov, ktoré by ťa mohli zaujímať. Zobrazte sa vo výsledkoch.`
-        : message;
-
-      response = await chatWithHistory(
-        [
-          { role: 'user', content: systemContext },
-          { role: 'assistant', content: 'Rozumiem, som pripravený pomôcť.' },
-          ...chatHistory,
-        ],
-        promptWithSearch
-      );
+      // If search results found, provide a simple confirmation message
+      if (searchResults && searchResults.length > 0) {
+        response = `Našiel som ${searchResults.length} ${searchResults.length === 1 ? 'inzerát' : searchResults.length < 5 ? 'inzeráty' : 'inzerátov'} pre "${searchIntent.query}". Presmerujem ťa na výsledky...`;
+      } else if (searchIntent.isSearch && searchResults && searchResults.length === 0) {
+        response = `Bohužiaľ, nenašiel som žiadne inzeráty pre "${searchIntent.query}". Skús to s inými kľúčovými slovami alebo širšou kategóriou.`;
+      } else {
+        response = await chatWithHistory(
+          [
+            { role: 'user', content: systemContext },
+            { role: 'assistant', content: 'Rozumiem, som pripravený pomôcť.' },
+            ...chatHistory,
+          ],
+          message
+        );
+      }
     } catch (apiError: any) {
       if (apiError.status === 429 || apiError.message?.includes('preťažená')) {
         return NextResponse.json(
