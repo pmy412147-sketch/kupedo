@@ -195,16 +195,23 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
       </Card>
 
       {results.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-emerald-600" />
-              Podobné produkty ({results.length})
-            </h3>
-            <Button onClick={clearSearch} variant="outline" size="sm">
-              Nové vyhľadávanie
-            </Button>
-          </div>
+        <div ref={resultsRef} className="space-y-4 scroll-mt-20">
+          <Card className="p-4 bg-gradient-to-r from-emerald-500 to-blue-600 text-white">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">Našli sme {results.length} podobných produktov!</h3>
+                  <p className="text-sm text-emerald-50">Na základe AI analýzy vášho obrázka</p>
+                </div>
+              </div>
+              <Button onClick={clearSearch} variant="outline" size="sm" className="bg-white/20 border-white/30 hover:bg-white/30 text-white">
+                Nové vyhľadávanie
+              </Button>
+            </div>
+          </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.map((ad, index) => (
