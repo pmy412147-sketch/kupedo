@@ -17,6 +17,7 @@ import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, Char
 import { useRouter } from 'next/navigation';
 import { SearchWithSuggestions } from './SearchWithSuggestions';
 import { VoiceSearch } from './VoiceSearch';
+import { NotificationCenter } from './NotificationCenter';
 import { supabase } from '@/lib/supabase';
 
 export function Header() {
@@ -94,6 +95,8 @@ export function Header() {
             </div>
 
             <div className="flex items-center gap-2">
+              {user && <NotificationCenter />}
+
               <Button
                 variant="ghost"
                 size="icon"

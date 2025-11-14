@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
 import { ConsentBanner } from '@/components/ConsentBanner';
+import { MobileNav } from '@/components/MobileNav';
 import Script from 'next/script';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -38,6 +39,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <AuthProvider>
           {children}
+          <MobileNav />
           <Toaster />
           <ConsentBanner />
         </AuthProvider>
