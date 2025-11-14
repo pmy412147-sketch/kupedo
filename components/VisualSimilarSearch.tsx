@@ -61,12 +61,29 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
       const analyzeData = await analyzeResponse.json();
       setAnalysis(analyzeData.analysis);
 
+      // Extrahovať kľúčové slová z analýzy
+      let searchTerm = analyzeData.analysis;
+
+      // Hľadať kľúčové slová v texte
+      const keywordsMatch = analyzeData.analysis.match(/Kľúčové slová:\s*(.+?)(?:\n|$)/i);
+      if (keywordsMatch) {
+        // Použiť prvé 2-3 kľúčové slová
+        const keywords = keywordsMatch[1].split(',').slice(0, 3).join(' ').trim();
+        searchTerm = keywords;
+      } else {
+        // Skúsiť nájsť značku/model v prvom riadku
+        const firstLine = analyzeData.analysis.split('\n')[0];
+        if (firstLine.includes('BMW') || firstLine.includes('iPhone') || firstLine.includes(':')) {
+          searchTerm = firstLine.replace(/Popis:\s*/i, '').substring(0, 50);
+        }
+      }
+
       // Presmerovať na hlavnú stránku s výsledkami vyhľadávania
-      toast.success(`Analyzované: ${analyzeData.analysis}`);
+      toast.success(`Vyhľadávam: ${searchTerm}`);
 
       // Krátka pauza aby používateľ videl toast
       setTimeout(() => {
-        router.push(`/?search=${encodeURIComponent(analyzeData.analysis)}`);
+        router.push(`/?search=${encodeURIComponent(searchTerm)}`);
       }, 1000);
     } catch (error) {
       console.error('Error in visual search:', error);
