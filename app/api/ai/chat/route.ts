@@ -38,14 +38,39 @@ export async function POST(req: NextRequest) {
     if (searchIntent.isSearch && searchIntent.query) {
       try {
         const searchTerm = searchIntent.query.toLowerCase().trim();
-        const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+        let searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+
+        // Normalizácia funkcia pre slovenčinu
+        const normalizeText = (text: string) => {
+          return text
+            .toLowerCase()
+            // Normalizuj slovenské tvary
+            .replace(/izbov[ýáéíóúy]/gi, 'izbov')
+            .replace(/bytov[ýáéíóúy]/gi, 'bytov')
+            .replace(/domov[ýáéíóúy]/gi, 'domov')
+            // Odstráň pomlčky medzi číslami a slovami
+            .replace(/(\d+)-izbov/gi, '$1 izbov')
+            .replace(/(\d+)-bytov/gi, '$1 bytov');
+        };
+
+        // Normalizuj aj search words
+        searchWords = searchWords.map(word => normalizeText(word));
+
+        // Odstráň veľké čísla (ceny) zo search words - tie sú v samostatnom poli
+        searchWords = searchWords.filter(word => {
+          const num = parseInt(word);
+          return isNaN(num) || num < 1000; // Ponechaj malé čísla (napr. "3" pre 3-izbový)
+        });
+
+        console.log('[AI Chat Search] Original query:', searchIntent.query);
+        console.log('[AI Chat Search] Normalized search words:', searchWords);
 
         if (searchWords.length === 1) {
           // Jedno slovo - použiť OR vyhľadávanie
           const { data: ads, error } = await supabase
             .from('ads')
             .select('*')
-            .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
+            .or(`title.ilike.%${searchWords[0]}%,description.ilike.%${searchWords[0]}%,location.ilike.%${searchWords[0]}%`)
             .eq('status', 'active')
             .limit(20);
 
@@ -54,6 +79,7 @@ export async function POST(req: NextRequest) {
             searchResults = [];
           } else {
             searchResults = ads || [];
+            console.log('[AI Chat Search] Found', searchResults.length, 'ads with single word search');
           }
         } else {
           // Viac slov - získať všetky aktívne inzeráty a filtrovať lokálne
@@ -61,30 +87,27 @@ export async function POST(req: NextRequest) {
             .from('ads')
             .select('*')
             .eq('status', 'active')
-            .limit(200); // Zvýšiť limit pre lepšie výsledky
+            .limit(200);
 
           if (error) {
             console.error('Error searching ads:', error);
             searchResults = [];
           } else if (allAds) {
-            // Normalizácia funkcia pre slovenčinu
-            const normalizeText = (text: string) => {
-              return text
-                .toLowerCase()
-                // Normalizuj slovenské tvary
-                .replace(/izbov[ýáéíóúy]/gi, 'izbov')
-                .replace(/bytov[ýáéíóúy]/gi, 'bytov')
-                .replace(/domov[ýáéíóúy]/gi, 'domov')
-                // Odstráň pomlčky medzi číslami a slovami
-                .replace(/(\d+)-izbov/gi, '$1 izbov')
-                .replace(/(\d+)-bytov/gi, '$1 bytov');
-            };
+            console.log('[AI Chat Search] Filtering', allAds.length, 'ads');
 
             // Filtrovať - každý inzerát musí obsahovať všetky hľadané slová
             searchResults = allAds.filter(ad => {
               const searchableText = normalizeText(`${ad.title} ${ad.description} ${ad.location}`);
-              return searchWords.every(word => searchableText.includes(word));
-            }).slice(0, 20); // Vrátiť max 20 výsledkov
+              const matches = searchWords.every(word => searchableText.includes(word));
+
+              if (matches) {
+                console.log('[AI Chat Search] Match found:', ad.title);
+              }
+
+              return matches;
+            }).slice(0, 20);
+
+            console.log('[AI Chat Search] Final results:', searchResults.length, 'ads');
           } else {
             searchResults = [];
           }
