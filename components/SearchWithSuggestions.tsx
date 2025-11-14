@@ -2,10 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
-import { Search, TrendingUp, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Search, TrendingUp, Clock, Camera, X, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { VoiceSearch } from './VoiceSearch';
+import { Card } from '@/components/ui/card';
+import { toast } from 'sonner';
 
 interface SearchSuggestion {
   title: string;
@@ -28,7 +31,11 @@ export function SearchWithSuggestions({
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const [showCamera, setShowCamera] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -129,6 +136,67 @@ export function SearchWithSuggestions({
     handleSearch(suggestion.title);
   };
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Prosím nahrajte obrázok');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Obrázok je príliš veľký. Maximum je 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const imageData = reader.result as string;
+      setPreview(imageData);
+      await analyzeAndSearch(imageData);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const analyzeAndSearch = async (imageData: string) => {
+    setAnalyzing(true);
+
+    try {
+      const analyzeResponse = await fetch('/api/ai/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: imageData,
+          userId: 'guest',
+        }),
+      });
+
+      if (!analyzeResponse.ok) {
+        throw new Error('Nepodarilo sa analyzovať obrázok');
+      }
+
+      const analyzeData = await analyzeResponse.json();
+      router.push(`/?visual=true&analysis=${encodeURIComponent(analyzeData.analysis)}`);
+
+      toast.success('Obrázok bol analyzovaný!');
+      setShowCamera(false);
+      setPreview(null);
+    } catch (error) {
+      console.error('Error analyzing image:', error);
+      toast.error('Nepodarilo sa analyzovať obrázok');
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const clearImage = () => {
+    setPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
       <form onSubmit={handleSubmit}>
@@ -144,6 +212,16 @@ export function SearchWithSuggestions({
               onFocus={() => setShowSuggestions(true)}
             />
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={() => setShowCamera(!showCamera)}
+            className="relative"
+            title="Vyhľadať podľa fotky"
+          >
+            <Camera className="h-4 w-4" />
+          </Button>
           <VoiceSearch
             onSearch={(voiceQuery) => {
               setQuery(voiceQuery);
@@ -181,6 +259,77 @@ export function SearchWithSuggestions({
             ))}
           </div>
         </div>
+      )}
+
+      {showCamera && (
+        <Card className="absolute z-50 w-full mt-2 p-4 shadow-lg">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-sm">Vyhľadávanie podľa fotky</h3>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setShowCamera(false);
+                  clearImage();
+                }}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {!preview ? (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full"
+                  style={{ backgroundColor: '#10b981' }}
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Vybrať fotku
+                </Button>
+
+                <p className="text-xs text-gray-500 text-center">
+                  Nahrajte fotku produktu a AI nájde podobné inzeráty
+                </p>
+              </>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative">
+                  <img
+                    src={preview}
+                    alt="Preview"
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <Button
+                    onClick={clearImage}
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    disabled={analyzing}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {analyzing && (
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                    <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                    <span>Analyzujem a hľadám podobné produkty...</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </Card>
       )}
     </div>
   );

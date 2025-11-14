@@ -1,12 +1,21 @@
-import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { createClient as createSupabaseClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://pgktuyehfwwsjqbvndjs.supabase.co';
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBna3R1eWVoZnd3c2pxYnZuZGpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MTc4MDAsImV4cCI6MjA3Nzk5MzgwMH0.xFC-JqLUFlpvugPdZNaEGDKC_Tivd56uDcwy43ki5bQ';
 
-export const supabase = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+let supabaseInstance: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  if (!supabaseInstance) {
+    supabaseInstance = createSupabaseClient(supabaseUrl, supabaseAnonKey);
+  }
+  return supabaseInstance;
+}
+
+export const supabase = getSupabase();
 
 export function createClient() {
-  return createSupabaseClient(supabaseUrl, supabaseAnonKey);
+  return getSupabase();
 }
 
 export type Profile = {

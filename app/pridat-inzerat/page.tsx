@@ -23,7 +23,7 @@ import { X, Upload, Sparkles } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { getCategoryFields } from '@/lib/category-fields';
 import { CategorySpecificFields } from '@/components/CategorySpecificFields';
-import { AIDescriptionGenerator } from '@/components/AIDescriptionGenerator';
+import { InlineAIAssistant } from '@/components/InlineAIAssistant';
 
 export default function AddAdPage() {
   const { user } = useAuth();
@@ -32,7 +32,6 @@ export default function AddAdPage() {
   const [images, setImages] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [showAIGenerator, setShowAIGenerator] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -388,28 +387,22 @@ export default function AddAdPage() {
               {selectedCategory && (
                 <>
 
-                  {/* AI Generator Button */}
-                  <Card className="p-4 bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-emerald-950 dark:to-blue-950 border-emerald-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="font-semibold flex items-center gap-2 mb-1">
-                          <Sparkles className="h-5 w-5 text-emerald-600" />
-                          Pomôcť s AI
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Nechajte AI vytvoriť profesionálny popis za vás
-                        </p>
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={() => setShowAIGenerator(true)}
-                        style={{ backgroundColor: '#10b981' }}
-                      >
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Spustiť
-                      </Button>
-                    </div>
-                  </Card>
+                  {/* AI Assistant */}
+                  {user && (
+                    <InlineAIAssistant
+                      formData={{
+                        title: formData.title,
+                        description: formData.description,
+                        price: formData.price,
+                        category_id: formData.category_id,
+                        images: previews,
+                      }}
+                      onSuggestion={(field, value) => {
+                        setFormData({ ...formData, [field]: value });
+                      }}
+                      userId={user.id}
+                    />
+                  )}
 
                   {/* Nadpis */}
                   <div className="space-y-3">
@@ -1053,22 +1046,6 @@ export default function AddAdPage() {
         </div>
       </main>
 
-      {user && (
-        <AIDescriptionGenerator
-          open={showAIGenerator}
-          onClose={() => setShowAIGenerator(false)}
-          onGenerated={(description, title) => {
-            setFormData({
-              ...formData,
-              description,
-              title: title || formData.title,
-            });
-            setShowAIGenerator(false);
-          }}
-          category={selectedCategory}
-          userId={user.id}
-        />
-      )}
     </>
   );
 }

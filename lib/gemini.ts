@@ -1,12 +1,23 @@
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 
-const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+function getApiKey(): string {
+  const apiKey = process.env.GOOGLE_GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-if (!apiKey) {
-  throw new Error('GOOGLE_GEMINI_API_KEY is not set in environment variables');
+  if (!apiKey) {
+    throw new Error('GOOGLE_GEMINI_API_KEY or NEXT_PUBLIC_GEMINI_API_KEY is not set in environment variables');
+  }
+
+  return apiKey;
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+let genAIInstance: GoogleGenerativeAI | null = null;
+
+function getGenAI(): GoogleGenerativeAI {
+  if (!genAIInstance) {
+    genAIInstance = new GoogleGenerativeAI(getApiKey());
+  }
+  return genAIInstance;
+}
 
 export interface GeminiConfig {
   temperature?: number;
@@ -24,6 +35,7 @@ const defaultConfig: GeminiConfig = {
 
 export function getGeminiModel(modelName: string = 'gemini-2.0-flash-exp', config: GeminiConfig = {}): GenerativeModel {
   const mergedConfig = { ...defaultConfig, ...config };
+  const genAI = getGenAI();
 
   return genAI.getGenerativeModel({
     model: modelName,
