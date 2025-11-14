@@ -269,6 +269,12 @@ export default function AdDetailScreen({ route, navigation }: any) {
                 <Text style={styles.mainActionButtonText}>💬 Kontaktovať predajcu</Text>
               </TouchableOpacity>
 
+              {ad.phone && (
+                <TouchableOpacity style={styles.callActionButton} onPress={handleCall}>
+                  <Text style={styles.callActionButtonText}>📞 Zavolať</Text>
+                </TouchableOpacity>
+              )}
+
               <TouchableOpacity style={styles.favoriteActionButton} onPress={toggleFavorite}>
                 <Text style={styles.favoriteActionButtonText}>
                   {isFavorite ? '❤️ Pridať do obľúbených' : '🤍 Pridať do obľúbených'}
@@ -514,6 +520,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   mainActionButtonText: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+    color: colors.white,
+  },
+  callActionButton: {
+    backgroundColor: colors.status.info,
+    borderRadius: borderRadius.lg,
+    paddingVertical: spacing.sm + 2,
+    alignItems: 'center',
+  },
+  callActionButtonText: {
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.bold,
     color: colors.white,
