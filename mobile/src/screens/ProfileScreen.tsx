@@ -23,6 +23,7 @@ export default function ProfileScreen({ navigation, route }: any) {
 
   const [profile, setProfile] = useState<any>(null);
   const [userAds, setUserAds] = useState<Ad[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [coinBalance, setCoinBalance] = useState(0);
   const [activeTab, setActiveTab] = useState<'ads' | 'reviews'>('ads');
@@ -30,6 +31,7 @@ export default function ProfileScreen({ navigation, route }: any) {
   useEffect(() => {
     if (profileId) {
       fetchProfileData();
+      fetchReviews();
       if (isOwnProfile) {
         fetchCoinBalance();
       }
@@ -47,6 +49,21 @@ export default function ProfileScreen({ navigation, route }: any) {
 
     if (data) {
       setCoinBalance(data.balance);
+    }
+  };
+
+  const fetchReviews = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
+        .eq('reviewed_user_id', profileId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      if (data) setReviews(data);
+    } catch (error) {
+      console.error('Error fetching reviews:', error);
     }
   };
 
@@ -383,10 +400,42 @@ export default function ProfileScreen({ navigation, route }: any) {
 
       {activeTab === 'reviews' && (
         <View style={styles.tabContent}>
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>⭐</Text>
-            <Text style={styles.emptyText}>Žiadne recenzie</Text>
-          </View>
+          {reviews.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyIcon}>⭐</Text>
+              <Text style={styles.emptyText}>Žiadne recenzie</Text>
+            </View>
+          ) : (
+            reviews.map((review) => (
+              <View key={review.id} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <View style={styles.reviewAvatar}>
+                    <Text style={styles.reviewAvatarText}>
+                      {review.reviewer?.full_name?.[0] || '?'}
+                    </Text>
+                  </View>
+                  <View style={styles.reviewInfo}>
+                    <Text style={styles.reviewerName}>
+                      {review.reviewer?.full_name || 'Používateľ'}
+                    </Text>
+                    <View style={styles.reviewRating}>
+                      {[...Array(5)].map((_, i) => (
+                        <Text key={i} style={styles.star}>
+                          {i < review.rating ? '⭐' : '☆'}
+                        </Text>
+                      ))}
+                    </View>
+                  </View>
+                  <Text style={styles.reviewDate}>
+                    {new Date(review.created_at).toLocaleDateString('sk-SK')}
+                  </Text>
+                </View>
+                {review.comment && (
+                  <Text style={styles.reviewComment}>{review.comment}</Text>
+                )}
+              </View>
+            ))
+          )}
         </View>
       )}
 
@@ -620,6 +669,58 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: typography.fontSize.base,
     color: colors.text.secondary,
+  },
+  reviewCard: {
+    backgroundColor: colors.white,
+    padding: spacing.md,
+    borderRadius: borderRadius.lg,
+    marginBottom: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border.light,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  reviewAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.emerald[500],
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: spacing.sm,
+  },
+  reviewAvatarText: {
+    color: colors.white,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.bold,
+  },
+  reviewInfo: {
+    flex: 1,
+  },
+  reviewerName: {
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
+    color: colors.text.primary,
+    marginBottom: spacing.xs,
+  },
+  reviewRating: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  star: {
+    fontSize: typography.fontSize.sm,
+  },
+  reviewDate: {
+    fontSize: typography.fontSize.xs,
+    color: colors.text.secondary,
+  },
+  reviewComment: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
+    lineHeight: 20,
   },
   adsGrid: {
     gap: spacing.md,
