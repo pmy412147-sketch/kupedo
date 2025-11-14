@@ -12,6 +12,7 @@ import {
   Share,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
@@ -186,6 +187,7 @@ export default function AdDetailScreen({ route, navigation }: any) {
   }
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
@@ -396,13 +398,17 @@ export default function AdDetailScreen({ route, navigation }: any) {
         </>
       )}
     </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  container: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,

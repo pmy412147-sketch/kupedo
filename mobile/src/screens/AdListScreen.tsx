@@ -11,6 +11,7 @@ import {
   StatusBar,
   Modal,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { categories } from '../constants/categories';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';

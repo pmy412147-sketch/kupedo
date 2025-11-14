@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -165,6 +166,7 @@ export default function ProfileScreen({ navigation, route }: any) {
   }
 
   return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
     <ScrollView style={styles.container}>
       {/* Profile Header Card */}
       <View style={styles.profileCard}>
@@ -390,13 +392,17 @@ export default function ProfileScreen({ navigation, route }: any) {
 
       <View style={{ height: 100 }} />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: colors.background.secondary,
+  },
+  container: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
