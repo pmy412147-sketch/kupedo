@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    // Use Gemini for vision analysis
-    const { analyzeImage } = await import('@/lib/gemini');
+    // Use Claude for vision analysis
+    const { analyzeImage } = await import('@/lib/claude');
 
     const prompt = `
 Analyzuj túto fotografiu produktu pre online marketplace.

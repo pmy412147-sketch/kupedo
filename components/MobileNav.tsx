@@ -43,13 +43,13 @@ export function MobileNav() {
   const loadUnreadCount = async () => {
     if (!user) return;
 
-    const { data } = await supabase
+    const { count } = await supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
       .eq('receiver_id', user.id)
-      .eq('read', false);
+      .eq('is_read', false);
 
-    setUnreadCount(data?.length || 0);
+    setUnreadCount(count || 0);
   };
 
   if (!user) return null;

@@ -160,6 +160,73 @@ export async function chatWithHistory(
   }
 }
 
+export async function analyzeImage(
+  imageData: string,
+  prompt: string,
+  config?: ClaudeConfig
+): Promise<string> {
+  try {
+    const anthropic = getAnthropic();
+    const mergedConfig = { ...defaultConfig, ...config };
+
+    // Determine if imageData is a URL or base64
+    let imageSource: any;
+
+    if (imageData.startsWith('http://') || imageData.startsWith('https://')) {
+      // It's a URL
+      imageSource = {
+        type: 'image',
+        source: {
+          type: 'url',
+          url: imageData,
+        },
+      };
+    } else {
+      // It's base64 data
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      const mediaType = imageData.match(/^data:image\/(\w+);base64,/)?.[1] || 'jpeg';
+
+      imageSource = {
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: `image/${mediaType}`,
+          data: base64Data,
+        },
+      };
+    }
+
+    const message = await anthropic.messages.create({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: mergedConfig.max_tokens || 1024,
+      temperature: mergedConfig.temperature,
+      top_p: mergedConfig.top_p,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            imageSource,
+            {
+              type: 'text',
+              text: prompt,
+            },
+          ],
+        },
+      ],
+    });
+
+    const content = message.content[0];
+    if (content.type === 'text') {
+      return content.text;
+    }
+
+    throw new Error('Unexpected response format from Claude');
+  } catch (error) {
+    console.error('Error analyzing image with Claude:', error);
+    throw error;
+  }
+}
+
 export const claudePrompts = {
   generateAdDescription: (productInfo: any) => `
 Napíš profesionálny, presvedčivý a detailný popis inzerátu pre slovenský online marketplace v slovenčine.
