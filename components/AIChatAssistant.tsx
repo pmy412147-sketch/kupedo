@@ -166,7 +166,7 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 rounded-full h-14 w-14 shadow-lg z-50"
+        className="fixed bottom-20 right-4 md:bottom-6 md:right-6 rounded-full h-14 w-14 shadow-lg z-50"
         style={{ backgroundColor: '#10b981' }}
       >
         <MessageCircle className="h-6 w-6" />
@@ -176,17 +176,17 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
 
   return (
     <Card
-      className={`fixed bottom-6 right-6 z-50 shadow-2xl transition-all duration-300 ${
-        isMinimized ? 'w-80 h-16' : 'w-96 h-[600px]'
+      className={`fixed bottom-20 right-2 md:bottom-6 md:right-6 z-50 shadow-2xl transition-all duration-300 ${
+        isMinimized ? 'w-[calc(100vw-1rem)] md:w-80 h-16' : 'w-[calc(100vw-1rem)] md:w-96 h-[500px] md:h-[600px]'
       }`}
     >
       <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-t-lg">
+        <div className="flex items-center justify-between p-3 md:p-4 border-b bg-gradient-to-r from-emerald-600 to-blue-600 text-white rounded-t-lg">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5" />
+            <Sparkles className="h-4 w-4 md:h-5 md:w-5" />
             <div>
-              <h3 className="font-semibold">AI Asistent</h3>
-              <Badge variant="secondary" className="text-xs">
+              <h3 className="font-semibold text-sm md:text-base">AI Asistent</h3>
+              <Badge variant="secondary" className="text-[10px] md:text-xs px-1.5 py-0">
                 Online
               </Badge>
             </div>
