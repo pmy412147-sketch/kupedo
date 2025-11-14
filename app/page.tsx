@@ -17,7 +17,6 @@ import { Search, MapPin, Chrome as Home, SlidersHorizontal, Users, Package, Shie
 import { AdSenseInFeed } from '@/components/AdSenseInFeed';
 import { AIChatAssistant } from '@/components/AIChatAssistant';
 import { AIRecommendations } from '@/components/AIRecommendations';
-import { SearchWithSuggestions } from '@/components/SearchWithSuggestions';
 
 
 export default function HomePage() {
@@ -102,17 +101,57 @@ export default function HomePage() {
     fetchAds();
   }, [searchParams]);
 
-  const handleHeroSearch = () => {
-    const params = new URLSearchParams();
+  const handleHeroSearch = async () => {
+    setLoading(true);
+    try {
+      let query = supabase
+        .from('ads')
+        .select('*')
+        .eq('status', 'active');
 
-    if (heroFilters.searchQuery.trim()) {
-      params.set('search', heroFilters.searchQuery.trim());
-    }
+      if (heroFilters.searchQuery.trim()) {
+        const searchTerm = heroFilters.searchQuery.trim().toLowerCase();
+        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+      }
 
-    if (heroFilters.category !== 'vsetky') {
-      router.push(`/kategoria/${heroFilters.category}?${params.toString()}`);
-    } else {
-      router.push(`/?${params.toString()}`);
+      if (heroFilters.category && heroFilters.category !== 'vsetky') {
+        query = query.eq('category_id', heroFilters.category);
+      }
+
+      if (heroFilters.postalCode.trim()) {
+        query = query.or(`postal_code.ilike.%${heroFilters.postalCode}%,location.ilike.%${heroFilters.postalCode}%`);
+      }
+
+      if (heroFilters.priceFrom) {
+        const priceFrom = parseFloat(heroFilters.priceFrom);
+        if (!isNaN(priceFrom)) {
+          query = query.gte('price', priceFrom);
+        }
+      }
+
+      if (heroFilters.priceTo) {
+        const priceTo = parseFloat(heroFilters.priceTo);
+        if (!isNaN(priceTo)) {
+          query = query.lte('price', priceTo);
+        }
+      }
+
+      query = query
+        .order('is_boosted', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error in hero search:', error);
+      } else {
+        setAds(data || []);
+      }
+    } catch (error) {
+      console.error('Error in hero search:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -156,7 +195,13 @@ export default function HomePage() {
               <div className="hidden lg:block bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-5" style={{ width: '130%', maxWidth: '850px' }}>
                 <div className="mb-3">
                   <label className="text-xs text-gray-700 mb-1 block font-semibold">Čo hľadáte?</label>
-                  <SearchWithSuggestions placeholder="napr. iPhone 15, byt v Bratislave..." className="w-full" />
+                  <Input
+                    placeholder="napr. iPhone 15, byt v Bratislave..."
+                    value={heroFilters.searchQuery}
+                    onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
+                    onKeyDown={(e) => e.key === 'Enter' && handleHeroSearch()}
+                    className="h-11 text-sm text-gray-900"
+                  />
                 </div>
                 <div className="grid grid-cols-5 gap-2 mb-3">
                   <div>
@@ -257,7 +302,13 @@ export default function HomePage() {
               <div className="lg:hidden bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4">
                 <div className="mb-3">
                   <label className="text-xs text-gray-700 mb-1 block font-semibold">Čo hľadáte?</label>
-                  <SearchWithSuggestions placeholder="napr. iPhone, byt..." className="w-full" />
+                  <Input
+                    placeholder="napr. iPhone, byt..."
+                    value={heroFilters.searchQuery}
+                    onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
+                    onKeyDown={(e) => e.key === 'Enter' && handleHeroSearch()}
+                    className="h-10 text-sm text-gray-900"
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
