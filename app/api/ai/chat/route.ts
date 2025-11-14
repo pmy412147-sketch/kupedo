@@ -37,17 +37,23 @@ export async function POST(req: NextRequest) {
 
     if (searchIntent.isSearch && searchIntent.query) {
       try {
-        const { data: ads } = await supabase
-          .from('advertisements')
+        const searchTerm = searchIntent.query.toLowerCase().trim();
+        const { data: ads, error } = await supabase
+          .from('ads')
           .select('*')
-          .ilike('title', `%${searchIntent.query}%`)
-          .or(`description.ilike.%${searchIntent.query}%`)
+          .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
           .eq('status', 'active')
-          .limit(6);
+          .limit(20);
 
-        searchResults = ads || [];
+        if (error) {
+          console.error('Error searching ads:', error);
+          searchResults = [];
+        } else {
+          searchResults = ads || [];
+        }
       } catch (error) {
         console.error('Error searching ads:', error);
+        searchResults = [];
       }
     }
 
