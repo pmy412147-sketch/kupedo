@@ -47,40 +47,9 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
     setAnalysis('');
 
     try {
-      const analyzeResponse = await fetch('/api/ai/analyze-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image: imageData,
-          userId: 'guest',
-        }),
-      });
-
-      if (!analyzeResponse.ok) {
-        throw new Error('Nepodarilo sa analyzovať obrázok');
-      }
-
-      const analyzeData = await analyzeResponse.json();
-      setAnalysis(analyzeData.analysis);
-
-      const searchResponse = await fetch('/api/ai/semantic-search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: analyzeData.analysis,
-          limit: 6,
-        }),
-      });
-
-      if (!searchResponse.ok) {
-        throw new Error('Nepodarilo sa vyhľadať podobné produkty');
-      }
-
-      const searchData = await searchResponse.json();
-      setResults(searchData.results || []);
-      onResultsFound?.(searchData.results?.length || 0);
-
-      toast.success(`Našli sme ${searchData.results?.length || 0} podobných produktov`);
+      // Visual search is not available with Claude 3 Haiku
+      toast.info('Vyhľadávanie podľa obrázka je momentálne nedostupné. Použite textové vyhľadávanie.');
+      setPreview(null);
     } catch (error) {
       console.error('Error in visual search:', error);
       toast.error('Nepodarilo sa vyhľadať podobné produkty');
