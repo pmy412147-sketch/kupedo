@@ -144,10 +144,10 @@ export default function AIFeaturesPage() {
             <span className="text-sm font-semibold text-emerald-700">Powered by Google Gemini AI</span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 px-4">
             AI Funkcie Kupado.sk
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-base md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
             Najmodernejšia AI marketplace platforma v Európe. Inteligentné funkcie, ktoré vám pomôžu predávať rýchlejšie a efektívnejšie.
           </p>
         </div>
@@ -162,30 +162,30 @@ export default function AIFeaturesPage() {
           </TabsList>
 
           <TabsContent value="overview" className="space-y-8">
-            <Card className="p-8 bg-gradient-to-r from-emerald-500 to-blue-600 text-white">
+            <Card className="p-4 md:p-8 bg-gradient-to-r from-emerald-500 to-blue-600 text-white">
               <div className="flex items-start justify-between">
-                <div className="space-y-4">
-                  <h2 className="text-3xl font-bold">15+ AI Funkcií</h2>
-                  <p className="text-lg text-emerald-50 max-w-2xl">
+                <div className="space-y-3 md:space-y-4">
+                  <h2 className="text-2xl md:text-3xl font-bold">15+ AI Funkcií</h2>
+                  <p className="text-sm md:text-lg text-emerald-50 max-w-2xl">
                     Využívame najnovšie technológie umelej inteligencie od Google pre poskytnutie
                     najlepšieho marketplace zážitku. Každá funkcia je navrhnutá tak, aby vám ušetrila čas a zvýšila úspešnosť predaja.
                   </p>
-                  <div className="flex items-center gap-6 pt-4">
+                  <div className="flex items-center gap-3 md:gap-6 pt-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">99%</div>
-                      <div className="text-sm text-emerald-100">Presnosť AI</div>
+                      <div className="text-2xl md:text-3xl font-bold">99%</div>
+                      <div className="text-xs md:text-sm text-emerald-100">Presnosť<br className="md:hidden" /> AI</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">&lt;1s</div>
-                      <div className="text-sm text-emerald-100">Odozva</div>
+                      <div className="text-2xl md:text-3xl font-bold">&lt;1s</div>
+                      <div className="text-xs md:text-sm text-emerald-100">Odozva</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">24/7</div>
-                      <div className="text-sm text-emerald-100">Dostupnosť</div>
+                      <div className="text-2xl md:text-3xl font-bold">24/7</div>
+                      <div className="text-xs md:text-sm text-emerald-100">Dostupnosť</div>
                     </div>
                   </div>
                 </div>
-                <Brain className="h-32 w-32 opacity-20" />
+                <Brain className="h-16 w-16 md:h-32 md:w-32 opacity-20" />
               </div>
             </Card>
 
