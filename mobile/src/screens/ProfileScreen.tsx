@@ -276,6 +276,36 @@ export default function ProfileScreen({ navigation, route }: any) {
             <Text style={styles.statSubtext}>dokončené</Text>
           </View>
         </View>
+
+        {/* Logout Button - Only show if own profile */}
+        {isOwnProfile && (
+          <TouchableOpacity
+            style={styles.logoutButton}
+            onPress={async () => {
+              Alert.alert(
+                'Odhlásiť sa',
+                'Naozaj sa chcete odhlásiť?',
+                [
+                  { text: 'Zrušiť', style: 'cancel' },
+                  {
+                    text: 'Odhlásiť',
+                    style: 'destructive',
+                    onPress: async () => {
+                      try {
+                        await signOut();
+                      } catch (error) {
+                        console.error('Logout error:', error);
+                        Alert.alert('Chyba', 'Nepodarilo sa odhlásiť');
+                      }
+                    },
+                  },
+                ],
+              );
+            }}
+          >
+            <Text style={styles.logoutButtonText}>🚪 Odhlásiť sa</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Tabs */}
@@ -503,6 +533,24 @@ const styles = StyleSheet.create({
     backgroundColor: colors.emerald[50],
     borderWidth: 2,
     borderColor: colors.emerald[200],
+  },
+  logoutButton: {
+    backgroundColor: colors.status.error,
+    marginTop: spacing.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: borderRadius.lg,
+    alignItems: 'center',
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoutButtonText: {
+    color: colors.white,
+    fontSize: typography.fontSize.base,
+    fontWeight: typography.fontWeight.semibold,
   },
   statHeader: {
     flexDirection: 'row',
