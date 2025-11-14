@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useEffect, useRef } from 'react';
 import { setupNotificationListeners } from './src/services/notificationService';
 import HomeScreen from './src/screens/HomeScreen';
@@ -235,15 +235,21 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <NavigationContainer ref={navigationRef}>
-        <AppNavigator />
-        <StatusBar style="auto" />
-      </NavigationContainer>
+      <SafeAreaView style={styles.safeArea}>
+        <NavigationContainer ref={navigationRef}>
+          <AppNavigator />
+          <StatusBar style="dark" />
+        </NavigationContainer>
+      </SafeAreaView>
     </AuthProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.white,
+  },
   addButton: {
     width: 56,
     height: 56,
