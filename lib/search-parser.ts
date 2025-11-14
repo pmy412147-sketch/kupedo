@@ -23,11 +23,13 @@ const SLOVAK_STOP_WORDS = [
 
 const ROOM_COUNT_PATTERNS = [
   { pattern: /(\d+)\s*[-\s]?\s*izbov[ýáéíóúyě]/gi, type: 'numeric' },
+  { pattern: /(\d+)\s+izbov/gi, type: 'numeric' },
   { pattern: /garsónk[aáu]/gi, rooms: 1 },
   { pattern: /dvojgarsónk[aáu]/gi, rooms: 2 },
   { pattern: /jednoizbov[ýáéíóúy]/gi, rooms: 1 },
   { pattern: /dvojizbov[ýáéíóúy]/gi, rooms: 2 },
   { pattern: /trojizbov[ýáéíóúy]/gi, rooms: 3 },
+  { pattern: /trojizb/gi, rooms: 3 },
   { pattern: /štvoriizbov[ýáéíóúy]/gi, rooms: 4 },
   { pattern: /päťizbov[ýáéíóúy]/gi, rooms: 5 },
 ];
@@ -134,23 +136,25 @@ function extractPriceRange(query: string): { min?: number; max?: number } {
   const priceRange: { min?: number; max?: number } = {};
 
   const maxPatterns = [
-    /do\s+(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi,
-    /max\s+(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi,
-    /maximálne\s+(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi,
+    /do\s+(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi,
+    /do\s+(\d{6,})\s*(?:eur|€)?/gi,
+    /max\s+(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi,
+    /maximálne\s+(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi,
   ];
 
   const minPatterns = [
-    /od\s+(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi,
-    /min\s+(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi,
-    /minimálne\s+(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi,
+    /od\s+(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi,
+    /od\s+(\d{6,})\s*(?:eur|€)?/gi,
+    /min\s+(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi,
+    /minimálne\s+(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi,
   ];
 
-  const rangePattern = /(\d+)\s*(\d{3})?\s*[-až]\s*(\d+)\s*(\d{3})?\s*(?:eur|€)?/gi;
+  const rangePattern = /(\d+)\s*(\d{3})?\s*(\d{3})?\s*[-až]\s*(\d+)\s*(\d{3})?\s*(\d{3})?\s*(?:eur|€)?/gi;
 
   const rangeMatch = rangePattern.exec(query);
   if (rangeMatch) {
-    const min = parseInt(rangeMatch[1] + (rangeMatch[2] || ''));
-    const max = parseInt(rangeMatch[3] + (rangeMatch[4] || ''));
+    const min = parseInt(rangeMatch[1] + (rangeMatch[2] || '') + (rangeMatch[3] || ''));
+    const max = parseInt(rangeMatch[4] + (rangeMatch[5] || '') + (rangeMatch[6] || ''));
     if (min > 0) priceRange.min = min;
     if (max > 0) priceRange.max = max;
     return priceRange;
@@ -159,7 +163,12 @@ function extractPriceRange(query: string): { min?: number; max?: number } {
   for (const pattern of maxPatterns) {
     const match = pattern.exec(query);
     if (match) {
-      const price = parseInt(match[1] + (match[2] || ''));
+      let price: number;
+      if (match[1].length >= 6) {
+        price = parseInt(match[1]);
+      } else {
+        price = parseInt(match[1] + (match[2] || '') + (match[3] || ''));
+      }
       if (price > 0) {
         priceRange.max = price;
         break;
@@ -171,7 +180,12 @@ function extractPriceRange(query: string): { min?: number; max?: number } {
   for (const pattern of minPatterns) {
     const match = pattern.exec(query);
     if (match) {
-      const price = parseInt(match[1] + (match[2] || ''));
+      let price: number;
+      if (match[1].length >= 6) {
+        price = parseInt(match[1]);
+      } else {
+        price = parseInt(match[1] + (match[2] || '') + (match[3] || ''));
+      }
       if (price > 0) {
         priceRange.min = price;
         break;
@@ -193,13 +207,27 @@ function extractLocation(query: string): string | undefined {
     }
   }
 
-  const locationPattern = /\b(?:v|vo)\s+([a-záčďéěíľĺňóôŕřšťúůýž\s]+?)(?:\s+(?:do|od|za|s|so|pri|nad|pod)|$)/gi;
-  const match = locationPattern.exec(query);
-  if (match && match[1]) {
-    const location = match[1].trim();
-    if (location.length >= 3 && !SLOVAK_STOP_WORDS.includes(location.toLowerCase())) {
-      return location;
+  const locationPatterns = [
+    /\b(?:v|vo)\s+([a-záčďéěíľĺňóôŕřšťúůýž\s]+?)(?:\s+(?:do|od|za|s|so|pri|nad|pod)|$)/gi,
+    /\b([a-záčďéěíľĺňóôŕřšťúůýž]+(?:\s+[a-záčďéěíľĺňóôŕřšťúůýž]+)?)\s+(?:do|od|za)/gi,
+    /(?:^|\s)([a-záčďéěíľĺňóôŕřšťúůýž]{4,}(?:\s+-\s+[a-záčďéěíľĺňóôŕřšťúůýž\s]+)?)/gi
+  ];
+
+  for (const locationPattern of locationPatterns) {
+    const match = locationPattern.exec(query);
+    if (match && match[1]) {
+      const location = match[1].trim();
+      if (location.length >= 3 && !SLOVAK_STOP_WORDS.includes(location.toLowerCase())) {
+        const normalizedLocation = normalizeText(location);
+        for (const city of SLOVAK_CITIES) {
+          if (normalizeText(city).includes(normalizedLocation) || normalizedLocation.includes(normalizeText(city))) {
+            return city;
+          }
+        }
+        return location;
+      }
     }
+    locationPattern.lastIndex = 0;
   }
 
   return undefined;

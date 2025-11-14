@@ -58,12 +58,21 @@ export async function POST(req: NextRequest) {
           const suggestions = generateSearchSuggestions(parsedQuery, 0);
           if (suggestions.length > 0) {
             searchExplanation += '\n\nTipy:\n' + suggestions.map(s => `• ${s}`).join('\n');
+          } else {
+            searchExplanation = buildNoResultsMessage(parsedQuery);
           }
+        } else {
+          const topAds = searchResults.slice(0, 3);
+          const priceRange = {
+            min: Math.min(...topAds.map(ad => ad.price)),
+            max: Math.max(...topAds.map(ad => ad.price))
+          };
+          searchExplanation += `\n\nCenové rozpätie: ${priceRange.min.toLocaleString('sk-SK')}€ - ${priceRange.max.toLocaleString('sk-SK')}€`;
         }
       } catch (error) {
         console.error('[AI Chat] Error searching ads:', error);
         searchResults = [];
-        searchExplanation = 'Vyskytla sa chyba pri vyhľadávaní.';
+        searchExplanation = 'Vyskytla sa chyba pri vyhľadávaní. Prosím, skúste to znova alebo preformulujte váš dotaz.';
       }
     }
 
@@ -163,48 +172,69 @@ export async function POST(req: NextRequest) {
 function detectSearchIntent(message: string): { isSearch: boolean; query: string | null } {
   const searchKeywords = [
     'hľadám', 'hladam', 'nájdi', 'najdi', 'ukáž', 'ukaz', 'chcem', 'potrebujem',
-    'kúpiť', 'kupit', 'predať', 'predat', 'mám záujem', 'zaujíma ma'
+    'kúpiť', 'kupit', 'predať', 'predat', 'mám záujem', 'zaujíma ma', 'hľadaj', 'hladaj',
+    'ponúkni', 'ponukni', 'ukažte', 'ukazte', 'máš', 'mas', 'nájdeš', 'najdes'
   ];
 
   const lowerMessage = message.toLowerCase();
   const hasSearchIntent = searchKeywords.some(keyword => lowerMessage.includes(keyword));
 
-  if (!hasSearchIntent) {
+  const hasProductKeywords = /\b(byt|dom|auto|mobil|bicykel|noteboook|telefón|telefon|laptop|pc|chata|pozemok|garáž|garaz)\w*/i.test(message);
+
+  if (!hasSearchIntent && !hasProductKeywords) {
     return { isSearch: false, query: null };
   }
 
-  // Extract search query - remove common words and noise
+  console.log('[DetectSearchIntent] Search intent detected in:', message);
+
   let cleanQuery = message
-    // Odstráň privítania a formality
-    .replace(/^(ahoj|dobr[ýú] de[ňn]|zdravím|čau|nazdar|dobrý večer)[,\s]*/gi, '')
-    // Odstráň search keywords
-    .replace(/hľadám|hladam|nájdi|najdi|ukáž|ukaz|chcem|potrebujem|kúpiť|kupit|predať|predat/gi, '')
-    // Odstráň cenové frázy - extrahuj iba číslo
-    .replace(/do\s+(\d+)\s*(\d+)?/gi, '$1$2')
-    .replace(/za\s+(\d+)/gi, '$1')
-    .replace(/cena\s+do/gi, '')
-    .replace(/maximálne/gi, '')
-    // Normalizuj slovenské tvary - odstráň diakritiku a koncovky
-    .replace(/izbov[ýáéíóúy]/gi, 'izbov')
-    .replace(/bytov[ýáéíóúy]/gi, 'bytov')
-    .replace(/domov[ýáéíóúy]/gi, 'domov')
-    // Odstráň predložky a spojky
-    .replace(/\b(v|na|z|zo|do|od|s|so|k|o|po|pre|pri|cez|medzi|nad|pod|pred|za|a|ale|alebo|či)\b/gi, '')
-    // Odstráň čiarky a bodky
-    .replace(/[,\.]/g, ' ')
-    // Normalizuj medzery
+    .replace(/^(ahoj|dobr[ýú] de[ňn]|zdravím|čau|nazdar|dobrý večer|dobré ráno|dobré popoludnie|hej|čaute|čaves)[,\s!]*/gi, '')
+    .replace(/\b(hľadám|hladam|nájdi|najdi|ukáž|ukaz|chcem|potrebujem|kúpiť|kupit|predať|predat|hľadaj|hladaj|ponúkni|ponukni|ukažte|ukazte|máš|mas|nájdeš|najdes)\b/gi, '')
+    .replace(/\b(mi|ma|ti|ta|si|sa|me)\b/gi, '')
     .replace(/\s+/g, ' ')
     .trim();
 
-  // Ak ostali iba čísla, pokús sa použiť pôvodný text
-  if (/^\d+\s*\d*$/.test(cleanQuery) && message.toLowerCase().includes('byt')) {
-    cleanQuery = 'byt ' + cleanQuery;
+  console.log('[DetectSearchIntent] Cleaned query:', cleanQuery);
+
+  if (!cleanQuery || cleanQuery.length < 3) {
+    const hasNumbers = /\d{3,}/.test(message);
+    const hasLocation = /bratislava|košice|prešov|žilina|nitra|banská bystrica|trnava/i.test(message);
+
+    if (hasProductKeywords || hasNumbers || hasLocation) {
+      cleanQuery = message
+        .replace(/^(ahoj|dobr[ýú] de[ňn]|zdravím|čau|nazdar|dobrý večer)[,\s]*/gi, '')
+        .replace(/\b(mi|ma|ti|ta|si|sa|me)\b/gi, '')
+        .trim();
+      console.log('[DetectSearchIntent] Using fallback cleaned query:', cleanQuery);
+    }
   }
 
   return {
-    isSearch: true,
+    isSearch: hasSearchIntent || hasProductKeywords,
     query: cleanQuery || null
   };
+}
+
+function buildNoResultsMessage(parsedQuery: any): string {
+  const filters = parsedQuery.filters;
+  const messages = [];
+
+  messages.push('Nenašiel som žiadne inzeráty, ktoré by presne zodpovedali vašim kritériám.');
+
+  if (filters.roomCount && filters.priceMax && filters.location) {
+    messages.push('\nSkúste:');
+    messages.push(`• Zvýšiť maximálnu cenu nad ${filters.priceMax.toLocaleString('sk-SK')}€`);
+    messages.push(`• Rozšíriť vyhľadávanie na okolie lokality ${filters.location}`);
+    messages.push(`• Hľadať aj ${filters.roomCount - 1}-izbové alebo ${filters.roomCount + 1}-izbové byty`);
+  } else if (filters.priceMax) {
+    messages.push(`\nSkúste zvýšiť maximálnu cenu alebo vyhľadajte s širšími kritériami.`);
+  } else if (filters.location) {
+    messages.push(`\nSkúste rozšíriť vyhľadávanie na celú Bratislavu alebo okolie.`);
+  } else {
+    messages.push('\nSkúste upraviť vaše kritériá alebo použite všeobecnejšie hľadanie.');
+  }
+
+  return messages.join('\n');
 }
 
 function getSystemContext(contextType: string, searchResults?: any[] | null): string {
