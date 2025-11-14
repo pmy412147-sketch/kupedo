@@ -244,10 +244,10 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
                             router.push(`/?search=${encodeURIComponent(message.searchQuery!)}`);
                             setIsOpen(false);
                           }}
-                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-1.5 h-auto"
                         >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Zobraziť výsledky vyhľadávania ({message.searchResults?.length || 0} inzerátov)
+                          <ExternalLink className="h-3 w-3 mr-1.5" />
+                          Zobraziť výsledky ({message.searchResults?.length || 0})
                         </Button>
                       </div>
                     )}
