@@ -9,13 +9,19 @@ import {
   TextInput,
   Dimensions,
   StatusBar,
-  RefreshControl
+  RefreshControl,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { categories } from '../constants/categories';
 import { colors, spacing, borderRadius, typography } from '../theme/colors';
+import { NotificationCenter } from '../components/NotificationCenter';
+import { AIChatAssistant, AIChatButton } from '../components/AIChatAssistant';
+import { VisualSimilarSearch } from '../components/VisualSimilarSearch';
+import { VoiceSearch } from '../components/VoiceSearch';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +32,7 @@ export default function HomeScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showAIChat, setShowAIChat] = useState(false);
 
   useEffect(() => {
     loadAds();
@@ -105,13 +112,16 @@ export default function HomeScreen({ navigation }: any) {
           <Text style={styles.logo}>Kupedo</Text>
         </View>
         {user && (
-          <TouchableOpacity
-            style={styles.coinsButton}
-            onPress={() => navigation.navigate('Coins')}
-          >
-            <Text style={styles.coinIcon}>🪙</Text>
-            <Text style={styles.coinCount}>{userCoins}</Text>
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <NotificationCenter />
+            <TouchableOpacity
+              style={styles.coinsButton}
+              onPress={() => navigation.navigate('Coins')}
+            >
+              <Text style={styles.coinIcon}>🪙</Text>
+              <Text style={styles.coinCount}>{userCoins}</Text>
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
@@ -138,8 +148,14 @@ export default function HomeScreen({ navigation }: any) {
               style={styles.searchButton}
               onPress={handleSearch}
             >
-              <Text style={styles.searchButtonText}>🔍</Text>
+              <Ionicons name="search" size={20} color={colors.primary} />
             </TouchableOpacity>
+          </View>
+
+          {/* AI Search Features */}
+          <View style={styles.aiSearchFeatures}>
+            <VoiceSearch onSearch={(query) => setSearchQuery(query)} />
+            <VisualSimilarSearch />
           </View>
         </View>
 
@@ -228,6 +244,20 @@ export default function HomeScreen({ navigation }: any) {
 
         <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* AI Chat Assistant */}
+      {user && <AIChatButton onPress={() => setShowAIChat(true)} />}
+
+      <Modal
+        visible={showAIChat}
+        animationType="slide"
+        onRequestClose={() => setShowAIChat(false)}
+      >
+        <AIChatAssistant
+          contextType="general"
+          onClose={() => setShowAIChat(false)}
+        />
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -262,6 +292,11 @@ const styles = StyleSheet.create({
     fontWeight: typography.fontWeight.bold,
     color: colors.emerald[600],
   },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
   coinsButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -290,6 +325,11 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  aiSearchFeatures: {
+    flexDirection: 'row',
+    marginTop: spacing.sm,
     gap: spacing.sm,
   },
   searchInput: {
