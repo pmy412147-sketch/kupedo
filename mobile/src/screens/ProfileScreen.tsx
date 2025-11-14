@@ -253,6 +253,26 @@ export default function ProfileScreen({ navigation, route }: any) {
               <Text style={styles.contactButtonText}>💬 Kontaktovať</Text>
             </TouchableOpacity>
           )}
+
+          {/* Quick Actions - Only show if own profile */}
+          {isOwnProfile && (
+            <View style={styles.quickActionsContainer}>
+              <TouchableOpacity
+                style={styles.quickActionButton}
+                onPress={() => navigation.navigate('Dashboard')}
+              >
+                <Text style={styles.quickActionIcon}>📊</Text>
+                <Text style={styles.quickActionText}>Dashboard</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.quickActionButton}
+                onPress={() => navigation.navigate('MyAds')}
+              >
+                <Text style={styles.quickActionIcon}>📋</Text>
+                <Text style={styles.quickActionText}>Moje inzeráty</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Stats Grid */}
@@ -585,6 +605,32 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.bold,
     color: colors.white,
+  },
+  quickActionsContainer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+  },
+  quickActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    backgroundColor: colors.white,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: borderRadius.lg,
+    borderWidth: 1,
+    borderColor: colors.border.default,
+  },
+  quickActionIcon: {
+    fontSize: typography.fontSize.lg,
+  },
+  quickActionText: {
+    fontSize: typography.fontSize.sm,
+    fontWeight: typography.fontWeight.medium,
+    color: colors.text.primary,
   },
   statsGrid: {
     flexDirection: 'row',
