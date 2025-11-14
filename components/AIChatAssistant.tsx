@@ -23,6 +23,8 @@ interface Message {
   content: string;
   timestamp: Date;
   searchResults?: any[];
+  searchQuery?: string;
+  shouldRedirect?: boolean;
 }
 
 interface AIChatAssistantProps {
@@ -114,10 +116,19 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
         content: data.response,
         timestamp: new Date(data.timestamp),
         searchResults: data.searchResults || undefined,
+        searchQuery: data.searchQuery || undefined,
+        shouldRedirect: data.shouldRedirect || false,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
       setConversationId(data.conversationId);
+
+      if (data.shouldRedirect && data.searchQuery) {
+        setTimeout(() => {
+          router.push(`/?search=${encodeURIComponent(data.searchQuery)}`);
+          setIsOpen(false);
+        }, 1500);
+      }
     } catch (error: any) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
@@ -225,44 +236,19 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
                       </span>
                     </div>
 
-                    {message.searchResults && message.searchResults.length > 0 && (
-                      <div className="space-y-2 mt-2">
-                        <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                          Našiel som {message.searchResults.length} inzerátov:
-                        </p>
-                        {message.searchResults.slice(0, 3).map((ad: any) => (
-                          <div
-                            key={ad.id}
-                            onClick={() => {
-                              router.push(`/inzerat/${ad.id}`);
-                              setIsOpen(false);
-                            }}
-                            className="bg-white dark:bg-gray-900 rounded-lg p-3 border cursor-pointer hover:border-emerald-500 transition-colors"
-                          >
-                            <h4 className="font-medium text-sm line-clamp-1">{ad.title}</h4>
-                            <p className="text-lg font-bold text-emerald-600 mt-1">
-                              {ad.price} €
-                            </p>
-                            <div className="flex items-center justify-between mt-2">
-                              <span className="text-xs text-gray-500">{ad.location}</span>
-                              <ExternalLink className="h-3 w-3 text-gray-400" />
-                            </div>
-                          </div>
-                        ))}
-                        {message.searchResults.length > 3 && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              const query = message.content;
-                              router.push(`/?q=${encodeURIComponent(query)}`);
-                              setIsOpen(false);
-                            }}
-                            className="w-full text-xs"
-                          >
-                            Zobraziť všetkých {message.searchResults.length} inzerátov
-                          </Button>
-                        )}
+                    {message.shouldRedirect && message.searchQuery && (
+                      <div className="mt-2">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            router.push(`/?search=${encodeURIComponent(message.searchQuery!)}`);
+                            setIsOpen(false);
+                          }}
+                          className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Zobraziť výsledky vyhľadávania ({message.searchResults?.length || 0} inzerátov)
+                        </Button>
                       </div>
                     )}
                   </div>

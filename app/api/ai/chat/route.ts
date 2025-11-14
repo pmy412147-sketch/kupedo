@@ -121,6 +121,8 @@ export async function POST(req: NextRequest) {
       conversationId: conversation?.id,
       timestamp: new Date().toISOString(),
       searchResults: searchResults && searchResults.length > 0 ? searchResults : null,
+      searchQuery: searchIntent.isSearch ? searchIntent.query : null,
+      shouldRedirect: searchIntent.isSearch && searchResults && searchResults.length > 0,
     });
   } catch (error: any) {
     console.error('Error in AI chat:', error);

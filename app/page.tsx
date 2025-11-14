@@ -81,6 +81,10 @@ export default function HomePage() {
   };
 
   useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setHeroFilters(prev => ({ ...prev, searchQuery }));
+    }
     fetchAds();
   }, [searchParams]);
 
