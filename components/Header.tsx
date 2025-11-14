@@ -13,9 +13,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, ChartBar as BarChart3, Coins } from 'lucide-react';
+import { Search, Plus, Heart, MessageSquare, User, LogOut, Moon, Sun, Menu, ChartBar as BarChart3, Coins, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { SearchWithSuggestions } from './SearchWithSuggestions';
+import { VoiceSearch } from './VoiceSearch';
 import { supabase } from '@/lib/supabase';
 
 export function Header() {
@@ -171,6 +172,10 @@ export function Header() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => router.push('/ai-features')}>
+                        <Sparkles className="mr-2 h-4 w-4" />
+                        AI Funkcie
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => router.push(`/profil/${user.id}`)}>
                         <User className="mr-2 h-4 w-4" />
                         Môj profil

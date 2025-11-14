@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Search, TrendingUp, Clock } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { VoiceSearch } from './VoiceSearch';
 
 interface SearchSuggestion {
   title: string;
@@ -131,15 +132,23 @@ export function SearchWithSuggestions({
   return (
     <div ref={wrapperRef} className={`relative ${className}`}>
       <form onSubmit={handleSubmit}>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            type="text"
-            placeholder={placeholder}
-            className="pl-10 pr-4"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => setShowSuggestions(true)}
+        <div className="relative flex items-center gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder={placeholder}
+              className="pl-10 pr-4"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setShowSuggestions(true)}
+            />
+          </div>
+          <VoiceSearch
+            onSearch={(voiceQuery) => {
+              setQuery(voiceQuery);
+              handleSearch(voiceQuery);
+            }}
           />
         </div>
       </form>
