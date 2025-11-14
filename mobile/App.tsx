@@ -13,6 +13,7 @@ import RegisterScreen from './src/screens/RegisterScreen';
 import AdListScreen from './src/screens/AdListScreen';
 import AdDetailScreen from './src/screens/AdDetailScreen';
 import CreateAdScreen from './src/screens/CreateAdScreen';
+import EditAdScreen from './src/screens/EditAdScreen';
 import MessagesScreen from './src/screens/MessagesScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import FavoritesScreen from './src/screens/FavoritesScreen';
@@ -189,7 +190,7 @@ function AppNavigator() {
           />
           <Stack.Screen
             name="EditAd"
-            component={CreateAdScreen}
+            component={EditAdScreen}
             options={{
               title: 'Upraviť inzerát',
               headerStyle: {
