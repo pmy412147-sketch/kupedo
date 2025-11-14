@@ -156,10 +156,29 @@ function detectSearchIntent(message: string): { isSearch: boolean; query: string
     return { isSearch: false, query: null };
   }
 
-  // Extract search query - remove common words
-  const cleanQuery = message
-    .replace(/hľadám|hladam|nájdi|najdi|ukáž|ukaz|chcem|potrebujem|kúpiť|kupit/gi, '')
+  // Extract search query - remove common words and noise
+  let cleanQuery = message
+    // Odstráň privítania a formality
+    .replace(/^(ahoj|dobr[ýú] de[ňn]|zdravím|čau|nazdar|dobrý večer)[,\s]*/gi, '')
+    // Odstráň search keywords
+    .replace(/hľadám|hladam|nájdi|najdi|ukáž|ukaz|chcem|potrebujem|kúpiť|kupit|predať|predat/gi, '')
+    // Odstráň cenové frázy - extrahuj iba číslo
+    .replace(/do\s+(\d+)\s*(\d+)?/gi, '$1$2')
+    .replace(/za\s+(\d+)/gi, '$1')
+    .replace(/cena\s+do/gi, '')
+    .replace(/maximálne/gi, '')
+    // Odstráň predložky a spojky
+    .replace(/\b(v|na|z|zo|do|od|s|so|k|o|po|pre|pri|cez|medzi|nad|pod|pred|za|a|ale|alebo|či)\b/gi, '')
+    // Odstráň čiarky a bodky
+    .replace(/[,\.]/g, ' ')
+    // Normalizuj medzery
+    .replace(/\s+/g, ' ')
     .trim();
+
+  // Ak ostali iba čísla, pokús sa použiť pôvodný text
+  if (/^\d+\s*\d*$/.test(cleanQuery) && message.toLowerCase().includes('byt')) {
+    cleanQuery = 'byt ' + cleanQuery;
+  }
 
   return {
     isSearch: true,
