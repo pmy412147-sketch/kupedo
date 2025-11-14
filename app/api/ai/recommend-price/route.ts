@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateStructuredOutput, geminiPrompts } from '@/lib/gemini';
+import { generateStructuredOutput, claudePrompts } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 interface PriceRecommendation {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    const prompt = geminiPrompts.recommendPrice(productInfo, similarProducts || []);
+    const prompt = claudePrompts.recommendPrice(productInfo, similarProducts || []);
     const schema = JSON.stringify({
       recommendedPrice: 0,
       priceRange: {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateStructuredOutput, geminiPrompts } from '@/lib/gemini';
+import { generateStructuredOutput, claudePrompts } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 interface TitleResponse {
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    const prompt = geminiPrompts.generateAdTitle(productInfo);
+    const prompt = claudePrompts.generateAdTitle(productInfo);
     const schema = JSON.stringify({
       titles: ['string', 'string', 'string'],
     });

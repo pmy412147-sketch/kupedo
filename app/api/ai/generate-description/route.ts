@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateTextWithRetry, geminiPrompts } from '@/lib/gemini';
+import { generateTextWithRetry, claudePrompts } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    const prompt = geminiPrompts.generateAdDescription(productInfo);
+    const prompt = claudePrompts.generateAdDescription(productInfo);
     let generatedText: string;
 
     try {

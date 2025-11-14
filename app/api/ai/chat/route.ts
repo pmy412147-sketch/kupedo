@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chatWithHistory, ChatMessage } from '@/lib/gemini';
+import { chatWithHistory, ChatMessage } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 export async function POST(req: NextRequest) {
@@ -39,8 +39,8 @@ export async function POST(req: NextRequest) {
     try {
       response = await chatWithHistory(
         [
-          { role: 'user', parts: systemContext },
-          { role: 'model', parts: 'Rozumiem, som pripravený pomôcť.' },
+          { role: 'user', content: systemContext },
+          { role: 'assistant', content: 'Rozumiem, som pripravený pomôcť.' },
           ...chatHistory,
         ],
         message
@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
     const endTime = Date.now();
 
     chatHistory.push(
-      { role: 'user', parts: message },
-      { role: 'model', parts: response }
+      { role: 'user', content: message },
+      { role: 'assistant', content: response }
     );
 
     if (conversationId && conversation) {

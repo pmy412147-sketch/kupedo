@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateStructuredOutput } from '@/lib/gemini';
+import { generateStructuredOutput } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 interface FraudAnalysis {

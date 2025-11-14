@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateStructuredOutput, geminiPrompts } from '@/lib/gemini';
+import { generateStructuredOutput, claudePrompts } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 interface Alternative {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    const prompt = geminiPrompts.suggestAlternatives(product, category);
+    const prompt = claudePrompts.suggestAlternatives(product, category);
     const schema = JSON.stringify({
       alternatives: [
         {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateStructuredOutput, geminiPrompts } from '@/lib/gemini';
+import { generateStructuredOutput, claudePrompts } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 
 interface QualityEvaluation {
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    const prompt = geminiPrompts.evaluateAdQuality(adData);
+    const prompt = claudePrompts.evaluateAdQuality(adData);
     const schema = JSON.stringify({
       totalScore: 0,
       breakdown: {

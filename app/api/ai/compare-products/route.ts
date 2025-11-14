@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateStructuredOutput, geminiPrompts } from '@/lib/gemini';
+import { generateStructuredOutput, claudePrompts } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 
@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
 
     const startTime = Date.now();
 
-    const prompt = geminiPrompts.compareProducts(products);
+    const prompt = claudePrompts.compareProducts(products);
     const schema = JSON.stringify({
       summary: 'string',
       comparison: {
