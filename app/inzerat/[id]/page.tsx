@@ -16,6 +16,10 @@ import { ImageLightbox } from '@/components/ImageLightbox';
 import { FinancingCalculator } from '@/components/FinancingCalculator';
 import { ReportAdModal } from '@/components/ReportAdModal';
 import { ReviewModal } from '@/components/ReviewModal';
+import { AdQualityBadge } from '@/components/AdQualityBadge';
+import PriceTrendChart from '@/components/PriceTrendChart';
+import { AIChatAssistant } from '@/components/AIChatAssistant';
+import { SimilarAds } from '@/components/SimilarAds';
 
 interface Ad {
   id: string;
@@ -357,7 +361,17 @@ export default function AdDetailPage() {
                   )}
                 </div>
 
-                <h1 className="text-3xl font-bold mb-4">{ad.title}</h1>
+                <div className="flex items-center justify-between mb-4">
+                  <h1 className="text-3xl font-bold">{ad.title}</h1>
+                  {user && (
+                    <AdQualityBadge
+                      adId={ad.id}
+                      adData={ad}
+                      userId={user.id}
+                      showDetails={true}
+                    />
+                  )}
+                </div>
 
                 <div className="flex items-center gap-4 mb-6 text-gray-600">
                   <div className="flex items-center">
@@ -807,7 +821,7 @@ export default function AdDetailPage() {
                       Zobraziť profil
                     </Button>
 
-                    {user && user.uid !== ad.user_id && (
+                    {user && user.id !== ad.user_id && (
                       <Button
                         variant="outline"
                         className="w-full border-yellow-500 text-yellow-600 hover:bg-yellow-50"
@@ -834,11 +848,17 @@ export default function AdDetailPage() {
                 {ad.category_id === 'auto' && ad.price > 0 && (
                   <FinancingCalculator vehiclePrice={ad.price} />
                 )}
+
+                <PriceTrendChart adId={ad.id} currentPrice={ad.price} />
               </div>
             </div>
           </div>
         </div>
       </main>
+
+      <SimilarAds adId={ad.id} category={ad.category_id} />
+
+      <AIChatAssistant contextType="buying_guide" />
 
       {lightboxOpen && (
         <ImageLightbox

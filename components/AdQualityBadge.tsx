@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
 import { Sparkles, TrendingUp, AlertCircle, CheckCircle2, Lightbulb } from 'lucide-react';
 
 interface QualityBreakdown {
@@ -155,7 +154,12 @@ export function AdQualityBadge({
                   <span className="text-gray-500">/100</span>
                 </div>
               </div>
-              <Progress value={totalScore} className="h-3" />
+              <div className="w-full bg-gray-200 rounded-full h-3 dark:bg-gray-700">
+                <div
+                  className="bg-emerald-600 h-3 rounded-full transition-all duration-300"
+                  style={{ width: `${totalScore}%` }}
+                />
+              </div>
               <p className="text-sm text-gray-600 mt-2">{getScoreLabel(totalScore)}</p>
             </Card>
 
@@ -168,7 +172,12 @@ export function AdQualityBadge({
                     <span className="text-sm font-medium">Popis (max 30)</span>
                     <span className="text-sm font-semibold">{breakdown.description}/30</span>
                   </div>
-                  <Progress value={(breakdown.description / 30) * 100} className="h-2" />
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div
+                      className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(breakdown.description / 30) * 100}%` }}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -176,7 +185,12 @@ export function AdQualityBadge({
                     <span className="text-sm font-medium">Fotografie (max 25)</span>
                     <span className="text-sm font-semibold">{breakdown.photos}/25</span>
                   </div>
-                  <Progress value={(breakdown.photos / 25) * 100} className="h-2" />
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div
+                      className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(breakdown.photos / 25) * 100}%` }}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -184,7 +198,12 @@ export function AdQualityBadge({
                     <span className="text-sm font-medium">Špecifikácie (max 25)</span>
                     <span className="text-sm font-semibold">{breakdown.specifications}/25</span>
                   </div>
-                  <Progress value={(breakdown.specifications / 25) * 100} className="h-2" />
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div
+                      className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(breakdown.specifications / 25) * 100}%` }}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -192,7 +211,12 @@ export function AdQualityBadge({
                     <span className="text-sm font-medium">Cena (max 20)</span>
                     <span className="text-sm font-semibold">{breakdown.pricing}/20</span>
                   </div>
-                  <Progress value={(breakdown.pricing / 20) * 100} className="h-2" />
+                  <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                    <div
+                      className="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(breakdown.pricing / 20) * 100}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
