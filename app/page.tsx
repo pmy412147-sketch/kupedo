@@ -453,6 +453,80 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-12">
           <AIRecommendations />
         </div>
+
+        {/* AI Features Showcase */}
+        <div className="bg-gradient-to-r from-emerald-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 px-4 py-2 rounded-full mb-4 shadow-sm">
+                <Sparkles className="h-5 w-5 text-emerald-600" />
+                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">AI Funkcie</span>
+              </div>
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Inteligentné nástroje pre váš úspech
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                Využite pokročilé AI funkcie pre rýchlejší a efektívnejší predaj
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              <button
+                onClick={() => router.push('/ai-features')}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
+              >
+                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
+                  <Search className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Vizuálne vyhľadávanie
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Nahrajte fotku a nájdite podobné produkty
+                </p>
+                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                  Vyskúšať →
+                </span>
+              </button>
+
+              <button
+                onClick={() => router.push('/ai-features')}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
+              >
+                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mb-4">
+                  <BarChart3 className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Trhová analytika
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Cenové trendy a AI insights v reálnom čase
+                </p>
+                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                  Zobraziť →
+                </span>
+              </button>
+
+              <button
+                onClick={() => router.push('/porovnat')}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md hover:shadow-xl transition-all text-left"
+              >
+                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+                  <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                  Porovnanie produktov
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Detailné AI porovnanie až 4 produktov
+                </p>
+                <span className="text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+                  Porovnať →
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
       </main>
       <Footer />
       <AIChatAssistant contextType="general" />
