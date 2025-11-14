@@ -15,6 +15,7 @@ import { Search, MapPin, Chrome as Home, SlidersHorizontal, Users, Package, Shie
 import { AdSenseInFeed } from '@/components/AdSenseInFeed';
 import { AIChatAssistant } from '@/components/AIChatAssistant';
 import { AIRecommendations } from '@/components/AIRecommendations';
+import { SearchWithSuggestions } from '@/components/SearchWithSuggestions';
 
 
 export default function HomePage() {
@@ -141,22 +142,12 @@ export default function HomePage() {
 
               <div className="hidden lg:block bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-5" style={{ width: '130%', maxWidth: '850px' }}>
                 <div className="mb-3">
-                  <label className="text-xs text-gray-600 mb-1 block font-medium">Čo hľadáte?</label>
-                  <Input
-                    placeholder="napr. iPhone 15, byt v Bratislave..."
-                    value={heroFilters.searchQuery}
-                    onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
-                    className="h-11 text-sm text-gray-900"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleHeroSearch();
-                      }
-                    }}
-                  />
+                  <label className="text-xs text-gray-700 mb-1 block font-semibold">Čo hľadáte?</label>
+                  <SearchWithSuggestions placeholder="napr. iPhone 15, byt v Bratislave..." className="w-full" />
                 </div>
                 <div className="grid grid-cols-5 gap-2 mb-3">
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Kategória</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Kategória</label>
                     <Select
                       value={heroFilters.category}
                       onValueChange={(v) => setHeroFilters({ ...heroFilters, category: v })}
@@ -191,7 +182,7 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">PSČ</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">PSČ</label>
                     <Input
                       placeholder="napr. 81101"
                       value={heroFilters.postalCode}
@@ -201,7 +192,7 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Okolie</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Okolie</label>
                     <Select
                       value={heroFilters.radius}
                       onValueChange={(v) => setHeroFilters({ ...heroFilters, radius: v })}
@@ -219,7 +210,7 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Cena od</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Cena od</label>
                     <Input
                       type="number"
                       placeholder="0 €"
@@ -230,7 +221,7 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Cena do</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Cena do</label>
                     <Input
                       type="number"
                       placeholder="∞ €"
@@ -252,22 +243,12 @@ export default function HomePage() {
 
               <div className="lg:hidden bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-4">
                 <div className="mb-3">
-                  <label className="text-xs text-gray-600 mb-1 block font-medium">Čo hľadáte?</label>
-                  <Input
-                    placeholder="napr. iPhone, byt..."
-                    value={heroFilters.searchQuery}
-                    onChange={(e) => setHeroFilters({ ...heroFilters, searchQuery: e.target.value })}
-                    className="h-10 text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleHeroSearch();
-                      }
-                    }}
-                  />
+                  <label className="text-xs text-gray-700 mb-1 block font-semibold">Čo hľadáte?</label>
+                  <SearchWithSuggestions placeholder="napr. iPhone, byt..." className="w-full" />
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Kategória</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Kategória</label>
                     <Select
                       value={heroFilters.category}
                       onValueChange={(v) => setHeroFilters({ ...heroFilters, category: v })}
@@ -302,17 +283,17 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">PSČ</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">PSČ</label>
                     <Input
                       placeholder="81101"
                       value={heroFilters.postalCode}
                       onChange={(e) => setHeroFilters({ ...heroFilters, postalCode: e.target.value })}
-                      className="h-9 text-xs"
+                      className="h-9 text-xs text-gray-900"
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Okolie</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Okolie</label>
                     <Select
                       value={heroFilters.radius}
                       onValueChange={(v) => setHeroFilters({ ...heroFilters, radius: v })}
@@ -330,25 +311,25 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <label className="text-xs text-gray-600 mb-1 block font-medium">Cena od</label>
+                    <label className="text-xs text-gray-700 mb-1 block font-semibold">Cena od</label>
                     <Input
                       type="number"
                       placeholder="0 €"
                       value={heroFilters.priceFrom}
                       onChange={(e) => setHeroFilters({ ...heroFilters, priceFrom: e.target.value })}
-                      className="h-9 text-xs"
+                      className="h-9 text-xs text-gray-900"
                     />
                   </div>
                 </div>
 
                 <div className="mb-3">
-                  <label className="text-xs text-gray-600 mb-1 block font-medium">Cena do</label>
+                  <label className="text-xs text-gray-700 mb-1 block font-semibold">Cena do</label>
                   <Input
                     type="number"
                     placeholder="∞ €"
                     value={heroFilters.priceTo}
                     onChange={(e) => setHeroFilters({ ...heroFilters, priceTo: e.target.value })}
-                    className="h-9 text-xs"
+                    className="h-9 text-xs text-gray-900"
                   />
                 </div>
 
