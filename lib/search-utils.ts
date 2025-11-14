@@ -74,14 +74,34 @@ export async function performEnhancedSearch(
       const description = (ad.description || '').toLowerCase();
       const combinedText = `${title} ${description}`;
 
+      // Check metadata.rooms
       if (metadata.rooms !== undefined) {
         return metadata.rooms === parsed.filters.roomCount;
       }
 
+      // Check metadata.roomCount
       if (metadata.roomCount !== undefined) {
         return metadata.roomCount === parsed.filters.roomCount;
       }
 
+      // Check metadata.realEstate.kind (e.g., "3-izbový")
+      if (metadata.realEstate && metadata.realEstate.kind) {
+        const kind = String(metadata.realEstate.kind).toLowerCase();
+        const roomCount = parsed.filters.roomCount!;
+        if (kind.includes(`${roomCount}-izbov`) || kind.includes(`${roomCount} izbov`)) {
+          return true;
+        }
+      }
+
+      // Check metadata.categorySpecific.pocetIzieb
+      if (metadata.categorySpecific && metadata.categorySpecific.pocetIzieb) {
+        const pocetIzieb = String(metadata.categorySpecific.pocetIzieb);
+        if (pocetIzieb === String(parsed.filters.roomCount)) {
+          return true;
+        }
+      }
+
+      // Fallback to text search
       const roomCount = parsed.filters.roomCount!;
       const patterns = [
         new RegExp(`\\b${roomCount}\\s*[-\\s]?\\s*izbov`, 'i'),
@@ -92,7 +112,7 @@ export async function performEnhancedSearch(
       if (roomCount === 1) {
         patterns.push(/\bgarsónk/i, /\bjednoizbov/i);
       } else if (roomCount === 2) {
-        patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i);
+        patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i, /\bdvoj[\s-]?garzón/i);
       } else if (roomCount === 3) {
         patterns.push(/\btrojizbov/i, /\btrojizb/i);
       } else if (roomCount === 4) {
@@ -296,13 +316,34 @@ async function performFallbackSearch(
       const description = (ad.description || '').toLowerCase();
       const combinedText = `${title} ${description}`;
 
+      // Check metadata.rooms
       if (metadata.rooms !== undefined) {
         return metadata.rooms === parsed.filters.roomCount;
       }
+
+      // Check metadata.roomCount
       if (metadata.roomCount !== undefined) {
         return metadata.roomCount === parsed.filters.roomCount;
       }
 
+      // Check metadata.realEstate.kind (e.g., "3-izbový")
+      if (metadata.realEstate && metadata.realEstate.kind) {
+        const kind = String(metadata.realEstate.kind).toLowerCase();
+        const roomCount = parsed.filters.roomCount!;
+        if (kind.includes(`${roomCount}-izbov`) || kind.includes(`${roomCount} izbov`)) {
+          return true;
+        }
+      }
+
+      // Check metadata.categorySpecific.pocetIzieb
+      if (metadata.categorySpecific && metadata.categorySpecific.pocetIzieb) {
+        const pocetIzieb = String(metadata.categorySpecific.pocetIzieb);
+        if (pocetIzieb === String(parsed.filters.roomCount)) {
+          return true;
+        }
+      }
+
+      // Fallback to text search
       const roomCount = parsed.filters.roomCount!;
       const patterns = [
         new RegExp(`\\b${roomCount}\\s*[-\\s]?\\s*izbov`, 'i'),
@@ -313,7 +354,7 @@ async function performFallbackSearch(
       if (roomCount === 1) {
         patterns.push(/\bgarsónk/i, /\bjednoizbov/i);
       } else if (roomCount === 2) {
-        patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i);
+        patterns.push(/\bdvojgarsónk/i, /\bdvojizbov/i, /\bdvoj[\s-]?garzón/i);
       } else if (roomCount === 3) {
         patterns.push(/\btrojizbov/i, /\btrojizb/i);
       } else if (roomCount === 4) {
