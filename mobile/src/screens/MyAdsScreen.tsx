@@ -250,7 +250,7 @@ export default function MyAdsScreen({ navigation }: any) {
                     style={styles.actionButtonDelete}
                     onPress={() => handleDelete(ad)}
                   >
-                    <Text style={styles.actionButtonDeleteText}>🗑️ Zmazať</Text>
+                    <Text style={styles.actionButtonDeleteText}>🗑 Zmazať</Text>
                   </TouchableOpacity>
                 </View>
               </View>
