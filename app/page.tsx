@@ -11,7 +11,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, MapPin, Chrome as Home, SlidersHorizontal, Users, Package, Shield, TrendingUp, Sparkles, Award, Clock, CheckCircle } from 'lucide-react';
+import { Search, MapPin, Chrome as Home, SlidersHorizontal, Users, Package, Shield, TrendingUp, Sparkles, Award, Clock, CheckCircle, BarChart3, Eye } from 'lucide-react';
 import { AdSenseInFeed } from '@/components/AdSenseInFeed';
 import { AIChatAssistant } from '@/components/AIChatAssistant';
 import { AIRecommendations } from '@/components/AIRecommendations';
