@@ -128,9 +128,39 @@ export default function ChatScreen({ route }: any) {
 
       setNewMessage('');
       flatListRef.current?.scrollToEnd();
+
+      sendPushNotification(userId);
     } catch (err: any) {
       console.error('Unexpected error:', err);
       Alert.alert('Chyba', `Neočakávaná chyba: ${err?.message || 'Neznáma chyba'}`);
+    }
+  };
+
+  const sendPushNotification = async (recipientId: string) => {
+    try {
+      const { data: supabaseUrl } = await supabase.auth.getSession();
+      const url = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
+      const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+
+      await fetch(`${url}/functions/v1/send-push-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+        },
+        body: JSON.stringify({
+          userId: recipientId,
+          title: `Nová správa od ${user?.email}`,
+          body: newMessage.trim().substring(0, 100),
+          data: {
+            type: 'message',
+            conversationId: conversationId,
+            senderId: user?.id,
+          },
+        }),
+      });
+    } catch (error) {
+      console.log('Failed to send push notification (not critical):', error);
     }
   };
 

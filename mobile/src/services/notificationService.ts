@@ -35,7 +35,7 @@ export const registerForPushNotifications = async (userId: string) => {
     }
 
     const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: 'your-project-id-here'
+      projectId: 'ff555602-dfe7-47ac-97b0-440c376c1850'
     });
     const token = tokenData.data;
     console.log('Push token:', token);
@@ -84,7 +84,7 @@ const savePushToken = async (userId: string, token: string) => {
 export const removePushToken = async (userId: string) => {
   try {
     const tokenData = await Notifications.getExpoPushTokenAsync({
-      projectId: 'your-project-id-here'
+      projectId: 'ff555602-dfe7-47ac-97b0-440c376c1850'
     });
     const token = tokenData.data;
 
