@@ -42,7 +42,7 @@ export default function ReviewModal({
     try {
       const { error } = await supabase.from('reviews').insert({
         reviewer_id: userId,
-        reviewee_id: revieweeId,
+        reviewed_user_id: revieweeId,
         ad_id: adId,
         rating,
         comment: comment.trim(),

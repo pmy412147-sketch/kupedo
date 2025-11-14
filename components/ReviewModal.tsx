@@ -40,7 +40,7 @@ export function ReviewModal({
         .from('reviews')
         .insert({
           reviewer_id: user.id,
-          reviewee_id: revieweeId,
+          reviewed_user_id: revieweeId,
           ad_id: adId || null,
           rating,
           comment: comment.trim() || null

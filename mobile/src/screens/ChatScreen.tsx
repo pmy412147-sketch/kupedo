@@ -1,19 +1,68 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ChatScreen({ route }: any) {
-  const { conversationId } = route.params;
+  const { conversationId: paramConversationId, userId, adId } = route.params;
   const { user } = useAuth();
+  const [conversationId, setConversationId] = useState<string | null>(paramConversationId || null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [loading, setLoading] = useState(true);
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
-    loadMessages();
-    subscribeToMessages();
-  }, [conversationId]);
+    if (paramConversationId) {
+      setConversationId(paramConversationId);
+      setLoading(false);
+    } else if (userId && adId) {
+      findOrCreateConversation();
+    }
+  }, [paramConversationId, userId, adId]);
+
+  useEffect(() => {
+    if (conversationId && !loading) {
+      loadMessages();
+      subscribeToMessages();
+    }
+  }, [conversationId, loading]);
+
+  const findOrCreateConversation = async () => {
+    try {
+      const { data: existing, error: findError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('ad_id', adId)
+        .or(`and(participant_1.eq.${user?.id},participant_2.eq.${userId}),and(participant_1.eq.${userId},participant_2.eq.${user?.id})`)
+        .maybeSingle();
+
+      if (findError) throw findError;
+
+      if (existing) {
+        setConversationId(existing.id);
+      } else {
+        const { data: newConv, error: createError } = await supabase
+          .from('conversations')
+          .insert({
+            ad_id: adId,
+            participant_1: user?.id,
+            participant_2: userId,
+            last_message_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        setConversationId(newConv.id);
+      }
+    } catch (error: any) {
+      console.error('Error finding/creating conversation:', error);
+      Alert.alert('Chyba', 'Nepodarilo sa vytvoriť konverzáciu');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadMessages = async () => {
     const { data } = await supabase
@@ -53,11 +102,10 @@ export default function ChatScreen({ route }: any) {
       return;
     }
 
-    console.log('Sending message:', {
-      conversation_id: conversationId,
-      sender_id: user?.id,
-      content: newMessage.trim(),
-    });
+    if (!conversationId) {
+      Alert.alert('Chyba', 'Konverzácia ešte nie je pripravená');
+      return;
+    }
 
     try {
       const { data, error } = await supabase.from('messages').insert({
@@ -72,7 +120,11 @@ export default function ChatScreen({ route }: any) {
         return;
       }
 
-      console.log('Message sent successfully:', data);
+      await supabase
+        .from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
       setNewMessage('');
       flatListRef.current?.scrollToEnd();
     } catch (err: any) {
@@ -80,6 +132,15 @@ export default function ChatScreen({ route }: any) {
       Alert.alert('Chyba', `Neočakávaná chyba: ${err?.message || 'Neznáma chyba'}`);
     }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>Pripravujem konverzáciu...</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -133,6 +194,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
   },
   messagesList: {
     padding: 15,
