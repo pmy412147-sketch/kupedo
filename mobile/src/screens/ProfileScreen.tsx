@@ -16,7 +16,7 @@ interface Ad {
 }
 
 export default function ProfileScreen({ navigation, route }: any) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const profileId = route?.params?.profileId || user?.id;
   const isOwnProfile = user?.id === profileId;
 
