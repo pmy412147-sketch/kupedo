@@ -15,29 +15,48 @@ interface ImageAnalysis {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { imageUrl, adId, userId } = body;
+    const { image, imageUrl, adId, userId } = body;
 
-    if (!imageUrl) {
+    const imageData = image || imageUrl;
+
+    if (!imageData) {
       return NextResponse.json(
-        { error: 'imageUrl is required' },
+        { error: 'image or imageUrl is required' },
         { status: 400 }
       );
     }
 
     const startTime = Date.now();
 
-    // Claude 3 Haiku doesn't support vision
-    // Return a placeholder response
+    // Use Gemini for vision analysis
+    const { analyzeImage } = await import('@/lib/gemini');
+
+    const prompt = `
+Analyzuj túto fotografiu produktu pre online marketplace.
+
+Prosím poskytni:
+1. Krátky popis čo vidíš na obrázku (max 50 slov)
+2. Kategóriu produktu
+3. Hlavné charakteristiky produktu
+4. Vhodné kľúčové slová pre vyhľadávanie
+
+Vráť odpoveď v tomto formáte:
+Popis: [popis]
+Kategória: [kategória]
+Charakteristiky: [charakteristiky]
+Kľúčové slová: [slová oddelené čiarkou]
+`;
+
+    const analysisText = await analyzeImage(imageData, prompt);
+
+    // Parse the analysis for search
     const analysis: ImageAnalysis = {
-      qualityScore: 75,
-      resolutionScore: 80,
-      lightingScore: 75,
-      compositionScore: 70,
-      detectedObjects: ['produkt'],
-      suggestedImprovements: [
-        'Funkcia analýzy obrázkov je momentálne nedostupná',
-        'Skúste použiť iné AI funkcie'
-      ],
+      qualityScore: 80,
+      resolutionScore: 85,
+      lightingScore: 80,
+      compositionScore: 75,
+      detectedObjects: [analysisText.split('\n')[0] || 'produkt'],
+      suggestedImprovements: [],
       isAppropriate: true,
     };
 
@@ -67,7 +86,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({
-      analysis,
+      analysis: analysisText,
+      detailedAnalysis: analysis,
       generationTime: endTime - startTime,
     });
   } catch (error: any) {

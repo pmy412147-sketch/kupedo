@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +13,8 @@ import {
   Sparkles,
   Minimize2,
   Maximize2,
-  Loader2
+  Loader2,
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -20,6 +22,7 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  searchResults?: any[];
 }
 
 interface AIChatAssistantProps {
@@ -28,6 +31,7 @@ interface AIChatAssistantProps {
 
 export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -109,6 +113,7 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
         role: 'assistant',
         content: data.response,
         timestamp: new Date(data.timestamp),
+        searchResults: data.searchResults || undefined,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -203,20 +208,63 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
                   key={index}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
-                  <div
-                    className={`max-w-[80%] rounded-lg p-3 ${
-                      message.role === 'user'
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
-                    }`}
-                  >
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                    <span className="text-xs opacity-70 mt-1 block">
-                      {message.timestamp.toLocaleTimeString('sk-SK', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
+                  <div className="max-w-[80%] space-y-2">
+                    <div
+                      className={`rounded-lg p-3 ${
+                        message.role === 'user'
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <span className="text-xs opacity-70 mt-1 block">
+                        {message.timestamp.toLocaleTimeString('sk-SK', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+
+                    {message.searchResults && message.searchResults.length > 0 && (
+                      <div className="space-y-2 mt-2">
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                          Našiel som {message.searchResults.length} inzerátov:
+                        </p>
+                        {message.searchResults.slice(0, 3).map((ad: any) => (
+                          <div
+                            key={ad.id}
+                            onClick={() => {
+                              router.push(`/inzerat/${ad.id}`);
+                              setIsOpen(false);
+                            }}
+                            className="bg-white dark:bg-gray-900 rounded-lg p-3 border cursor-pointer hover:border-emerald-500 transition-colors"
+                          >
+                            <h4 className="font-medium text-sm line-clamp-1">{ad.title}</h4>
+                            <p className="text-lg font-bold text-emerald-600 mt-1">
+                              {ad.price} €
+                            </p>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-xs text-gray-500">{ad.location}</span>
+                              <ExternalLink className="h-3 w-3 text-gray-400" />
+                            </div>
+                          </div>
+                        ))}
+                        {message.searchResults.length > 3 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const query = message.content;
+                              router.push(`/?q=${encodeURIComponent(query)}`);
+                              setIsOpen(false);
+                            }}
+                            className="w-full text-xs"
+                          >
+                            Zobraziť všetkých {message.searchResults.length} inzerátov
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

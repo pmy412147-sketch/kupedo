@@ -163,8 +163,23 @@ export function SearchWithSuggestions({
     setAnalyzing(true);
 
     try {
-      // Visual search is not available with Claude 3 Haiku
-      toast.info('Vyhľadávanie podľa obrázka je momentálne nedostupné. Použite textové vyhľadávanie.');
+      const analyzeResponse = await fetch('/api/ai/analyze-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: imageData,
+          userId: 'guest',
+        }),
+      });
+
+      if (!analyzeResponse.ok) {
+        throw new Error('Nepodarilo sa analyzovať obrázok');
+      }
+
+      const analyzeData = await analyzeResponse.json();
+      router.push(`/?visual=true&analysis=${encodeURIComponent(analyzeData.analysis)}`);
+
+      toast.success('Obrázok bol analyzovaný!');
       setShowCamera(false);
       setPreview(null);
     } catch (error) {
