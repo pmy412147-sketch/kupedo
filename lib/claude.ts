@@ -39,7 +39,7 @@ export async function generateText(prompt: string, config?: ClaudeConfig): Promi
     const mergedConfig = { ...defaultConfig, ...config };
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: mergedConfig.max_tokens || 1024,
       temperature: mergedConfig.temperature,
       top_p: mergedConfig.top_p,
@@ -141,7 +141,7 @@ export async function chatWithHistory(
     ];
 
     const message = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: mergedConfig.max_tokens || 1024,
       temperature: mergedConfig.temperature,
       top_p: mergedConfig.top_p,
