@@ -225,14 +225,14 @@ export default function MyAdsScreen({ navigation }: any) {
                     style={styles.actionButtonTopovat}
                     onPress={() => handleTopovat(ad)}
                   >
-                    <Text style={styles.actionButtonTopovatText}>⭐ Topovať</Text>
+                    <Text style={styles.actionButtonTopovatText}>Topovať</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.actionButtonEdit}
                     onPress={() => handleEdit(ad)}
                   >
-                    <Text style={styles.actionButtonEditText}>✏️ Upraviť</Text>
+                    <Text style={styles.actionButtonEditText}>Upraviť</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -242,7 +242,7 @@ export default function MyAdsScreen({ navigation }: any) {
                     onPress={() => handlePause(ad)}
                   >
                     <Text style={styles.actionButtonPauseText}>
-                      {ad.status === 'active' ? '⏸️ Pauza' : '▶️ Aktivovať'}
+                      {ad.status === 'active' ? 'Pozastaviť' : 'Aktivovať'}
                     </Text>
                   </TouchableOpacity>
 
@@ -250,7 +250,7 @@ export default function MyAdsScreen({ navigation }: any) {
                     style={styles.actionButtonDelete}
                     onPress={() => handleDelete(ad)}
                   >
-                    <Text style={styles.actionButtonDeleteText}>🗑 Zmazať</Text>
+                    <Text style={styles.actionButtonDeleteText}>Zmazať</Text>
                   </TouchableOpacity>
                 </View>
               </View>

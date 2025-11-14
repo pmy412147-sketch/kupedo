@@ -56,7 +56,7 @@ export default function ProfileScreen({ navigation, route }: any) {
     try {
       const { data, error } = await supabase
         .from('reviews')
-        .select('*, reviewer:profiles!reviewer_id(full_name, avatar_url)')
+        .select('*, reviewer:profiles!reviewer_id(display_name, avatar_url)')
         .eq('reviewed_user_id', profileId)
         .order('created_at', { ascending: false });
 
@@ -411,12 +411,12 @@ export default function ProfileScreen({ navigation, route }: any) {
                 <View style={styles.reviewHeader}>
                   <View style={styles.reviewAvatar}>
                     <Text style={styles.reviewAvatarText}>
-                      {review.reviewer?.full_name?.[0] || '?'}
+                      {review.reviewer?.display_name?.[0] || '?'}
                     </Text>
                   </View>
                   <View style={styles.reviewInfo}>
                     <Text style={styles.reviewerName}>
-                      {review.reviewer?.full_name || 'Používateľ'}
+                      {review.reviewer?.display_name || 'Používateľ'}
                     </Text>
                     <View style={styles.reviewRating}>
                       {[...Array(5)].map((_, i) => (
