@@ -8,6 +8,8 @@ import { AdCard } from '@/components/AdCard';
 import { Footer } from '@/components/Footer';
 import { supabase, Ad } from '@/lib/supabase';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { parseSearchQuery } from '@/lib/search-parser';
+import { performEnhancedSearch } from '@/lib/search-utils';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -39,6 +41,23 @@ export default function HomePage() {
   const fetchAds = async (filters?: FilterValues) => {
     setLoading(true);
     try {
+      const searchQuery = searchParams.get('search');
+
+      if (searchQuery) {
+        console.log('[Homepage] Using enhanced search for:', searchQuery);
+
+        const parsed = parseSearchQuery(searchQuery);
+        console.log('[Homepage] Parsed filters:', JSON.stringify(parsed.filters));
+        console.log('[Homepage] Search terms:', parsed.searchTerms);
+
+        const searchResult = await performEnhancedSearch(supabase, parsed, 50);
+        console.log('[Homepage] Found', searchResult.totalCount, 'ads');
+
+        setAds(searchResult.ads);
+        setLoading(false);
+        return;
+      }
+
       let query = supabase
         .from('ads')
         .select('*')
@@ -59,76 +78,6 @@ export default function HomePage() {
       if (filters?.priceTo) {
         const priceTo = parseFloat(filters.priceTo);
         query = query.lte('price', priceTo);
-      }
-
-      const searchQuery = searchParams.get('search');
-      if (searchQuery) {
-        const searchTerm = searchQuery.toLowerCase().trim();
-
-        // Normalizácia funkcia pre slovenčinu
-        const normalizeText = (text: string) => {
-          return text
-            .toLowerCase()
-            // Normalizuj slovenské tvary
-            .replace(/izbov[ýáéíóúy]/gi, 'izbov')
-            .replace(/bytov[ýáéíóúy]/gi, 'bytov')
-            .replace(/domov[ýáéíóúy]/gi, 'domov')
-            // Odstráň pomlčky medzi číslami a slovami
-            .replace(/(\d+)-izbov/gi, '$1 izbov')
-            .replace(/(\d+)-bytov/gi, '$1 bytov');
-        };
-
-        // Rozdeliť search query na jednotlivé slová
-        let searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
-
-        // Normalizuj search words
-        searchWords = searchWords.map(word => normalizeText(word));
-
-        // Odstráň veľké čísla (ceny) zo search words - tie sú v samostatnom poli
-        searchWords = searchWords.filter(word => {
-          const num = parseInt(word);
-          return isNaN(num) || num < 1000; // Ponechaj malé čísla (napr. "3" pre 3-izbový)
-        });
-
-        console.log('[Homepage Search] Original query:', searchQuery);
-        console.log('[Homepage Search] Normalized search words:', searchWords);
-
-        if (searchWords.length === 0) {
-          // Ak po filtrovaní neostalo nič, nenič nerobiť
-          setLoading(false);
-          return;
-        }
-
-        if (searchWords.length === 1) {
-          // Ak je len jedno slovo, použiť štandardné OR vyhľadávanie
-          query = query.or(`title.ilike.%${searchWords[0]}%,description.ilike.%${searchWords[0]}%,location.ilike.%${searchWords[0]}%`);
-        } else {
-          // Ak je viac slov, hľadať každé slovo samostatne (AND logika)
-          // Najprv získať všetky aktívne inzeráty
-          const { data: allAds } = await query;
-
-          if (allAds) {
-            console.log('[Homepage Search] Filtering', allAds.length, 'ads');
-
-            // Filtrovať lokálne - každý inzerát musí obsahovať všetky hľadané slová
-            const filteredAds = allAds.filter(ad => {
-              const searchableText = normalizeText(`${ad.title} ${ad.description} ${ad.location}`);
-              const matches = searchWords.every(word => searchableText.includes(word));
-
-              if (matches) {
-                console.log('[Homepage Search] Match found:', ad.title);
-              }
-
-              return matches;
-            });
-
-            console.log('[Homepage Search] Final results:', filteredAds.length, 'ads');
-
-            setAds(filteredAds);
-            setLoading(false);
-            return;
-          }
-        }
       }
 
       const { data, error } = await query;

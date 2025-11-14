@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { chatWithHistory, ChatMessage } from '@/lib/claude';
 import { supabase } from '@/lib/supabase';
+import { parseSearchQuery, buildSearchExplanation } from '@/lib/search-parser';
+import { performEnhancedSearch, generateSearchSuggestions } from '@/lib/search-utils';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,87 +36,34 @@ export async function POST(req: NextRequest) {
     // Check if user is asking to search for something
     const searchIntent = detectSearchIntent(message);
     let searchResults = null;
+    let searchExplanation = '';
+    let parsedQuery = null;
 
     if (searchIntent.isSearch && searchIntent.query) {
       try {
-        const searchTerm = searchIntent.query.toLowerCase().trim();
-        let searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+        console.log('[AI Chat] Parsing search query:', searchIntent.query);
 
-        // Normalizácia funkcia pre slovenčinu
-        const normalizeText = (text: string) => {
-          return text
-            .toLowerCase()
-            // Normalizuj slovenské tvary
-            .replace(/izbov[ýáéíóúy]/gi, 'izbov')
-            .replace(/bytov[ýáéíóúy]/gi, 'bytov')
-            .replace(/domov[ýáéíóúy]/gi, 'domov')
-            // Odstráň pomlčky medzi číslami a slovami
-            .replace(/(\d+)-izbov/gi, '$1 izbov')
-            .replace(/(\d+)-bytov/gi, '$1 bytov');
-        };
+        parsedQuery = parseSearchQuery(searchIntent.query);
+        console.log('[AI Chat] Parsed filters:', JSON.stringify(parsedQuery.filters));
+        console.log('[AI Chat] Search terms:', parsedQuery.searchTerms);
+        console.log('[AI Chat] Confidence:', parsedQuery.confidence);
 
-        // Normalizuj aj search words
-        searchWords = searchWords.map(word => normalizeText(word));
+        const searchResult = await performEnhancedSearch(supabase, parsedQuery, 20);
+        searchResults = searchResult.ads;
+        searchExplanation = searchResult.searchExplanation;
 
-        // Odstráň veľké čísla (ceny) zo search words - tie sú v samostatnom poli
-        searchWords = searchWords.filter(word => {
-          const num = parseInt(word);
-          return isNaN(num) || num < 1000; // Ponechaj malé čísla (napr. "3" pre 3-izbový)
-        });
+        console.log('[AI Chat] Search results:', searchResults.length, 'ads found');
 
-        console.log('[AI Chat Search] Original query:', searchIntent.query);
-        console.log('[AI Chat Search] Normalized search words:', searchWords);
-
-        if (searchWords.length === 1) {
-          // Jedno slovo - použiť OR vyhľadávanie
-          const { data: ads, error } = await supabase
-            .from('ads')
-            .select('*')
-            .or(`title.ilike.%${searchWords[0]}%,description.ilike.%${searchWords[0]}%,location.ilike.%${searchWords[0]}%`)
-            .eq('status', 'active')
-            .limit(20);
-
-          if (error) {
-            console.error('Error searching ads:', error);
-            searchResults = [];
-          } else {
-            searchResults = ads || [];
-            console.log('[AI Chat Search] Found', searchResults.length, 'ads with single word search');
-          }
-        } else {
-          // Viac slov - získať všetky aktívne inzeráty a filtrovať lokálne
-          const { data: allAds, error } = await supabase
-            .from('ads')
-            .select('*')
-            .eq('status', 'active')
-            .limit(200);
-
-          if (error) {
-            console.error('Error searching ads:', error);
-            searchResults = [];
-          } else if (allAds) {
-            console.log('[AI Chat Search] Filtering', allAds.length, 'ads');
-
-            // Filtrovať - každý inzerát musí obsahovať všetky hľadané slová
-            searchResults = allAds.filter(ad => {
-              const searchableText = normalizeText(`${ad.title} ${ad.description} ${ad.location}`);
-              const matches = searchWords.every(word => searchableText.includes(word));
-
-              if (matches) {
-                console.log('[AI Chat Search] Match found:', ad.title);
-              }
-
-              return matches;
-            }).slice(0, 20);
-
-            console.log('[AI Chat Search] Final results:', searchResults.length, 'ads');
-          } else {
-            searchResults = [];
+        if (searchResults.length === 0) {
+          const suggestions = generateSearchSuggestions(parsedQuery, 0);
+          if (suggestions.length > 0) {
+            searchExplanation += '\n\nTipy:\n' + suggestions.map(s => `• ${s}`).join('\n');
           }
         }
       } catch (error) {
-        console.error('Error searching ads:', error);
+        console.error('[AI Chat] Error searching ads:', error);
         searchResults = [];
+        searchExplanation = 'Vyskytla sa chyba pri vyhľadávaní.';
       }
     }
 
@@ -124,11 +73,18 @@ export async function POST(req: NextRequest) {
     let response: string;
 
     try {
-      // If search results found, provide a simple confirmation message
+      // If search results found, provide a detailed response
       if (searchResults && searchResults.length > 0) {
-        response = `Našiel som ${searchResults.length} ${searchResults.length === 1 ? 'inzerát' : searchResults.length < 5 ? 'inzeráty' : 'inzerátov'} pre "${searchIntent.query}". Presmerujem ťa na výsledky...`;
-      } else if (searchIntent.isSearch && searchResults && searchResults.length === 0) {
-        response = `Bohužiaľ, nenašiel som žiadne inzeráty pre "${searchIntent.query}". Skús to s inými kľúčovými slovami alebo širšou kategóriou.`;
+        let responseText = searchExplanation;
+
+        if (parsedQuery) {
+          const filterInfo = buildSearchExplanation(parsedQuery);
+          responseText = `${filterInfo}\n\nPresmerujem ťa na výsledky...`;
+        }
+
+        response = responseText;
+      } else if (searchIntent.isSearch && searchResults !== null && searchResults.length === 0) {
+        response = searchExplanation || `Bohužiaľ, nenašiel som žiadne inzeráty pre "${searchIntent.query}". Skús to s inými kľúčovými slovami alebo širšou kategóriou.`;
       } else {
         response = await chatWithHistory(
           [
