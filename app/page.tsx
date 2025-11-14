@@ -65,36 +65,64 @@ export default function HomePage() {
       if (searchQuery) {
         const searchTerm = searchQuery.toLowerCase().trim();
 
+        // Normalizácia funkcia pre slovenčinu
+        const normalizeText = (text: string) => {
+          return text
+            .toLowerCase()
+            // Normalizuj slovenské tvary
+            .replace(/izbov[ýáéíóúy]/gi, 'izbov')
+            .replace(/bytov[ýáéíóúy]/gi, 'bytov')
+            .replace(/domov[ýáéíóúy]/gi, 'domov')
+            // Odstráň pomlčky medzi číslami a slovami
+            .replace(/(\d+)-izbov/gi, '$1 izbov')
+            .replace(/(\d+)-bytov/gi, '$1 bytov');
+        };
+
         // Rozdeliť search query na jednotlivé slová
-        const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+        let searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+
+        // Normalizuj search words
+        searchWords = searchWords.map(word => normalizeText(word));
+
+        // Odstráň veľké čísla (ceny) zo search words - tie sú v samostatnom poli
+        searchWords = searchWords.filter(word => {
+          const num = parseInt(word);
+          return isNaN(num) || num < 1000; // Ponechaj malé čísla (napr. "3" pre 3-izbový)
+        });
+
+        console.log('[Homepage Search] Original query:', searchQuery);
+        console.log('[Homepage Search] Normalized search words:', searchWords);
+
+        if (searchWords.length === 0) {
+          // Ak po filtrovaní neostalo nič, nenič nerobiť
+          setLoading(false);
+          return;
+        }
 
         if (searchWords.length === 1) {
           // Ak je len jedno slovo, použiť štandardné OR vyhľadávanie
-          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
+          query = query.or(`title.ilike.%${searchWords[0]}%,description.ilike.%${searchWords[0]}%,location.ilike.%${searchWords[0]}%`);
         } else {
           // Ak je viac slov, hľadať každé slovo samostatne (AND logika)
           // Najprv získať všetky aktívne inzeráty
           const { data: allAds } = await query;
 
           if (allAds) {
-            // Normalizácia funkcia pre slovenčinu
-            const normalizeText = (text: string) => {
-              return text
-                .toLowerCase()
-                // Normalizuj slovenské tvary
-                .replace(/izbov[ýáéíóúy]/gi, 'izbov')
-                .replace(/bytov[ýáéíóúy]/gi, 'bytov')
-                .replace(/domov[ýáéíóúy]/gi, 'domov')
-                // Odstráň pomlčky medzi číslami a slovami
-                .replace(/(\d+)-izbov/gi, '$1 izbov')
-                .replace(/(\d+)-bytov/gi, '$1 bytov');
-            };
+            console.log('[Homepage Search] Filtering', allAds.length, 'ads');
 
             // Filtrovať lokálne - každý inzerát musí obsahovať všetky hľadané slová
             const filteredAds = allAds.filter(ad => {
               const searchableText = normalizeText(`${ad.title} ${ad.description} ${ad.location}`);
-              return searchWords.every(word => searchableText.includes(word));
+              const matches = searchWords.every(word => searchableText.includes(word));
+
+              if (matches) {
+                console.log('[Homepage Search] Match found:', ad.title);
+              }
+
+              return matches;
             });
+
+            console.log('[Homepage Search] Final results:', filteredAds.length, 'ads');
 
             setAds(filteredAds);
             setLoading(false);
