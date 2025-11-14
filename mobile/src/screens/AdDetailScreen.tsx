@@ -67,7 +67,24 @@ export default function AdDetailScreen({ route, navigation }: any) {
         .single();
 
       if (error) throw error;
-      if (data) setSeller(data);
+
+      const { data: reviewStats } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('reviewed_user_id', userId);
+
+      const ratingCount = reviewStats?.length || 0;
+      const ratingAverage = ratingCount > 0
+        ? (reviewStats.reduce((sum, r) => sum + r.rating, 0) / ratingCount).toFixed(1)
+        : '0.0';
+
+      if (data) {
+        setSeller({
+          ...data,
+          rating_count: ratingCount,
+          rating_average: ratingAverage
+        });
+      }
     } catch (error) {
       console.error('Error loading seller:', error);
     }
@@ -360,6 +377,14 @@ export default function AdDetailScreen({ route, navigation }: any) {
                 )}
                 <View style={styles.sellerInfo}>
                   <Text style={styles.sellerName}>{seller.display_name || 'Používateľ'}</Text>
+                  {seller.rating_count > 0 && (
+                    <View style={styles.ratingRow}>
+                      <Text style={styles.ratingStar}>⭐</Text>
+                      <Text style={styles.ratingText}>
+                        {seller.rating_average} ({seller.rating_count} {seller.rating_count === 1 ? 'recenzia' : seller.rating_count < 5 ? 'recenzie' : 'recenzií'})
+                      </Text>
+                    </View>
+                  )}
                 </View>
               </View>
 
@@ -637,6 +662,19 @@ const styles = StyleSheet.create({
     fontSize: typography.fontSize.base,
     fontWeight: typography.fontWeight.semibold,
     color: colors.text.primary,
+    marginBottom: spacing.xs / 2,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs / 2,
+  },
+  ratingStar: {
+    fontSize: typography.fontSize.sm,
+  },
+  ratingText: {
+    fontSize: typography.fontSize.sm,
+    color: colors.text.secondary,
   },
   viewProfileButton: {
     backgroundColor: colors.white,

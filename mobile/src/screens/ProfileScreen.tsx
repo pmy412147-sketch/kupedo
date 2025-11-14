@@ -75,8 +75,22 @@ export default function ProfileScreen({ navigation, route }: any) {
         .eq('id', profileId)
         .single();
 
+      const { data: reviewStats } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('reviewed_user_id', profileId);
+
+      const ratingCount = reviewStats?.length || 0;
+      const ratingAverage = ratingCount > 0
+        ? (reviewStats.reduce((sum, r) => sum + r.rating, 0) / ratingCount).toFixed(1)
+        : '0.0';
+
       if (profileData) {
-        setProfile(profileData);
+        setProfile({
+          ...profileData,
+          rating_count: ratingCount,
+          rating_average: ratingAverage
+        });
       }
 
       const { data: adsData } = await supabase
@@ -342,7 +356,7 @@ export default function ProfileScreen({ navigation, route }: any) {
           onPress={() => setActiveTab('reviews')}
         >
           <Text style={[styles.tabText, activeTab === 'reviews' && styles.tabTextActive]}>
-            Recenzie (0)
+            Recenzie ({reviews.length})
           </Text>
         </TouchableOpacity>
       </View>

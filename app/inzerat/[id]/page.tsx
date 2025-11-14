@@ -83,6 +83,8 @@ interface UserProfile {
   id: string;
   name: string;
   avatar_url?: string;
+  rating_count?: number;
+  rating_average?: string;
 }
 
 export default function AdDetailPage() {
@@ -145,11 +147,23 @@ export default function AdDetailPage() {
           .eq('id', adData.user_id)
           .single();
 
+        const { data: reviewStats } = await supabase
+          .from('reviews')
+          .select('rating')
+          .eq('reviewed_user_id', adData.user_id);
+
+        const ratingCount = reviewStats?.length || 0;
+        const ratingAverage = ratingCount > 0
+          ? (reviewStats.reduce((sum, r) => sum + r.rating, 0) / ratingCount).toFixed(1)
+          : '0.0';
+
         if (sellerData) {
           setSeller({
             id: sellerData.id,
             name: sellerData.display_name || 'Používateľ',
-            avatar_url: sellerData.avatar_url
+            avatar_url: sellerData.avatar_url,
+            rating_count: ratingCount,
+            rating_average: ratingAverage
           } as UserProfile);
         }
 
@@ -771,8 +785,17 @@ export default function AdDetailPage() {
                         <AvatarImage src={seller?.avatar_url} />
                         <AvatarFallback>{seller?.name?.[0] || 'U'}</AvatarFallback>
                       </Avatar>
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium">{seller?.name}</p>
+                        {seller?.rating_count && seller.rating_count > 0 && (
+                          <div className="flex items-center gap-1 text-sm text-gray-600">
+                            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                            <span>{seller.rating_average}</span>
+                            <span className="text-gray-400">
+                              ({seller.rating_count} {seller.rating_count === 1 ? 'recenzia' : seller.rating_count < 5 ? 'recenzie' : 'recenzií'})
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
                     <Button

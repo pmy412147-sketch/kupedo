@@ -72,20 +72,6 @@ export default function ProfilePage() {
         .eq('id', profileId)
         .single();
 
-      if (profileData) {
-        setProfile(profileData);
-      }
-
-      const { data: adsData } = await supabase
-        .from('ads')
-        .select('*')
-        .eq('user_id', profileId)
-        .eq('status', 'active')
-        .order('created_at', { ascending: false })
-        .limit(12);
-
-      setUserAds(adsData || []);
-
       const { data: reviewsData } = await supabase
         .from('reviews')
         .select(`
@@ -98,6 +84,34 @@ export default function ProfilePage() {
         .limit(10);
 
       setReviews(reviewsData || []);
+
+      const { data: reviewStats } = await supabase
+        .from('reviews')
+        .select('rating')
+        .eq('reviewed_user_id', profileId);
+
+      const ratingCount = reviewStats?.length || 0;
+      const ratingAverage = ratingCount > 0
+        ? (reviewStats.reduce((sum, r) => sum + r.rating, 0) / ratingCount).toFixed(1)
+        : '0.0';
+
+      if (profileData) {
+        setProfile({
+          ...profileData,
+          rating_count: ratingCount,
+          rating_average: ratingAverage
+        });
+      }
+
+      const { data: adsData } = await supabase
+        .from('ads')
+        .select('*')
+        .eq('user_id', profileId)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      setUserAds(adsData || []);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
