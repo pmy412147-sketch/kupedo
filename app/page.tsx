@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Search, MapPin, Chrome as Home, SlidersHorizontal, Users, Package, Shield, TrendingUp, Sparkles, Award, Clock, CheckCircle } from 'lucide-react';
 import { AdSenseInFeed } from '@/components/AdSenseInFeed';
+import { AIChatAssistant } from '@/components/AIChatAssistant';
+import { AIRecommendations } from '@/components/AIRecommendations';
 
 
 export default function HomePage() {
@@ -447,8 +449,13 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        <div className="container mx-auto px-4 py-12">
+          <AIRecommendations />
+        </div>
       </main>
       <Footer />
+      <AIChatAssistant contextType="general" />
     </>
   );
 }
