@@ -3,21 +3,20 @@
 import { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Upload, Camera, Sparkles, X, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Upload, Camera, Sparkles, X, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { AdCard } from '@/components/AdCard';
+import { useRouter } from 'next/navigation';
 
 interface VisualSimilarSearchProps {
   onResultsFound?: (count: number) => void;
 }
 
 export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps) {
-  const [uploading, setUploading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
-  const [results, setResults] = useState<any[]>([]);
   const [analysis, setAnalysis] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,7 +42,6 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
 
   const searchByImage = async (imageData: string) => {
     setSearching(true);
-    setResults([]);
     setAnalysis('');
 
     try {
@@ -63,24 +61,13 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
       const analyzeData = await analyzeResponse.json();
       setAnalysis(analyzeData.analysis);
 
-      const searchResponse = await fetch('/api/ai/semantic-search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: analyzeData.analysis,
-          limit: 6,
-        }),
-      });
+      // Presmerovať na hlavnú stránku s výsledkami vyhľadávania
+      toast.success(`Analyzované: ${analyzeData.analysis}`);
 
-      if (!searchResponse.ok) {
-        throw new Error('Nepodarilo sa vyhľadať podobné produkty');
-      }
-
-      const searchData = await searchResponse.json();
-      setResults(searchData.results || []);
-      onResultsFound?.(searchData.results?.length || 0);
-
-      toast.success(`Našli sme ${searchData.results?.length || 0} podobných produktov`);
+      // Krátka pauza aby používateľ videl toast
+      setTimeout(() => {
+        router.push(`/?search=${encodeURIComponent(analyzeData.analysis)}`);
+      }, 1000);
     } catch (error) {
       console.error('Error in visual search:', error);
       toast.error('Nepodarilo sa vyhľadať podobné produkty');
@@ -91,7 +78,6 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
 
   const clearSearch = () => {
     setPreview(null);
-    setResults([]);
     setAnalysis('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -174,63 +160,17 @@ export function VisualSimilarSearch({ onResultsFound }: VisualSimilarSearchProps
               </Button>
             </div>
 
-            {searching ? (
+            {searching && (
               <div className="text-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mx-auto mb-3" />
-                <p className="text-sm text-gray-600">Analyzujem obrázok a hľadám podobné produkty...</p>
+                <p className="text-sm text-gray-600">Analyzujem obrázok pomocou AI...</p>
+                <p className="text-xs text-gray-500 mt-2">Presmerujeme vás na výsledky vyhľadávania</p>
               </div>
-            ) : analysis && (
-              <Card className="p-4 bg-white">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="h-5 w-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 mb-1">AI Analýza obrázka:</p>
-                    <p className="text-sm text-gray-700">{analysis}</p>
-                  </div>
-                </div>
-              </Card>
             )}
           </div>
         )}
       </Card>
 
-      {results.length > 0 && (
-        <div ref={resultsRef} className="space-y-4 scroll-mt-20">
-          <Card className="p-4 bg-gradient-to-r from-emerald-500 to-blue-600 text-white">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold">Našli sme {results.length} podobných produktov!</h3>
-                  <p className="text-sm text-emerald-50">Na základe AI analýzy vášho obrázka</p>
-                </div>
-              </div>
-              <Button onClick={clearSearch} variant="outline" size="sm" className="bg-white/20 border-white/30 hover:bg-white/30 text-white">
-                Nové vyhľadávanie
-              </Button>
-            </div>
-          </Card>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {results.map((ad, index) => (
-              <AdCard key={ad.id || index} ad={ad} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {results.length === 0 && preview && !searching && (
-        <Card className="p-12 text-center">
-          <ImageIcon className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-          <h3 className="text-lg font-semibold text-gray-700 mb-2">Žiadne výsledky</h3>
-          <p className="text-gray-600 mb-4">Nenašli sme podobné produkty pre tento obrázok</p>
-          <Button onClick={clearSearch} variant="outline">
-            Skúsiť iný obrázok
-          </Button>
-        </Card>
-      )}
     </div>
   );
 }
