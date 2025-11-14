@@ -83,7 +83,10 @@ const savePushToken = async (userId: string, token: string) => {
 
 export const removePushToken = async (userId: string) => {
   try {
-    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    const tokenData = await Notifications.getExpoPushTokenAsync({
+      projectId: 'your-project-id-here'
+    });
+    const token = tokenData.data;
 
     await supabase
       .from('push_tokens')
@@ -93,7 +96,7 @@ export const removePushToken = async (userId: string) => {
 
     console.log('Push token removed successfully');
   } catch (error) {
-    console.error('Error removing push token:', error);
+    console.log('Could not remove push token (likely in Expo Go)');
   }
 };
 

@@ -54,11 +54,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    if (user) {
-      await removePushToken(user.id);
+    try {
+      if (user) {
+        await removePushToken(user.id);
+      }
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (error) {
+      console.error('Logout error:', error);
+      throw error;
     }
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
   };
 
   return (
