@@ -176,7 +176,7 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
 
   return (
     <Card
-      className={`fixed bottom-20 right-2 md:bottom-6 md:right-6 z-50 shadow-2xl transition-all duration-300 ${
+      className={`fixed bottom-20 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:bottom-6 md:right-6 z-50 shadow-2xl transition-all duration-300 ${
         isMinimized ? 'w-[calc(100vw-1rem)] md:w-80 h-16' : 'w-[calc(100vw-1rem)] md:w-96 h-[500px] md:h-[600px]'
       }`}
     >
