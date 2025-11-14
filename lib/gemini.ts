@@ -33,7 +33,7 @@ const defaultConfig: GeminiConfig = {
   topK: 40,
 };
 
-export function getGeminiModel(modelName: string = 'gemini-2.0-flash-exp', config: GeminiConfig = {}): GenerativeModel {
+export function getGeminiModel(modelName: string = 'gemini-1.5-flash', config: GeminiConfig = {}): GenerativeModel {
   const mergedConfig = { ...defaultConfig, ...config };
   const genAI = getGenAI();
 
@@ -45,11 +45,14 @@ export function getGeminiModel(modelName: string = 'gemini-2.0-flash-exp', confi
 
 export async function generateText(prompt: string, config?: GeminiConfig): Promise<string> {
   try {
-    const model = getGeminiModel('gemini-2.0-flash-exp', config);
+    const model = getGeminiModel('gemini-1.5-flash', config);
     const result = await model.generateContent(prompt);
     const response = result.response;
     return response.text();
-  } catch (error) {
+  } catch (error: any) {
+    if (error.status === 429 || error.message?.includes('quota') || error.message?.includes('exceeded')) {
+      throw new Error('AI je momentálne preťažená. Prosím skúste to o chvíľu.');
+    }
     console.error('Error generating text with Gemini:', error);
     throw error;
   }
@@ -57,7 +60,7 @@ export async function generateText(prompt: string, config?: GeminiConfig): Promi
 
 export async function generateTextWithRetry(
   prompt: string,
-  maxRetries: number = 3,
+  maxRetries: number = 1,
   config?: GeminiConfig
 ): Promise<string> {
   let lastError: Error | null = null;
@@ -65,15 +68,20 @@ export async function generateTextWithRetry(
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await generateText(prompt, config);
-    } catch (error) {
+    } catch (error: any) {
       lastError = error as Error;
+
+      if (error.message?.includes('preťažená') || error.status === 429) {
+        throw new Error('AI je momentálne preťažená. Prosím skúste to o chvíľu.');
+      }
+
       if (i < maxRetries - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        await new Promise(resolve => setTimeout(resolve, 3000 * (i + 1)));
       }
     }
   }
 
-  throw lastError || new Error('Failed to generate text after retries');
+  throw lastError || new Error('Nepodarilo sa vygenerať text. Skúste to prosím neskôr.');
 }
 
 export async function generateStructuredOutput<T>(
@@ -109,7 +117,7 @@ export async function chatWithHistory(
   config?: GeminiConfig
 ): Promise<string> {
   try {
-    const model = getGeminiModel('gemini-2.0-flash-exp', config);
+    const model = getGeminiModel('gemini-1.5-flash', config);
 
     const chat = model.startChat({
       history: messages.map(msg => ({
