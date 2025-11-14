@@ -162,34 +162,52 @@ export async function chatWithHistory(
 
 export const claudePrompts = {
   generateAdDescription: (productInfo: any) => `
-Napíš profesionálny a presvedčivý popis inzerátu pre slovenský online marketplace v slovenčine.
+Napíš profesionálny, presvedčivý a detailný popis inzerátu pre slovenský online marketplace v slovenčine.
 
 Informácie o produkte:
 ${JSON.stringify(productInfo, null, 2)}
 
+Štruktúra popisu:
+1. Úvodná veta - zaujmi kupujúceho, zvýrazni hlavné prednosti
+2. Technické parametre a špecifikácie - vypíš detailne všetky vlastnosti
+3. Stav produktu - buď konkrétny a úprimný
+4. Dôvod predaja (ak nie je uvedený, vynechaj)
+5. Čo je v balení / čo získa kupujúci
+6. Informácie o prevzatí a dodaní
+7. Výzva k akcii - motivuj ku kontaktu
+
 Požiadavky:
-- Popis by mal mať 100-300 slov
-- Zvýrazni kľúčové vlastnosti a výhody
+- Popis by mal mať 150-350 slov
+- Používaj profesionálnu slovenčinu
 - Buď konkrétny a objektívny
-- Používaj slovenčinu
-- Zakončí výzvou k akcii
+- Zvýrazni výhody a hodnotu pre kupujúceho
+- Uveď všetky dôležité technické detaily
+- Zakončí priateľskou výzvou k akcii
 - Nepoužívaj emojis
+
+Príklad kvalitného začiatku:
+"Predám iPhone 15 Pro v titanovovej farbe s kapacitou 256GB v stave ako nový. Telefón bol používaný len 3 mesiace, vždy s ochranným krytom a temperovaným sklom..."
 
 Vráť len samotný popis, bez nadpisov alebo dodatočných poznámok.
 `,
 
   generateAdTitle: (productInfo: any) => `
-Vytvor catchy a SEO optimalizovaný nadpis pre inzerát v slovenčine.
+Vytvor atraktívne a pútavé nadpisy pre inzerát v slovenčine.
 
 Informácie o produkte:
 ${JSON.stringify(productInfo, null, 2)}
 
 Požiadavky:
-- Maximálne 50 znakov
-- Zahrň značku a model
-- Buď konkrétny
-- Používaj slovenčinu
-- Vytvor 3 varianty
+- Maximálne 80 znakov
+- Zahrň značku, model a kľúčovú vlastnosť alebo stav
+- Buď konkrétny a výstižný
+- Používaj profesionálnu slovenčinu
+- Vytvor 3 rôzne varianty (kratší, stredný, dlhší)
+
+Príklady dobrých nadpisov:
+- "iPhone 15 Pro 256GB Titán - Ako nový, záruka"
+- "BMW X5 3.0d xDrive - Full výbava, TOP stav"
+- "Apple MacBook Pro M3 - 16GB RAM, 512GB SSD"
 
 Vráť vo formáte JSON:
 {
