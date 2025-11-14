@@ -77,9 +77,22 @@ export default function HomePage() {
           const { data: allAds } = await query;
 
           if (allAds) {
+            // Normalizácia funkcia pre slovenčinu
+            const normalizeText = (text: string) => {
+              return text
+                .toLowerCase()
+                // Normalizuj slovenské tvary
+                .replace(/izbov[ýáéíóúy]/gi, 'izbov')
+                .replace(/bytov[ýáéíóúy]/gi, 'bytov')
+                .replace(/domov[ýáéíóúy]/gi, 'domov')
+                // Odstráň pomlčky medzi číslami a slovami
+                .replace(/(\d+)-izbov/gi, '$1 izbov')
+                .replace(/(\d+)-bytov/gi, '$1 bytov');
+            };
+
             // Filtrovať lokálne - každý inzerát musí obsahovať všetky hľadané slová
             const filteredAds = allAds.filter(ad => {
-              const searchableText = `${ad.title} ${ad.description} ${ad.location}`.toLowerCase();
+              const searchableText = normalizeText(`${ad.title} ${ad.description} ${ad.location}`);
               return searchWords.every(word => searchableText.includes(word));
             });
 

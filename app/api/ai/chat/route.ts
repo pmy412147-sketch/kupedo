@@ -67,9 +67,22 @@ export async function POST(req: NextRequest) {
             console.error('Error searching ads:', error);
             searchResults = [];
           } else if (allAds) {
+            // Normalizácia funkcia pre slovenčinu
+            const normalizeText = (text: string) => {
+              return text
+                .toLowerCase()
+                // Normalizuj slovenské tvary
+                .replace(/izbov[ýáéíóúy]/gi, 'izbov')
+                .replace(/bytov[ýáéíóúy]/gi, 'bytov')
+                .replace(/domov[ýáéíóúy]/gi, 'domov')
+                // Odstráň pomlčky medzi číslami a slovami
+                .replace(/(\d+)-izbov/gi, '$1 izbov')
+                .replace(/(\d+)-bytov/gi, '$1 bytov');
+            };
+
             // Filtrovať - každý inzerát musí obsahovať všetky hľadané slová
             searchResults = allAds.filter(ad => {
-              const searchableText = `${ad.title} ${ad.description} ${ad.location}`.toLowerCase();
+              const searchableText = normalizeText(`${ad.title} ${ad.description} ${ad.location}`);
               return searchWords.every(word => searchableText.includes(word));
             }).slice(0, 20); // Vrátiť max 20 výsledkov
           } else {
@@ -192,6 +205,10 @@ function detectSearchIntent(message: string): { isSearch: boolean; query: string
     .replace(/za\s+(\d+)/gi, '$1')
     .replace(/cena\s+do/gi, '')
     .replace(/maximálne/gi, '')
+    // Normalizuj slovenské tvary - odstráň diakritiku a koncovky
+    .replace(/izbov[ýáéíóúy]/gi, 'izbov')
+    .replace(/bytov[ýáéíóúy]/gi, 'bytov')
+    .replace(/domov[ýáéíóúy]/gi, 'domov')
     // Odstráň predložky a spojky
     .replace(/\b(v|na|z|zo|do|od|s|so|k|o|po|pre|pri|cez|medzi|nad|pod|pred|za|a|ale|alebo|či)\b/gi, '')
     // Odstráň čiarky a bodky
