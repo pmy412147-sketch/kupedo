@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, Loader2, Check, AlertCircle, TrendingUp, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Loader2, Check, AlertCircle, TrendingUp, Info } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface InlineAIAssistantProps {
@@ -37,7 +37,6 @@ export function InlineAIAssistant({ formData, onSuggestion, userId }: InlineAIAs
   const [qualityScore, setQualityScore] = useState<QualityScore | null>(null);
   const [generatingDescription, setGeneratingDescription] = useState(false);
   const [generatingTitle, setGeneratingTitle] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(true);
 
   useEffect(() => {
     if (formData.description && formData.title && formData.price) {
@@ -146,33 +145,14 @@ export function InlineAIAssistant({ formData, onSuggestion, userId }: InlineAIAs
   if (!formData.category_id) return null;
 
   return (
-    <Card className="p-4 bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200">
+    <Card className="p-4 bg-gradient-to-r from-emerald-50 to-blue-50 border-emerald-200 sticky top-20 z-10">
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-emerald-600" />
-            <h3 className="font-semibold text-gray-900">AI Asistent</h3>
-            {qualityScore && (
-              <Badge variant="outline" className="ml-2">
-                {qualityScore.totalScore}/100
-              </Badge>
-            )}
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="h-8 w-8 p-0"
-          >
-            {isExpanded ? (
-              <ChevronUp className="h-4 w-4" />
-            ) : (
-              <ChevronDown className="h-4 w-4" />
-            )}
-          </Button>
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-emerald-600" />
+          <h3 className="font-semibold text-gray-900">AI Asistent</h3>
         </div>
 
-        {isExpanded && qualityScore && (
+        {qualityScore && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Kvalita inzerátu</span>
@@ -189,6 +169,9 @@ export function InlineAIAssistant({ formData, onSuggestion, userId }: InlineAIAs
                     style={{ width: `${qualityScore.totalScore}%` }}
                   />
                 </div>
+                <span className="text-lg font-bold text-gray-900">
+                  {qualityScore.totalScore}/100
+                </span>
               </div>
             </div>
 
@@ -224,15 +207,14 @@ export function InlineAIAssistant({ formData, onSuggestion, userId }: InlineAIAs
           </div>
         )}
 
-        {isExpanded && evaluating && (
+        {evaluating && (
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
             <span>Vyhodnocujem kvalitu...</span>
           </div>
         )}
 
-        {isExpanded && (
-          <div className="space-y-2 pt-2 border-t border-gray-200">
+        <div className="space-y-2 pt-2 border-t border-gray-200">
           <Button
             onClick={generateDescription}
             disabled={generatingDescription || !formData.title}
@@ -272,17 +254,14 @@ export function InlineAIAssistant({ formData, onSuggestion, userId }: InlineAIAs
               </>
             )}
           </Button>
-          </div>
-        )}
+        </div>
 
-        {isExpanded && (
-          <div className="flex items-start gap-2 text-xs text-gray-500 pt-2 border-t border-gray-200">
-            <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
-            <span>
-              AI ti pomáha vytvoriť kvalitný inzerát, ktorý priláka viac záujemcov
-            </span>
-          </div>
-        )}
+        <div className="flex items-start gap-2 text-xs text-gray-500 pt-2 border-t border-gray-200">
+          <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <span>
+            AI ti pomáha vytvoriť kvalitný inzerát, ktorý priláka viac záujemcov
+          </span>
+        </div>
       </div>
     </Card>
   );
