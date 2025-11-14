@@ -25,7 +25,19 @@ export async function POST(req: NextRequest) {
       titles: ['string', 'string', 'string'],
     });
 
-    const result = await generateStructuredOutput<TitleResponse>(prompt, schema);
+    let result: TitleResponse;
+
+    try {
+      result = await generateStructuredOutput<TitleResponse>(prompt, schema);
+    } catch (apiError: any) {
+      if (apiError.message?.includes('preťažená')) {
+        return NextResponse.json(
+          { error: 'AI je momentálne preťažená. Prosím skúste to o chvíľu.' },
+          { status: 503 }
+        );
+      }
+      throw apiError;
+    }
 
     const endTime = Date.now();
     const generationTime = endTime - startTime;

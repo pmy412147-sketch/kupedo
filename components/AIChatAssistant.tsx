@@ -91,11 +91,19 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Nepodarilo sa získať odpoveď');
-      }
-
       const data = await response.json();
+
+      if (!response.ok) {
+        let errorText = 'Prepáčte, vyskytla sa chyba. Skúste to prosím znova.';
+
+        if (response.status === 503 || data.error?.includes('preťažená')) {
+          errorText = 'AI asistent je momentálne preťažený. Skúste to prosím o chvíľu.';
+        } else if (data.error) {
+          errorText = data.error;
+        }
+
+        throw new Error(errorText);
+      }
 
       const assistantMessage: Message = {
         role: 'assistant',
@@ -105,11 +113,11 @@ export function AIChatAssistant({ contextType = 'general' }: AIChatAssistantProp
 
       setMessages((prev) => [...prev, assistantMessage]);
       setConversationId(data.conversationId);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending message:', error);
       const errorMessage: Message = {
         role: 'assistant',
-        content: 'Prepáčte, vyskytla sa chyba. Skúste to prosím znova.',
+        content: error.message || 'Prepáčte, vyskytla sa chyba. Skúste to prosím znova.',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);

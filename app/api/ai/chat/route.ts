@@ -34,14 +34,27 @@ export async function POST(req: NextRequest) {
     const systemContext = getSystemContext(contextType);
 
     const startTime = Date.now();
-    const response = await chatWithHistory(
-      [
-        { role: 'user', parts: systemContext },
-        { role: 'model', parts: 'Rozumiem, som pripravený pomôcť.' },
-        ...chatHistory,
-      ],
-      message
-    );
+    let response: string;
+
+    try {
+      response = await chatWithHistory(
+        [
+          { role: 'user', parts: systemContext },
+          { role: 'model', parts: 'Rozumiem, som pripravený pomôcť.' },
+          ...chatHistory,
+        ],
+        message
+      );
+    } catch (apiError: any) {
+      if (apiError.status === 429 || apiError.message?.includes('preťažená')) {
+        return NextResponse.json(
+          { error: 'AI je momentálne preťažená. Prosím skúste to o chvíľu.' },
+          { status: 503 }
+        );
+      }
+      throw apiError;
+    }
+
     const endTime = Date.now();
 
     chatHistory.push(

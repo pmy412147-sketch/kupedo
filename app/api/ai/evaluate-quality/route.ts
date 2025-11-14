@@ -43,7 +43,19 @@ export async function POST(req: NextRequest) {
       weaknesses: ['string'],
     });
 
-    const evaluation = await generateStructuredOutput<QualityEvaluation>(prompt, schema);
+    let evaluation: QualityEvaluation;
+
+    try {
+      evaluation = await generateStructuredOutput<QualityEvaluation>(prompt, schema);
+    } catch (apiError: any) {
+      if (apiError.message?.includes('preťažená')) {
+        return NextResponse.json(
+          { error: 'AI je momentálne preťažená. Prosím skúste to o chvíľu.' },
+          { status: 503 }
+        );
+      }
+      throw apiError;
+    }
 
     const endTime = Date.now();
     const generationTime = endTime - startTime;
@@ -94,7 +106,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      evaluation,
+      ...evaluation,
       generationTime,
     });
   } catch (error: any) {

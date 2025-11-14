@@ -17,7 +17,19 @@ export async function POST(req: NextRequest) {
     const startTime = Date.now();
 
     const prompt = geminiPrompts.generateAdDescription(productInfo);
-    const generatedText = await generateTextWithRetry(prompt);
+    let generatedText: string;
+
+    try {
+      generatedText = await generateTextWithRetry(prompt);
+    } catch (apiError: any) {
+      if (apiError.message?.includes('preťažená')) {
+        return NextResponse.json(
+          { error: 'AI je momentálne preťažená. Prosím skúste to o chvíľu.' },
+          { status: 503 }
+        );
+      }
+      throw apiError;
+    }
 
     const endTime = Date.now();
     const generationTime = endTime - startTime;
