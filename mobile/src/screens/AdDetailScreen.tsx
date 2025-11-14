@@ -208,7 +208,10 @@ export default function AdDetailScreen({ route, navigation }: any) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         {ad.images && ad.images.length > 0 ? (
           <View style={styles.imageContainer}>
             <ScrollView
@@ -440,6 +443,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: spacing.xxl + spacing.xl + spacing.lg,
   },
   loadingContainer: {
     flex: 1,
