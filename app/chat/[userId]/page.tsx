@@ -160,13 +160,15 @@ export default function ChatPage() {
 
     if (!user || !newMessage.trim() || !conversation) return;
 
+    const messageContent = newMessage.trim();
+
     try {
       const { error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversation.id,
           sender_id: user.id,
-          content: newMessage.trim(),
+          content: messageContent,
           is_read: false,
           created_at: new Date().toISOString()
         });
@@ -182,8 +184,47 @@ export default function ChatPage() {
         .eq('id', conversation.id);
 
       setNewMessage('');
+
+      sendPushNotification(messageContent);
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const sendPushNotification = async (messageContent: string) => {
+    try {
+      const recipientId = conversation?.participant_1 === user?.id
+        ? conversation?.participant_2
+        : conversation?.participant_1;
+
+      if (!recipientId) return;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          userId: recipientId,
+          title: `Nová správa od ${otherUser?.name || user?.email || 'Používateľ'}`,
+          body: messageContent.substring(0, 100),
+          data: {
+            type: 'message',
+            conversationId: conversation?.id,
+            senderId: user?.id,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        console.log('Failed to send push notification:', await response.text());
+      }
+    } catch (error) {
+      console.log('Failed to send push notification (not critical):', error);
     }
   };
 
