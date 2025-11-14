@@ -28,12 +28,12 @@ export interface GeminiConfig {
 
 const defaultConfig: GeminiConfig = {
   temperature: 0.7,
-  maxOutputTokens: 2048,
-  topP: 0.95,
-  topK: 40,
+  maxOutputTokens: 1024,
+  topP: 0.9,
+  topK: 32,
 };
 
-export function getGeminiModel(modelName: string = 'gemini-1.5-flash', config: GeminiConfig = {}): GenerativeModel {
+export function getGeminiModel(modelName: string = 'gemini-pro', config: GeminiConfig = {}): GenerativeModel {
   const mergedConfig = { ...defaultConfig, ...config };
   const genAI = getGenAI();
 
@@ -45,7 +45,7 @@ export function getGeminiModel(modelName: string = 'gemini-1.5-flash', config: G
 
 export async function generateText(prompt: string, config?: GeminiConfig): Promise<string> {
   try {
-    const model = getGeminiModel('gemini-1.5-flash', config);
+    const model = getGeminiModel('gemini-pro', config);
     const result = await model.generateContent(prompt);
     const response = result.response;
     return response.text();
@@ -117,7 +117,7 @@ export async function chatWithHistory(
   config?: GeminiConfig
 ): Promise<string> {
   try {
-    const model = getGeminiModel('gemini-1.5-flash', config);
+    const model = getGeminiModel('gemini-pro', config);
 
     const chat = model.startChat({
       history: messages.map(msg => ({
