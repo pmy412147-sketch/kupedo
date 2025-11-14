@@ -64,7 +64,30 @@ export default function HomePage() {
       const searchQuery = searchParams.get('search');
       if (searchQuery) {
         const searchTerm = searchQuery.toLowerCase().trim();
-        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
+
+        // Rozdeliť search query na jednotlivé slová
+        const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
+
+        if (searchWords.length === 1) {
+          // Ak je len jedno slovo, použiť štandardné OR vyhľadávanie
+          query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`);
+        } else {
+          // Ak je viac slov, hľadať každé slovo samostatne (AND logika)
+          // Najprv získať všetky aktívne inzeráty
+          const { data: allAds } = await query;
+
+          if (allAds) {
+            // Filtrovať lokálne - každý inzerát musí obsahovať všetky hľadané slová
+            const filteredAds = allAds.filter(ad => {
+              const searchableText = `${ad.title} ${ad.description} ${ad.location}`.toLowerCase();
+              return searchWords.every(word => searchableText.includes(word));
+            });
+
+            setAds(filteredAds);
+            setLoading(false);
+            return;
+          }
+        }
       }
 
       const { data, error } = await query;

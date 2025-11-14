@@ -38,18 +38,43 @@ export async function POST(req: NextRequest) {
     if (searchIntent.isSearch && searchIntent.query) {
       try {
         const searchTerm = searchIntent.query.toLowerCase().trim();
-        const { data: ads, error } = await supabase
-          .from('ads')
-          .select('*')
-          .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
-          .eq('status', 'active')
-          .limit(20);
+        const searchWords = searchTerm.split(/\s+/).filter(word => word.length > 0);
 
-        if (error) {
-          console.error('Error searching ads:', error);
-          searchResults = [];
+        if (searchWords.length === 1) {
+          // Jedno slovo - použiť OR vyhľadávanie
+          const { data: ads, error } = await supabase
+            .from('ads')
+            .select('*')
+            .or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%`)
+            .eq('status', 'active')
+            .limit(20);
+
+          if (error) {
+            console.error('Error searching ads:', error);
+            searchResults = [];
+          } else {
+            searchResults = ads || [];
+          }
         } else {
-          searchResults = ads || [];
+          // Viac slov - získať všetky aktívne inzeráty a filtrovať lokálne
+          const { data: allAds, error } = await supabase
+            .from('ads')
+            .select('*')
+            .eq('status', 'active')
+            .limit(200); // Zvýšiť limit pre lepšie výsledky
+
+          if (error) {
+            console.error('Error searching ads:', error);
+            searchResults = [];
+          } else if (allAds) {
+            // Filtrovať - každý inzerát musí obsahovať všetky hľadané slová
+            searchResults = allAds.filter(ad => {
+              const searchableText = `${ad.title} ${ad.description} ${ad.location}`.toLowerCase();
+              return searchWords.every(word => searchableText.includes(word));
+            }).slice(0, 20); // Vrátiť max 20 výsledkov
+          } else {
+            searchResults = [];
+          }
         }
       } catch (error) {
         console.error('Error searching ads:', error);
