@@ -32,13 +32,14 @@ export default function LoginScreen({ navigation }: any) {
           style={styles.logoIcon}
           resizeMode="contain"
         />
-        <Text style={styles.logoText}>Kupedo</Text>
       </View>
+      <Text style={styles.logoText}>Kupedo</Text>
       <Text style={styles.title}>Vitajte späť!</Text>
 
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#9ca3af"
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -48,6 +49,7 @@ export default function LoginScreen({ navigation }: any) {
       <TextInput
         style={styles.input}
         placeholder="Heslo"
+        placeholderTextColor="#9ca3af"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -78,26 +80,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   logoContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
-    gap: 8,
+    marginBottom: 16,
   },
   logoIcon: {
-    width: 56,
-    height: 56,
+    width: 120,
+    height: 120,
   },
   logoText: {
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: 'bold',
     color: '#10b981',
+    textAlign: 'center',
+    marginBottom: 32,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 30,
     textAlign: 'center',
+    color: '#1f2937',
   },
   input: {
     borderWidth: 1,
@@ -106,6 +109,7 @@ const styles = StyleSheet.create({
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
+    color: '#1f2937',
   },
   button: {
     backgroundColor: '#007AFF',
